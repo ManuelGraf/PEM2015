@@ -1,0 +1,8 @@
+Quantified Self:
+
+
+Radler-App
+1-button-app die tracked wie viele km man radelt und statistiken anteigt. Idealerweise Session Start und ende via NFC.
+
+Schrittzähler
+Selbe funktionalität, aber evtl nicht via gps sondern sensoren.
