@@ -7,12 +7,9 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
-
-import java.util.Arrays;
 
 
 public class StartActivity extends ActionBarActivity implements SensorEventListener  {
@@ -21,7 +18,6 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
     private TextView txtBPM;
     private SensorManager mSensorManager;
     private Sensor mStepCounterSensor;
-    private Sensor mStepDetectorSensor;
 
     private boolean startedStepCounter;
     private int stepCountInit;
@@ -41,7 +37,7 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         long lastTime = lastSteps[lastSteps.length-1];
         double delta = (lastTime - startTime); // time for 5 steps
         double bpm = (lastSteps.length * (60/(delta/1000000000)));
-        Log.d("Startactivity", "BPM:"+bpm);
+
         if(startTime != 0 && lastTime != 0){
             return bpm;
         }else{
@@ -71,19 +67,13 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
 
         super.onResume();
 
-        mSensorManager.registerListener(this, mStepCounterSensor,
-
-                SensorManager.SENSOR_DELAY_FASTEST);
-        mSensorManager.registerListener(this, mStepDetectorSensor,
-
-                SensorManager.SENSOR_DELAY_FASTEST);
+        mSensorManager.registerListener(this, mStepCounterSensor,SensorManager.SENSOR_DELAY_FASTEST);
 
     }
 
     protected void onStop() {
         super.onStop();
         mSensorManager.unregisterListener(this, mStepCounterSensor);
-        mSensorManager.unregisterListener(this, mStepDetectorSensor);
     }
 
     @Override
@@ -131,7 +121,6 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
             addStep(event.timestamp);
             txtStepCount.setText("Step Counter Detected : " + (value - stepCountInit));
             txtBPM.setText("BPM: "+(int)getBPM());
-            Log.d("StartActivity", Arrays.toString(lastSteps));
         }
     }
 }
