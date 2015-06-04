@@ -16,6 +16,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <uses-feature
+            android:name="@string/step_detector" android:required="false"/>
+
+        <uses-feature
+            android:name="@string/step_counter" android:required="false"/>
+
     </application>
 
 </manifest>
