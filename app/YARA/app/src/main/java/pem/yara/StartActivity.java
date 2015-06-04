@@ -12,32 +12,36 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import java.util.Arrays;
+
 
 public class StartActivity extends ActionBarActivity implements SensorEventListener  {
 
     private TextView txtStepCount;
+    private TextView txtBPM;
     private SensorManager mSensorManager;
     private Sensor mStepCounterSensor;
     private Sensor mStepDetectorSensor;
 
     private boolean startedStepCounter;
     private int stepCountInit;
-    private int[] lastSteps;
+    private long[] lastSteps;
 
-    public void addStep(int timestamp){
+    public void addStep(long timestamp){
         for (int i=0; i< lastSteps.length; i++){
-            if(lastSteps[i] != 0){
+            if( i+1 < lastSteps.length && lastSteps[i+1] != 0){
                 lastSteps[i] = lastSteps[i+1];
             }
         }
         lastSteps[lastSteps.length-1] = timestamp;
     }
-    public int getBPM(){
+    public double getBPM(){
         // calculate average bpm from the last few steps.
-        int startTime = lastSteps[0];
-        int lastTime = lastSteps[lastSteps.length-1];
-        int delta = lastTime - startTime / lastSteps.length-1;
-        int bpm = (delta/1000000) / 60;
+        long startTime = lastSteps[0];
+        long lastTime = lastSteps[lastSteps.length-1];
+        double delta = (lastTime - startTime); // time for 5 steps
+        double bpm = (lastSteps.length * (60/(delta/1000000000)));
+        Log.d("Startactivity", "BPM:"+bpm);
         if(startTime != 0 && lastTime != 0){
             return bpm;
         }else{
@@ -49,16 +53,17 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
-        txtStepCount = (TextView)findViewById(R.id.step_count);
+        txtStepCount = (TextView)findViewById(R.id.txtStepCount);
+        txtBPM = (TextView)findViewById(R.id.txtBPMCount);
 
         mSensorManager = (SensorManager)
                 getSystemService(Context.SENSOR_SERVICE);
         mStepCounterSensor = mSensorManager
                 .getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        mStepDetectorSensor = mSensorManager
+        /*mStepDetectorSensor = mSensorManager
                 .getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
-
-        lastSteps = new int[] {0,0,0,0,0};
+*/
+        lastSteps = new long[] {0,0,0,0,0};
     }
 
 
@@ -123,8 +128,10 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         }
 
         if (sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
-            txtStepCount.setText("Step Counter Detected : " + (value - stepCountInit)+ ",BPM:"+getBPM());
-            Log.d("StartActivity", lastSteps.toString());
+            addStep(event.timestamp);
+            txtStepCount.setText("Step Counter Detected : " + (value - stepCountInit));
+            txtBPM.setText("BPM: "+(int)getBPM());
+            Log.d("StartActivity", Arrays.toString(lastSteps));
         }
     }
 }
