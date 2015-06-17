@@ -17,10 +17,10 @@
             </intent-filter>
         </activity>
         <uses-feature
-            android:name="@string/step_detector" android:required="false"/>
+            android:name="@string/step_detector" android:required="true"/>
 
         <uses-feature
-            android:name="@string/step_counter" android:required="false"/>
+            android:name="@string/step_counter" android:required="true"/>
 
     </application>
 

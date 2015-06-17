@@ -23,4 +23,13 @@
         android:id="@+id/txtBPMCount"
         android:layout_below="@+id/txtStepCount"
         android:layout_alignParentStart="true" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="register Track"
+        android:id="@+id/btnRegisterTrack"
+        android:layout_below="@+id/txtBPMCount"
+        android:layout_alignParentStart="true"
+        android:layout_marginTop="36dp" />
 </RelativeLayout>
