@@ -1,6 +1,7 @@
 package pem.yara;
 
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -9,6 +10,8 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 
@@ -18,6 +21,11 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
     private TextView txtBPM;
     private SensorManager mSensorManager;
     private Sensor mStepCounterSensor;
+
+    private Button btnShowStats;
+    private Button btnStartRun;
+    private Button btnNewRun;
+    private Button btnShowSongs;
 
     private boolean startedStepCounter;
     private int stepCountInit;
@@ -60,6 +68,15 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
                 .getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
 */
         lastSteps = new long[] {0,0,0,0,0};
+
+        btnStartRun = (Button)findViewById(R.id.btnStartRunning);
+        btnStartRun.setOnClickListener(startRunListener);
+        btnNewRun = (Button)findViewById(R.id.btnRegisterTrack);
+        btnNewRun.setOnClickListener(newTrackListener);
+        btnShowStats = (Button)findViewById(R.id.btnShowStatistics);
+        btnShowStats.setOnClickListener(showStatisticsListener);
+        btnShowSongs = (Button)findViewById(R.id.btnShowSongList);
+        btnShowSongs.setOnClickListener(showSonglistListener);
     }
 
 
@@ -103,6 +120,9 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         return super.onOptionsItemSelected(item);
     }
 
+
+
+
     public void onSensorChanged(SensorEvent event) {
 
         Sensor sensor = event.sensor;
@@ -123,4 +143,29 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
             txtBPM.setText("BPM: "+(int)getBPM());
         }
     }
+
+    View.OnClickListener showStatisticsListener = new View.OnClickListener(){
+      public void onClick(View v){
+          Intent intent = new Intent(getApplicationContext(), StatisticsActivity.class);
+          startActivity(intent);
+      }
+    };
+    View.OnClickListener startRunListener = new View.OnClickListener(){
+      public void onClick(View v){
+          Intent intent = new Intent(getApplicationContext(), RunActivity.class);
+          startActivity(intent);
+      }
+    };
+    View.OnClickListener newTrackListener = new View.OnClickListener(){
+        public void onClick(View v){
+            Intent intent = new Intent(getApplicationContext(), RunActivity.class);
+            startActivity(intent);
+        }
+    };
+    View.OnClickListener showSonglistListener = new View.OnClickListener(){
+      public void onClick(View v){
+         /* Intent intent = new Intent(getApplicationContext(), StartActivity.class);
+          startActivity(intent);*/
+      }
+    };
 }

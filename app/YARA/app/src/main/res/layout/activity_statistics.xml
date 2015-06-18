@@ -1,0 +1,59 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+    android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="pem.yara.StatisticsActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Run Breakdown:"
+        android:id="@+id/runbreakdownheadline"
+        android:layout_alignParentTop="true"
+
+        android:layout_alignParentStart="true" />
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="216dp"
+        android:layout_below="@+id/runbreakdownheadline"
+        android:stretchColumns="1"
+        android:layout_alignParentStart="true">
+
+        <TableRow>
+            <TextView
+                android:layout_column="1"
+                android:text="Distance:"
+                android:padding="3dip" />
+            <TextView
+                android:text="0 km"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+        <TableRow>
+            <TextView
+                android:layout_column="1"
+                android:text="Pace:"
+                android:padding="3dip" />
+            <TextView
+                android:text="0 steps/min"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+        <TableRow>
+            <TextView
+                android:layout_column="1"
+                android:text="Time:"
+                android:padding="3dip" />
+            <TextView
+                android:text="0 min"
+                android:gravity="right"
+                android:padding="3dip" />
+        </TableRow>
+
+        </TableLayout>
+
+</RelativeLayout>

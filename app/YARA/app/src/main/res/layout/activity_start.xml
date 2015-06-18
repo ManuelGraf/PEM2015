@@ -24,12 +24,62 @@
         android:layout_below="@+id/txtStepCount"
         android:layout_alignParentStart="true" />
 
-    <Button
-        android:layout_width="wrap_content"
+
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:text="register Track"
+        android:id="@+id/trackSelectBar"
+        android:layout_centerVertical="true"
+        android:layout_alignParentStart="true">
+
+        <Spinner
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:id="@+id/spinner"
+            android:spinnerMode="dropdown"
+            android:layout_weight="0.5"
+            android:background="#555555" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Statistics"
+            android:id="@+id/btnShowStatistics"
+            android:layout_weight="0.15" />
+
+        <Button
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:text="Songlist"
+            android:id="@+id/btnShowSongList"
+            android:layout_weight="0.15" />
+
+    </LinearLayout>
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="New"
         android:id="@+id/btnRegisterTrack"
-        android:layout_below="@+id/txtBPMCount"
-        android:layout_alignParentStart="true"
-        android:layout_marginTop="36dp" />
+        android:focusable="false"
+        android:clickable="false"
+        android:layout_below="@+id/trackSelectBar"
+       />
+
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="Start Running"
+        android:id="@+id/btnStartRunning"
+        android:layout_below="@+id/btnRegisterTrack"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true" />
+
+
+
+
+
+
 </RelativeLayout>
