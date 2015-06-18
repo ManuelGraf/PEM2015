@@ -1,21 +1,29 @@
 package pem.yara;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.ServiceConnection;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import pem.yara.LocalService.LocalBinder;
 
 
 public class StartActivity extends ActionBarActivity implements SensorEventListener  {
+
+    LocalService mService;
+    boolean mBound = false;
 
     private TextView txtStepCount;
     private TextView txtBPM;
@@ -77,8 +85,18 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         btnShowStats.setOnClickListener(showStatisticsListener);
         btnShowSongs = (Button)findViewById(R.id.btnShowSongList);
         btnShowSongs.setOnClickListener(showSonglistListener);
+
     }
 
+    @Override
+    protected void onStart(){
+        super.onStart();
+        // Bind Service
+        Log.d("onStart", "Attempting to bind Service");
+        Intent intent = new Intent(this, LocalService.class);
+        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        Log.d("onStart", "Attempt over... Service bound? " + mBound);
+    }
 
     protected void onResume() {
 
@@ -90,8 +108,31 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
 
     protected void onStop() {
         super.onStop();
+        stopService(new Intent(this, LocalService.class));
+//        if(mBound) {
+            unbindService(mConnection);
+            mBound = false;
+//        }
         mSensorManager.unregisterListener(this, mStepCounterSensor);
     }
+
+    private ServiceConnection mConnection = new ServiceConnection() {
+
+        @Override
+        public void onServiceConnected(ComponentName className,
+                                       IBinder service) {
+            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            LocalBinder binder = (LocalBinder) service;
+            mService = binder.getService();
+            mBound = true;
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName arg0) {
+            Log.e("onServiceDisconnected", "onServiceDisconnected");
+            mBound = false;
+        }
+    };
 
     @Override
     public void onAccuracyChanged(Sensor s, int i){
@@ -119,9 +160,6 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
 
         return super.onOptionsItemSelected(item);
     }
-
-
-
 
     public void onSensorChanged(SensorEvent event) {
 
