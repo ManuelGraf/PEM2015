@@ -1,6 +1,6 @@
-package pem.yara.config;
+package pem.yara.echonest;
 
-public class EchoNest {
+public class Config {
 
     public static final String API_KEY = "YUNP8GLWKN942WKOF";
 
@@ -13,4 +13,8 @@ public class EchoNest {
     public static final String EMAIL = "grafm@cip.ifi.lmu.de";
 
     public static final String PASSWORD = "49766794";
+
+    public static final String BASE_URL = "http://developer.echonest.com/api/v4/";
+
+    public static final String SONG_SEARCH_URL = BASE_URL + "song/search?api_key=" + API_KEY + "&format=json&results=1&artist=%s&title=%s&bucket=audio_summary";
 }

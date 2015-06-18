@@ -4,13 +4,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.LocationListener;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -19,6 +20,13 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import pem.yara.LocationService.LocalBinder;
+
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
+
+import pem.yara.echonest.Client;
+import pem.yara.entity.YaraSong;
 
 
 public class StartActivity extends ActionBarActivity implements SensorEventListener  {
@@ -102,6 +110,9 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         c.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
         Log.d("onStart", "Attempt over... Service bound? " + mBound);
+        
+        ScanMusicTask scanMusicTask = new ScanMusicTask();
+        scanMusicTask.execute(getApplication());
     }
 
     protected void onResume() {
