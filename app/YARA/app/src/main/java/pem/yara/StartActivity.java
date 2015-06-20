@@ -77,6 +77,7 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
 */
         lastSteps = new long[] {0,0,0,0,0};
 
+        // Navigation buttons
         btnStartRun = (Button)findViewById(R.id.btnStartRunning);
         btnStartRun.setOnClickListener(startRunListener);
         btnNewRun = (Button)findViewById(R.id.btnRegisterTrack);
