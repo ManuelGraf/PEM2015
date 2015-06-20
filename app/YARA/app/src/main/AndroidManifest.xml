@@ -19,7 +19,7 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".LocalService"/>
+        <service android:name=".LocationService"/>
 
         <uses-feature
             android:name="@string/step_detector"

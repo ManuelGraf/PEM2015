@@ -8,6 +8,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.LocationListener;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
@@ -17,12 +18,12 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
-import pem.yara.LocalService.LocalBinder;
+import pem.yara.LocationService.LocalBinder;
 
 
 public class StartActivity extends ActionBarActivity implements SensorEventListener  {
 
-    LocalService mService;
+    LocationService mService;
     boolean mBound = false;
 
     private TextView txtStepCount;
@@ -94,24 +95,25 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         super.onStart();
         // Bind Service
         Log.d("onStart", "Attempting to bind Service");
-        Intent intent = new Intent(this, LocalService.class);
+        Intent intent = new Intent(this, LocationService.class);
+        intent.putExtra("recInterval", 1600);
         Context c;
         c=this.getBaseContext();
         c.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+
         Log.d("onStart", "Attempt over... Service bound? " + mBound);
     }
 
     protected void onResume() {
 
         super.onResume();
-
         mSensorManager.registerListener(this, mStepCounterSensor,SensorManager.SENSOR_DELAY_FASTEST);
 
     }
 
     protected void onStop() {
         super.onStop();
-        stopService(new Intent(this, LocalService.class));
+        stopService(new Intent(this, LocationService.class));
 //        if(mBound) {
             unbindService(mConnection);
             mBound = false;
@@ -207,7 +209,6 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
       public void onClick(View v){
          /* Intent intent = new Intent(getApplicationContext(), StartActivity.class);
           startActivity(intent);*/
-          Log.d("", "" + mService.getRandomNumber());
       }
     };
 }
