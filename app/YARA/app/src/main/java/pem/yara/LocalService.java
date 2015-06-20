@@ -1,8 +1,13 @@
 package pem.yara;
 
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
+import android.location.LocationListener;
+import android.location.LocationManager;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.util.Log;
 
@@ -12,6 +17,7 @@ import java.util.Random;
  * Created by Fabian on 18.06.2015.
  */
 public class LocalService extends Service {
+
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
     // Random number generator
@@ -31,6 +37,8 @@ public class LocalService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         Log.d("IBinder", "Service binding...");
+
+
         return mBinder;
     }
 
@@ -38,4 +46,6 @@ public class LocalService extends Service {
     public int getRandomNumber() {
         return mGenerator.nextInt(100);
     }
+
+
 }
