@@ -94,7 +94,9 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         // Bind Service
         Log.d("onStart", "Attempting to bind Service");
         Intent intent = new Intent(this, LocalService.class);
-        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        Context c;
+        c=this.getBaseContext();
+        c.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
         Log.d("onStart", "Attempt over... Service bound? " + mBound);
     }
 
@@ -204,6 +206,7 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
       public void onClick(View v){
          /* Intent intent = new Intent(getApplicationContext(), StartActivity.class);
           startActivity(intent);*/
+          Log.d("", "" + mService.getRandomNumber());
       }
     };
 }

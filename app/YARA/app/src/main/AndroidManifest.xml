@@ -19,6 +19,8 @@
             </intent-filter>
         </activity>
 
+        <service android:name=".LocalService"/>
+
         <uses-feature
             android:name="@string/step_detector"
             android:required="true" />
