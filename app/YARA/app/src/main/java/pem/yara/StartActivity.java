@@ -18,6 +18,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import pem.yara.LocationService.LocalBinder;
 
@@ -35,6 +36,7 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
     boolean mBound = false;
 
     private TextView txtStepCount;
+    private TextView txtStepCountAccelerometer;
     private TextView txtBPM;
     private SensorManager mSensorManager;
     private Sensor mStepCounterSensor;
@@ -75,6 +77,7 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
         txtStepCount = (TextView)findViewById(R.id.txtStepCount);
+        txtStepCountAccelerometer  = (TextView)findViewById(R.id.txtStepCountAccelerometer);
         txtBPM = (TextView)findViewById(R.id.txtBPMCount);
 
         mSensorManager = (SensorManager)
@@ -95,6 +98,28 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         btnShowStats.setOnClickListener(showStatisticsListener);
         btnShowSongs = (Button)findViewById(R.id.btnShowSongList);
         btnShowSongs.setOnClickListener(showSonglistListener);
+
+
+
+        //Init StepDetector
+        seekBar = (SeekBar) findViewById(R.id.seekBar);
+        seekBar.setProgress(10);
+        seekBar.setOnSeekBarChangeListener(seekBarListener);
+        textSensitive = (TextView) findViewById(R.id.textSensitive);
+        textSensitive.setText(String.valueOf(10));
+
+
+        int h = 480;
+        mYOffset = h * 0.5f;
+        mScale[0] = - (h * 0.5f * (1.0f / (SensorManager.STANDARD_GRAVITY * 2)));
+        mScale[1] = - (h * 0.5f * (1.0f / (SensorManager.MAGNETIC_FIELD_EARTH_MAX)));
+
+        mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
+        mSensor = mSensorManager.getDefaultSensor(
+                Sensor.TYPE_ACCELEROMETER /*|
+            Sensor.TYPE_MAGNETIC_FIELD |
+            Sensor.TYPE_ORIENTATION*/);
+        mSensorManager.registerListener(mStepDetector, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
     }
 
@@ -118,7 +143,8 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
     protected void onResume() {
 
         super.onResume();
-        mSensorManager.registerListener(this, mStepCounterSensor,SensorManager.SENSOR_DELAY_FASTEST);
+        //mSensorManager.registerListener(this, mStepCounterSensor,SensorManager.SENSOR_DELAY_FASTEST);
+        mSensorManager.registerListener(mStepDetector, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
     }
 
@@ -129,7 +155,8 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
             unbindService(mConnection);
             mBound = false;
 //        }
-        mSensorManager.unregisterListener(this, mStepCounterSensor);
+        //mSensorManager.unregisterListener(this, mStepCounterSensor);
+        mSensorManager.unregisterListener(mStepDetector, mSensor);
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -221,5 +248,110 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
          /* Intent intent = new Intent(getApplicationContext(), StartActivity.class);
           startActivity(intent);*/
       }
+    };
+
+
+
+
+
+
+    //AB HIER ERSTMAL DER STEP DETECTOR
+    private Sensor mSensor;
+
+    private final static String TAG = "StepDetector";
+    private float   mLimit = 10; // 1.97  2.96  4.44  6.66  10.00  15.00  22.50  33.75  50.62
+    private float   mLastValues[] = new float[3*2];
+    private float   mScale[] = new float[2];
+    private float   mYOffset;
+
+    private float   mLastDirections[] = new float[3*2];
+    private float   mLastExtremes[][] = { new float[3*2], new float[3*2] };
+    private float   mLastDiff[] = new float[3*2];
+    private int     mLastMatch = -1;
+
+    private SeekBar seekBar;
+    private TextView textSensitive;
+
+    public int mCount = 0;
+
+    private SensorEventListener mStepDetector = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            Sensor sensor = event.sensor;
+            synchronized (this) {
+                if (sensor.getType() == Sensor.TYPE_ORIENTATION) {
+                }
+                else {
+                    int j = (sensor.getType() == Sensor.TYPE_ACCELEROMETER) ? 1 : 0;
+                    if (j == 1) {
+                        float vSum = 0;
+                        for (int i=0 ; i<3 ; i++) {
+                            final float v = mYOffset + event.values[i] * mScale[j];
+                            vSum += v;
+                        }
+                        int k = 0;
+                        float v = vSum / 3;
+
+                        float direction = (v > mLastValues[k] ? 1 : (v < mLastValues[k] ? -1 : 0));
+                        if (direction == - mLastDirections[k]) {
+                            // Direction changed
+                            int extType = (direction > 0 ? 0 : 1); // minumum or maximum?
+                            mLastExtremes[extType][k] = mLastValues[k];
+                            float diff = Math.abs(mLastExtremes[extType][k] - mLastExtremes[1 - extType][k]);
+
+                            if (diff > mLimit) {
+
+                                boolean isAlmostAsLargeAsPrevious = diff > (mLastDiff[k]*2/3);
+                                boolean isPreviousLargeEnough = mLastDiff[k] > (diff/3);
+                                boolean isNotContra = (mLastMatch != 1 - extType);
+
+                                if (isAlmostAsLargeAsPrevious && isPreviousLargeEnough && isNotContra) {
+                                    Log.i(TAG, "step");
+                                    mCount ++;
+                                    Log.d("", "Count " + mCount);
+
+                                    updateViewMethod(mCount);
+
+                                    mLastMatch = extType;
+                                }
+                                else {
+                                    mLastMatch = -1;
+                                }
+                            }
+                            mLastDiff[k] = diff;
+                        }
+                        mLastDirections[k] = direction;
+                        mLastValues[k] = v;
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    };
+
+    private void updateViewMethod(int mCount) {
+        txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mCount));
+    }
+
+
+    private SeekBar.OnSeekBarChangeListener seekBarListener = new SeekBar.OnSeekBarChangeListener(){
+
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+            mLimit = seekBar.getProgress();
+
+            textSensitive.setText(String.valueOf(mLimit));
+        }
+
+        public void onStartTrackingTouch(SeekBar seekBar){
+
+        }
+
+        public void onStopTrackingTouch(SeekBar seekBar){
+
+        }
     };
 }
