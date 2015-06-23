@@ -20,13 +20,12 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import pem.yara.LocalService.LocalBinder;
 import pem.yara.LocationService.LocalBinder;
 import pem.yara.adapters.HomeScreenPageAdapter;
 import pem.yara.fragments.SongListFragment;
 
 
-public class StartActivity extends ActionBarActivity {
+public class StartActivity extends ActionBarActivity implements SongListFragment.OnSongListInteractionListener {
 
     LocationService mService;
     boolean mBound = false;
@@ -47,7 +46,6 @@ public class StartActivity extends ActionBarActivity {
     private Button btnStartRun;
     private Button btnNewRun;
     private Button btnShowSongs;
-    private Button btnFinishRun;
 
 
     @Override
@@ -60,7 +58,7 @@ public class StartActivity extends ActionBarActivity {
 
 
         // Navigation buttons
-        btnStartRun = (Button)findViewById(R.id.btnStartRunning);
+        /*btnStartRun = (Button)findViewById(R.id.btnStartRunning);
         btnStartRun.setOnClickListener(startRunListener);
         btnNewRun = (Button)findViewById(R.id.btnRegisterTrack);
         btnNewRun.setOnClickListener(newTrackListener);
@@ -68,7 +66,7 @@ public class StartActivity extends ActionBarActivity {
         btnShowStats.setOnClickListener(showStatisticsListener);
         btnShowSongs = (Button)findViewById(R.id.btnShowSongList);
         btnShowSongs.setOnClickListener(showSonglistListener);
-        btnFinishRun = (Button)findViewById(R.id.btnFinishRun);
+        btnFinishRun = (Button)findViewById(R.id.btnFinishRun);*/
 
 
 
@@ -98,11 +96,11 @@ public class StartActivity extends ActionBarActivity {
         mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         if(mStepCounterSensor != null){
-            Log.d("Step Counter Type", "TYPE_STEP_COUNTER verf�gbar");
+            Log.d("Step Counter Type", "TYPE_STEP_COUNTER verfuegbar");
             mSensorManager.registerListener(mStepDetectorCounter, mStepCounterSensor,SensorManager.SENSOR_DELAY_FASTEST);
         }else{
             Log.d("Step Counter Type", "Auf Accelerometer Step Detection Schalten");
-            //TODO: Nach dem Testen das hier einkommentieren und anpassen, dass immer der verf�gbare Sensor verwendet wird
+            //TODO: Nach dem Testen das hier einkommentieren und anpassen, dass immer der verfuegbare Sensor verwendet wird
             //mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         }
@@ -128,10 +126,11 @@ public class StartActivity extends ActionBarActivity {
         c.startService(intent);
         Log.d("onStart", "Service started");
         
-        ScanMusicTask scanMusicTask = new ScanMusicTask();
-        scanMusicTask.execute(getApplication());
+//        ScanMusicTask scanMusicTask = new ScanMusicTask();
+//        scanMusicTask.execute(getApplication());
     }
 
+    @Override
     protected void onResume() {
 
         super.onResume();
@@ -237,8 +236,11 @@ public class StartActivity extends ActionBarActivity {
 
 
 
+
+
+
     //AB HIER ERSTMAL DER STEP DETECTOR
-    //TODO: Seekbar entfernen mit den Variablen sobald unsere Sensitivit�t getestet wurde
+    //TODO: Seekbar entfernen mit den Variablen sobald unsere Sensitivitaet getestet wurde
     private float   mLimit = 10; // 1.97  2.96  4.44  6.66  10.00  15.00  22.50  33.75  50.62
 
     private SeekBar seekBar;
@@ -269,7 +271,7 @@ public class StartActivity extends ActionBarActivity {
     private class StepAccelerometer implements SensorEventListener{
 
         private final static String TAG = "StepDetector";
-        //TODO: das hier wieder einkommentieren, nachdem wir die Seekbar rausgel�scht haben
+        //TODO: das hier wieder einkommentieren, nachdem wir die Seekbar rausgeloescht haben
         //private float   mLimit = 10; // 1.97  2.96  4.44  6.66  10.00  15.00  22.50  33.75  50.62
         private float   mLastValues[] = new float[3*2];
         private float   mScale[] = new float[2];
@@ -343,6 +345,7 @@ public class StartActivity extends ActionBarActivity {
             }
         }
 
+        @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
         }

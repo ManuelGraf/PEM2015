@@ -5,7 +5,6 @@ android:paddingRight="@dimen/activity_horizontal_margin"
 android:paddingTop="@dimen/activity_vertical_margin"
 android:paddingBottom="@dimen/activity_vertical_margin" tools:context="pem.yara.StartActivity">
 
-<!-- Right side page. (Slave)  -->
     <android.support.v4.view.ViewPager
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/pager"
@@ -15,7 +14,7 @@ android:paddingBottom="@dimen/activity_vertical_margin" tools:context="pem.yara.
         <android.support.v4.view.PagerTitleStrip
             android:id="@+id/pager_title_strip"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="300dp"
             android:layout_gravity="top"
             android:background="#33b5e5"
             android:textColor="#fff"
@@ -25,8 +24,6 @@ android:paddingBottom="@dimen/activity_vertical_margin" tools:context="pem.yara.
 
 
     </android.support.v4.view.ViewPager>
-</RelativeLayout>
-
 
         <TextView
             android:layout_width="wrap_content"
@@ -65,7 +62,7 @@ android:paddingBottom="@dimen/activity_vertical_margin" tools:context="pem.yara.
             android:id="@+id/trackList"
             android:layout_gravity="center_horizontal"
             android:layout_weight="0.75" />
-
+</RelativeLayout>
 
 <!--
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
