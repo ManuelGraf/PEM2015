@@ -4,14 +4,12 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.database.Cursor;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.provider.MediaStore;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -22,15 +20,8 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import pem.yara.LocationService.LocalBinder;
 
-import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
-import pem.yara.echonest.Client;
-import pem.yara.entity.YaraSong;
-
-
-public class StartActivity extends ActionBarActivity implements SensorEventListener  {
+public class StartActivity extends ActionBarActivity {
 
     LocationService mService;
     boolean mBound = false;
@@ -40,37 +31,16 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
     private TextView txtBPM;
     private SensorManager mSensorManager;
     private Sensor mStepCounterSensor;
+    private Sensor mStepCounterAccelerometerSensor;
+
+    private SensorEventListener mStepDetectorAccelerometer;
+    private SensorEventListener mStepDetectorCounter;
 
     private Button btnShowStats;
     private Button btnStartRun;
     private Button btnNewRun;
     private Button btnShowSongs;
 
-    private boolean startedStepCounter;
-    private int stepCountInit;
-    private long[] lastSteps;
-
-    public void addStep(long timestamp){
-        for (int i=0; i< lastSteps.length; i++){
-            if( i+1 < lastSteps.length && lastSteps[i+1] != 0){
-                lastSteps[i] = lastSteps[i+1];
-            }
-        }
-        lastSteps[lastSteps.length-1] = timestamp;
-    }
-    public double getBPM(){
-        // calculate average bpm from the last few steps.
-        long startTime = lastSteps[0];
-        long lastTime = lastSteps[lastSteps.length-1];
-        double delta = (lastTime - startTime); // time for 5 steps
-        double bpm = (lastSteps.length * (60/(delta/1000000000)));
-
-        if(startTime != 0 && lastTime != 0){
-            return bpm;
-        }else{
-            return 0;
-        }
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,14 +50,6 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         txtStepCountAccelerometer  = (TextView)findViewById(R.id.txtStepCountAccelerometer);
         txtBPM = (TextView)findViewById(R.id.txtBPMCount);
 
-        mSensorManager = (SensorManager)
-                getSystemService(Context.SENSOR_SERVICE);
-        mStepCounterSensor = mSensorManager
-                .getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        /*mStepDetectorSensor = mSensorManager
-                .getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
-*/
-        lastSteps = new long[] {0,0,0,0,0};
 
         // Navigation buttons
         btnStartRun = (Button)findViewById(R.id.btnStartRunning);
@@ -108,18 +70,28 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         textSensitive = (TextView) findViewById(R.id.textSensitive);
         textSensitive.setText(String.valueOf(10));
 
-
-        int h = 480;
-        mYOffset = h * 0.5f;
-        mScale[0] = - (h * 0.5f * (1.0f / (SensorManager.STANDARD_GRAVITY * 2)));
-        mScale[1] = - (h * 0.5f * (1.0f / (SensorManager.MAGNETIC_FIELD_EARTH_MAX)));
-
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        mSensor = mSensorManager.getDefaultSensor(
-                Sensor.TYPE_ACCELEROMETER /*|
-            Sensor.TYPE_MAGNETIC_FIELD |
-            Sensor.TYPE_ORIENTATION*/);
-        mSensorManager.registerListener(mStepDetector, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        mStepCounterSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        mStepDetectorCounter = new StepCounter();
+        /*mStepDetectorSensor = mSensorManager
+                .getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);
+                */
+        mStepCounterAccelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        mStepDetectorAccelerometer = new StepAccelerometer();
+
+        mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
+
+        if(mStepCounterSensor != null){
+            Log.d("Step Counter Type", "TYPE_STEP_COUNTER verfügbar");
+            mSensorManager.registerListener(mStepDetectorCounter, mStepCounterSensor,SensorManager.SENSOR_DELAY_FASTEST);
+        }else{
+            Log.d("Step Counter Type", "Auf Accelerometer Step Detection Schalten");
+            //TODO: Nach dem Testen das hier einkommentieren und anpassen, dass immer der verfügbare Sensor verwendet wird
+            //mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
+
+        }
+
+
 
     }
 
@@ -143,8 +115,11 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
     protected void onResume() {
 
         super.onResume();
+        if(mStepCounterSensor != null){
+            mSensorManager.registerListener(mStepDetectorCounter, mStepCounterSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        }
         //mSensorManager.registerListener(this, mStepCounterSensor,SensorManager.SENSOR_DELAY_FASTEST);
-        mSensorManager.registerListener(mStepDetector, mSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
     }
 
@@ -155,8 +130,11 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
             unbindService(mConnection);
             mBound = false;
 //        }
+        if(mStepCounterSensor != null){
+            mSensorManager.unregisterListener(mStepDetectorCounter, mStepCounterSensor);
+        }
         //mSensorManager.unregisterListener(this, mStepCounterSensor);
-        mSensorManager.unregisterListener(mStepDetector, mSensor);
+        mSensorManager.unregisterListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor);
     }
 
     private ServiceConnection mConnection = new ServiceConnection() {
@@ -177,10 +155,6 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         }
     };
 
-    @Override
-    public void onAccuracyChanged(Sensor s, int i){
-
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -202,27 +176,6 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    public void onSensorChanged(SensorEvent event) {
-
-        Sensor sensor = event.sensor;
-        float[] values = event.values;
-        int value = -1;
-
-        if (values.length > 0) {
-            value = (int) values[0];
-            if(!startedStepCounter){
-                startedStepCounter = true;
-                stepCountInit = value;
-            }
-        }
-
-        if (sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
-            addStep(event.timestamp);
-            txtStepCount.setText("Step Counter Detected : " + (value - stepCountInit));
-            txtBPM.setText("BPM: "+(int)getBPM());
-        }
     }
 
     View.OnClickListener showStatisticsListener = new View.OnClickListener(){
@@ -254,29 +207,62 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
 
 
 
-
     //AB HIER ERSTMAL DER STEP DETECTOR
-    private Sensor mSensor;
-
-    private final static String TAG = "StepDetector";
+    //TODO: Seekbar entfernen mit den Variablen sobald unsere Sensitivität getestet wurde
     private float   mLimit = 10; // 1.97  2.96  4.44  6.66  10.00  15.00  22.50  33.75  50.62
-    private float   mLastValues[] = new float[3*2];
-    private float   mScale[] = new float[2];
-    private float   mYOffset;
-
-    private float   mLastDirections[] = new float[3*2];
-    private float   mLastExtremes[][] = { new float[3*2], new float[3*2] };
-    private float   mLastDiff[] = new float[3*2];
-    private int     mLastMatch = -1;
 
     private SeekBar seekBar;
     private TextView textSensitive;
 
-    public int mCount = 0;
+    private void updateViewMethod(int mCount) {
+        txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mCount));
+    }
 
-    private SensorEventListener mStepDetector = new SensorEventListener() {
-        @Override
-        public void onSensorChanged(SensorEvent event) {
+    private SeekBar.OnSeekBarChangeListener seekBarListener = new SeekBar.OnSeekBarChangeListener(){
+
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
+            mLimit = seekBar.getProgress();
+
+            textSensitive.setText(String.valueOf(mLimit));
+        }
+
+        public void onStartTrackingTouch(SeekBar seekBar){
+
+        }
+
+        public void onStopTrackingTouch(SeekBar seekBar){
+
+        }
+    };
+
+
+    private class StepAccelerometer implements SensorEventListener{
+
+        private final static String TAG = "StepDetector";
+        //TODO: das hier wieder einkommentieren, nachdem wir die Seekbar rausgelöscht haben
+        //private float   mLimit = 10; // 1.97  2.96  4.44  6.66  10.00  15.00  22.50  33.75  50.62
+        private float   mLastValues[] = new float[3*2];
+        private float   mScale[] = new float[2];
+        private float   mYOffset;
+
+        private float   mLastDirections[] = new float[3*2];
+        private float   mLastExtremes[][] = { new float[3*2], new float[3*2] };
+        private float   mLastDiff[] = new float[3*2];
+        private int     mLastMatch = -1;
+
+        private SeekBar seekBar;
+        private TextView textSensitive;
+
+        public int mCount = 0;
+
+        public StepAccelerometer(){
+            int h = 480;
+            mYOffset = h * 0.5f;
+            mScale[0] = - (h * 0.5f * (1.0f / (SensorManager.STANDARD_GRAVITY * 2)));
+            mScale[1] = - (h * 0.5f * (1.0f / (SensorManager.MAGNETIC_FIELD_EARTH_MAX)));
+        }
+
+        public void onSensorChanged(SensorEvent event){
             Sensor sensor = event.sensor;
             synchronized (this) {
                 if (sensor.getType() == Sensor.TYPE_ORIENTATION) {
@@ -327,31 +313,70 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
             }
         }
 
-        @Override
         public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
         }
-    };
 
-    private void updateViewMethod(int mCount) {
-        txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mCount));
+        public void setSensitivity(float sensitivity) {
+            mLimit = sensitivity; // 1.97  2.96  4.44  6.66  10.00  15.00  22.50  33.75  50.62
+        }
+
     }
 
+    private class StepCounter implements SensorEventListener{
 
-    private SeekBar.OnSeekBarChangeListener seekBarListener = new SeekBar.OnSeekBarChangeListener(){
+        private boolean startedStepCounter;
+        private int stepCountInit;
+        private long[] lastSteps;
 
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser){
-            mLimit = seekBar.getProgress();
-
-            textSensitive.setText(String.valueOf(mLimit));
+        public StepCounter(){
+            lastSteps = new long[] {0,0,0,0,0};
         }
 
-        public void onStartTrackingTouch(SeekBar seekBar){
+        public void onSensorChanged(SensorEvent event){
+            Sensor sensor = event.sensor;
+            float[] values = event.values;
+            int value = -1;
+
+            if (values.length > 0) {
+                value = (int) values[0];
+                if(!startedStepCounter){
+                    startedStepCounter = true;
+                    stepCountInit = value;
+                }
+            }
+
+            if (sensor.getType() == Sensor.TYPE_STEP_COUNTER) {
+                addStep(event.timestamp);
+                txtStepCount.setText("Step Counter Detected : " + (value - stepCountInit));
+                txtBPM.setText("BPM: "+(int)getBPM());
+            }
+        }
+
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
 
         }
 
-        public void onStopTrackingTouch(SeekBar seekBar){
-
+        public void addStep(long timestamp){
+            for (int i=0; i< lastSteps.length; i++){
+                if( i+1 < lastSteps.length && lastSteps[i+1] != 0){
+                    lastSteps[i] = lastSteps[i+1];
+                }
+            }
+            lastSteps[lastSteps.length-1] = timestamp;
         }
-    };
+        public double getBPM(){
+            // calculate average bpm from the last few steps.
+            long startTime = lastSteps[0];
+            long lastTime = lastSteps[lastSteps.length-1];
+            double delta = (lastTime - startTime); // time for 5 steps
+            double bpm = (lastSteps.length * (60/(delta/1000000000)));
+
+            if(startTime != 0 && lastTime != 0){
+                return bpm;
+            }else{
+                return 0;
+            }
+        }
+    }
 }
