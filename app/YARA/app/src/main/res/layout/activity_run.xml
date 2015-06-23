@@ -5,16 +5,13 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin" tools:context="pem.yara.RunActivity">
 
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Step_count"
-        android:id="@+id/txtStepCount"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:text="Step_count Accelerometer"
+        android:id="@+id/txtStepCountAccelerometer"
+        />
 
     <TextView
         android:layout_width="wrap_content"
@@ -25,14 +22,20 @@
         android:layout_below="@+id/txtStepCount"
         android:layout_alignParentStart="true" />
 
+    <SeekBar
+        android:id="@+id/seekBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="50"/>
+
     <TextView
+        android:id="@+id/textSensitive"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Currently Playing"
-        android:id="@+id/txtSongPlayed"
-        android:layout_below="@+id/txtBPMCount"
-        android:layout_alignParentStart="true" />
+        android:gravity="center_vertical|center_horizontal"
+        android:text="---"
+        android:textSize="20sp"/>
+
 
     <Button
         android:layout_width="fill_parent"
