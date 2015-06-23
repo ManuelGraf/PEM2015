@@ -24,7 +24,6 @@ import pem.yara.LocationService.LocalBinder;
 public class StartActivity extends ActionBarActivity {
 
     LocationService mService;
-    boolean mBound = false;
 
     private TextView txtStepCount;
     private TextView txtStepCountAccelerometer;
@@ -40,6 +39,7 @@ public class StartActivity extends ActionBarActivity {
     private Button btnStartRun;
     private Button btnNewRun;
     private Button btnShowSongs;
+    private Button btnFinishRun;
 
 
     @Override
@@ -60,6 +60,7 @@ public class StartActivity extends ActionBarActivity {
         btnShowStats.setOnClickListener(showStatisticsListener);
         btnShowSongs = (Button)findViewById(R.id.btnShowSongList);
         btnShowSongs.setOnClickListener(showSonglistListener);
+        btnFinishRun = (Button)findViewById(R.id.btnFinishRun);
 
 
 
@@ -101,12 +102,16 @@ public class StartActivity extends ActionBarActivity {
         // Bind Service
         Log.d("onStart", "Attempting to bind Service");
         Intent intent = new Intent(this, LocationService.class);
-        intent.putExtra("recInterval", 1600);
+        intent.putExtra("recInterval", 700);
+
         Context c;
         c=this.getBaseContext();
-        c.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
-        Log.d("onStart", "Attempt over... Service bound? " + mBound);
+        c.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        Log.d("onStart", "Service bound");
+
+        c.startService(intent);
+        Log.d("onStart", "Service started");
         
         ScanMusicTask scanMusicTask = new ScanMusicTask();
         scanMusicTask.execute(getApplication());
@@ -125,11 +130,8 @@ public class StartActivity extends ActionBarActivity {
 
     protected void onStop() {
         super.onStop();
-        stopService(new Intent(this, LocationService.class));
-//        if(mBound) {
-            unbindService(mConnection);
-            mBound = false;
-//        }
+
+        //TODO: FLO: Wir wollen die Listener nicht abschalten, wenn die StartActivity stoppt! Sonst messen wir nur, während der User NICHT läuft...
         if(mStepCounterSensor != null){
             mSensorManager.unregisterListener(mStepDetectorCounter, mStepCounterSensor);
         }
@@ -145,13 +147,12 @@ public class StartActivity extends ActionBarActivity {
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             LocalBinder binder = (LocalBinder) service;
             mService = binder.getService();
-            mBound = true;
+            Log.d("onServiceConnected", "after binder.getService()");
         }
 
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             Log.e("onServiceDisconnected", "onServiceDisconnected");
-            mBound = false;
         }
     };
 
@@ -192,6 +193,8 @@ public class StartActivity extends ActionBarActivity {
     };
     View.OnClickListener newTrackListener = new View.OnClickListener(){
         public void onClick(View v){
+            mService.startRecording();
+
             Intent intent = new Intent(getApplicationContext(), RunActivity.class);
             startActivity(intent);
         }
@@ -202,7 +205,12 @@ public class StartActivity extends ActionBarActivity {
           startActivity(intent);*/
       }
     };
-
+    View.OnClickListener finishRunListener = new View.OnClickListener(){
+        public void onClick(View v) {
+            Log.d("finishRunListener", "Button 'Finish Run' clicked");
+            mService.stopRecording();
+        }
+    };
 
 
 
