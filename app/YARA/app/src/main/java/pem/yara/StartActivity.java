@@ -8,19 +8,23 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
 import pem.yara.LocalService.LocalBinder;
+import pem.yara.adapters.HomeScreenPageAdapter;
+import pem.yara.fragments.SongListFragment;
 
 
-public class StartActivity extends ActionBarActivity implements SensorEventListener  {
+public class StartActivity extends ActionBarActivity implements SensorEventListener,SongListFragment.OnSongListInteractionListener {
 
     LocalService mService;
     boolean mBound = false;
@@ -29,6 +33,8 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
     private TextView txtBPM;
     private SensorManager mSensorManager;
     private Sensor mStepCounterSensor;
+    private HomeScreenPageAdapter mPagerAdapter;
+    ViewPager mViewPager;
 
     private Button btnShowStats;
     private Button btnStartRun;
@@ -78,38 +84,32 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         lastSteps = new long[] {0,0,0,0,0};
 
         // Navigation buttons
-        btnStartRun = (Button)findViewById(R.id.btnStartRunning);
-        btnStartRun.setOnClickListener(startRunListener);
-        btnNewRun = (Button)findViewById(R.id.btnRegisterTrack);
-        btnNewRun.setOnClickListener(newTrackListener);
-        btnShowStats = (Button)findViewById(R.id.btnShowStatistics);
-        btnShowStats.setOnClickListener(showStatisticsListener);
-        btnShowSongs = (Button)findViewById(R.id.btnShowSongList);
-        btnShowSongs.setOnClickListener(showSonglistListener);
+//        btnStartRun = (Button)findViewById(R.id.btnStartRunning);
+//        btnStartRun.setOnClickListener(startRunListener);
+//        btnNewRun = (Button)findViewById(R.id.btnRegisterTrack);
+//        btnNewRun.setOnClickListener(newTrackListener);
+//        btnShowStats = (Button)findViewById(R.id.btnShowStatistics);
+//        btnShowStats.setOnClickListener(showStatisticsListener);
+//        btnShowSongs = (Button)findViewById(R.id.btnShowSongList);
+//        btnShowSongs.setOnClickListener(showSonglistListener);
+
+
+
+
+        mPagerAdapter = new HomeScreenPageAdapter(getSupportFragmentManager());
+        mViewPager = (ViewPager) findViewById(R.id.pager);
+        mViewPager.setAdapter(mPagerAdapter);
 
     }
 
     @Override
     protected void onStart(){
         super.onStart();
-        // Bind Service
-        Log.d("onStart", "Attempting to bind Service");
-        Intent intent = new Intent(this, LocalService.class);
-        Context c;
-        c=this.getBaseContext();
-        c.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        Log.d("onStart", "Attempt over... Service bound? " + mBound);
     }
 
-    protected void onResume() {
-
-        super.onResume();
-
-        mSensorManager.registerListener(this, mStepCounterSensor,SensorManager.SENSOR_DELAY_FASTEST);
-
-    }
-
+    @Override
     protected void onStop() {
+
         super.onStop();
         stopService(new Intent(this, LocalService.class));
 //        if(mBound) {
@@ -185,7 +185,11 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         }
     }
 
-    View.OnClickListener showStatisticsListener = new View.OnClickListener(){
+    public void onSongListInteraction(Uri uri) {
+
+    }
+
+   /* View.OnClickListener showStatisticsListener = new View.OnClickListener(){
       public void onClick(View v){
           Intent intent = new Intent(getApplicationContext(), StatisticsActivity.class);
           startActivity(intent);
@@ -205,9 +209,14 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
     };
     View.OnClickListener showSonglistListener = new View.OnClickListener(){
       public void onClick(View v){
-         /* Intent intent = new Intent(getApplicationContext(), StartActivity.class);
-          startActivity(intent);*/
+         *//* Intent intent = new Intent(getApplicationContext(), StartActivity.class);
+          startActivity(intent);*//*
           Log.d("", "" + mService.getRandomNumber());
       }
-    };
+    };*/
+
+
+
 }
+
+

@@ -1,90 +1,35 @@
-<android.support.v4.widget.SlidingPaneLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:id="@+id/sp" >
-    <!-- Left side pane. (Master) -->
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-        android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".StartActivity"
-        android:orientation="vertical">
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
+android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
+android:paddingRight="@dimen/activity_horizontal_margin"
+android:paddingTop="@dimen/activity_vertical_margin"
+android:paddingBottom="@dimen/activity_vertical_margin" tools:context="pem.yara.StartActivity">
 
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Statistics"
-            android:id="@+id/btnShowStatistics"
-            />
+<!-- Right side page. (Slave)  -->
+    <android.support.v4.view.ViewPager
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/pager"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Songlist"
-            android:id="@+id/btnShowSongList"
-            />
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Start Run"
-            android:id="@+id/btnStartRunning"
-            android:focusable="false"
-            android:clickable="false"
-
-            />
-
-
-</LinearLayout>
-    <!-- Right side page. (Slave)  -->
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools" android:layout_width="match_parent"
-        android:layout_height="match_parent" android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:orientation="vertical"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin" tools:context=".StartActivity"
-        android:weightSum="1">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="Step_count"
-            android:id="@+id/txtStepCount"
-            />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceLarge"
-            android:text="BPM"
-            android:id="@+id/txtBPMCount"
-            android:layout_below="@+id/txtStepCount"
-            android:layout_alignParentStart="true" />
-
-        <ListView
+        <android.support.v4.view.PagerTitleStrip
+            android:id="@+id/pager_title_strip"
             android:layout_width="match_parent"
-            android:layout_height="340dp"
-            android:id="@+id/trackList"
-            android:layout_gravity="center_horizontal"
-            android:layout_weight="0.75" />
-
-
-        <Button
-            android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="New Track"
-            android:id="@+id/btnRegisterTrack"
+            android:layout_gravity="top"
+            android:background="#33b5e5"
+            android:textColor="#fff"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp" />
 
-            />
+
+
+    </android.support.v4.view.ViewPager>
+</RelativeLayout>
 
 
 
-    </LinearLayout>
 
-</android.support.v4.widget.SlidingPaneLayout>
 
 <!--
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
