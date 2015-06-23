@@ -149,7 +149,7 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
      */
     public class LocalBinder extends Binder {
         LocationService getService() {
-            // Return this instance of LocalService so clients can call public methods
+            // Return this instance of LocationService so clients can call public methods
             return LocationService.this;
         }
     }
