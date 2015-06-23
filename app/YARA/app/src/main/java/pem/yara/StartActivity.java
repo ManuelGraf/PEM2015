@@ -26,7 +26,7 @@ import pem.yara.adapters.HomeScreenPageAdapter;
 import pem.yara.fragments.SongListFragment;
 
 
-public class StartActivity extends ActionBarActivity implements SensorEventListener,SongListFragment.OnSongListInteractionListener {
+public class StartActivity extends ActionBarActivity {
 
     LocationService mService;
     boolean mBound = false;
@@ -47,6 +47,7 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
     private Button btnStartRun;
     private Button btnNewRun;
     private Button btnShowSongs;
+    private Button btnFinishRun;
 
 
     @Override
@@ -59,14 +60,15 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
 
 
         // Navigation buttons
-//        btnStartRun = (Button)findViewById(R.id.btnStartRunning);
-//        btnStartRun.setOnClickListener(startRunListener);
-//        btnNewRun = (Button)findViewById(R.id.btnRegisterTrack);
-//        btnNewRun.setOnClickListener(newTrackListener);
-//        btnShowStats = (Button)findViewById(R.id.btnShowStatistics);
-//        btnShowStats.setOnClickListener(showStatisticsListener);
-//        btnShowSongs = (Button)findViewById(R.id.btnShowSongList);
-//        btnShowSongs.setOnClickListener(showSonglistListener);
+        btnStartRun = (Button)findViewById(R.id.btnStartRunning);
+        btnStartRun.setOnClickListener(startRunListener);
+        btnNewRun = (Button)findViewById(R.id.btnRegisterTrack);
+        btnNewRun.setOnClickListener(newTrackListener);
+        btnShowStats = (Button)findViewById(R.id.btnShowStatistics);
+        btnShowStats.setOnClickListener(showStatisticsListener);
+        btnShowSongs = (Button)findViewById(R.id.btnShowSongList);
+        btnShowSongs.setOnClickListener(showSonglistListener);
+        btnFinishRun = (Button)findViewById(R.id.btnFinishRun);
 
 
 
@@ -96,11 +98,11 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         if(mStepCounterSensor != null){
-            Log.d("Step Counter Type", "TYPE_STEP_COUNTER verfügbar");
+            Log.d("Step Counter Type", "TYPE_STEP_COUNTER verfï¿½gbar");
             mSensorManager.registerListener(mStepDetectorCounter, mStepCounterSensor,SensorManager.SENSOR_DELAY_FASTEST);
         }else{
             Log.d("Step Counter Type", "Auf Accelerometer Step Detection Schalten");
-            //TODO: Nach dem Testen das hier einkommentieren und anpassen, dass immer der verfügbare Sensor verwendet wird
+            //TODO: Nach dem Testen das hier einkommentieren und anpassen, dass immer der verfï¿½gbare Sensor verwendet wird
             //mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         }
@@ -115,19 +117,22 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
         // Bind Service
         Log.d("onStart", "Attempting to bind Service");
         Intent intent = new Intent(this, LocationService.class);
-        intent.putExtra("recInterval", 1600);
+        intent.putExtra("recInterval", 700);
+
         Context c;
         c=this.getBaseContext();
-        c.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
 
-        Log.d("onStart", "Attempt over... Service bound? " + mBound);
+        c.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        Log.d("onStart", "Service bound");
+
+        c.startService(intent);
+        Log.d("onStart", "Service started");
         
         ScanMusicTask scanMusicTask = new ScanMusicTask();
         scanMusicTask.execute(getApplication());
     }
 
-    @Override
-    protected void onStop() {
+    protected void onResume() {
 
         super.onResume();
         if(mStepCounterSensor != null){
@@ -140,11 +145,8 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
 
     protected void onStop() {
         super.onStop();
-        stopService(new Intent(this, LocationService.class));
-//        if(mBound) {
-            unbindService(mConnection);
-            mBound = false;
-//        }
+
+        //TODO: FLO: Wir wollen die Listener nicht abschalten, wenn die StartActivity stoppt! Sonst messen wir nur, wï¿½hrend der User NICHT lï¿½uft...
         if(mStepCounterSensor != null){
             mSensorManager.unregisterListener(mStepDetectorCounter, mStepCounterSensor);
         }
@@ -160,7 +162,7 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
             // We've bound to LocalService, cast the IBinder and get LocalService instance
             LocalBinder binder = (LocalBinder) service;
             mService = binder.getService();
-            mBound = true;
+            Log.d("onServiceConnected", "after binder.getService()");
         }
 
         @Override
@@ -211,6 +213,8 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
     };
     View.OnClickListener newTrackListener = new View.OnClickListener(){
         public void onClick(View v){
+            mService.startRecording();
+
             Intent intent = new Intent(getApplicationContext(), RunActivity.class);
             startActivity(intent);
         }
@@ -220,17 +224,21 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
          *//* Intent intent = new Intent(getApplicationContext(), StartActivity.class);
           startActivity(intent);*//*
       }
+    };
+    View.OnClickListener finishRunListener = new View.OnClickListener(){
+        public void onClick(View v) {
+            Log.d("finishRunListener", "Button 'Finish Run' clicked");
+            mService.stopRecording();
+        }
+    };
     };*/
 
 
 
 
 
-
-
-
     //AB HIER ERSTMAL DER STEP DETECTOR
-    //TODO: Seekbar entfernen mit den Variablen sobald unsere Sensitivität getestet wurde
+    //TODO: Seekbar entfernen mit den Variablen sobald unsere Sensitivitï¿½t getestet wurde
     private float   mLimit = 10; // 1.97  2.96  4.44  6.66  10.00  15.00  22.50  33.75  50.62
 
     private SeekBar seekBar;
@@ -261,7 +269,7 @@ public class StartActivity extends ActionBarActivity implements SensorEventListe
     private class StepAccelerometer implements SensorEventListener{
 
         private final static String TAG = "StepDetector";
-        //TODO: das hier wieder einkommentieren, nachdem wir die Seekbar rausgelöscht haben
+        //TODO: das hier wieder einkommentieren, nachdem wir die Seekbar rausgelï¿½scht haben
         //private float   mLimit = 10; // 1.97  2.96  4.44  6.66  10.00  15.00  22.50  33.75  50.62
         private float   mLastValues[] = new float[3*2];
         private float   mScale[] = new float[2];
