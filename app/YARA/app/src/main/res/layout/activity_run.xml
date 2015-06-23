@@ -12,6 +12,14 @@
         android:text="Step_count Accelerometer"
         android:id="@+id/txtStepCountAccelerometer"
         />
+ <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Step_count Accelerometer"
+         android:layout_below="@+id/txtStepCountAccelerometer"
+        android:id="@+id/txtStepCount"
+        />
 
     <TextView
         android:layout_width="wrap_content"
@@ -21,6 +29,8 @@
         android:id="@+id/txtBPMCount"
         android:layout_below="@+id/txtStepCount"
         android:layout_alignParentStart="true" />
+
+
 
     <SeekBar
         android:id="@+id/seekBar"

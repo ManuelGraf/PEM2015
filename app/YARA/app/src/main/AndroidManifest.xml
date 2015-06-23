@@ -35,11 +35,13 @@
 
         <activity
             android:name=".RunActivity"
-            android:label="@string/title_activity_run" >
+            android:label="@string/title_activity_run"
+            android:screenOrientation="portrait">
         </activity>
         <activity
             android:name=".StatisticsActivity"
-            android:label="@string/title_activity_statistics" >
+            android:label="@string/title_activity_statistics"
+            android:screenOrientation="portrait">
         </activity>
     </application>
 
