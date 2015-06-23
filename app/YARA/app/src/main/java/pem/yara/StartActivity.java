@@ -28,7 +28,7 @@ import pem.yara.fragments.SongListFragment;
 public class StartActivity extends ActionBarActivity implements SongListFragment.OnSongListInteractionListener {
 
     LocationService mService;
-    boolean mBound = false;
+    Intent locationIntent;
 
     private TextView txtStepCount;
     private TextView txtStepCountAccelerometer;
@@ -102,11 +102,7 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
             Log.d("Step Counter Type", "Auf Accelerometer Step Detection Schalten");
             //TODO: Nach dem Testen das hier einkommentieren und anpassen, dass immer der verfuegbare Sensor verwendet wird
             //mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
-
         }
-
-
-
     }
 
     @Override
@@ -114,16 +110,16 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         super.onStart();
         // Bind Service
         Log.d("onStart", "Attempting to bind Service");
-        Intent intent = new Intent(this, LocationService.class);
-        intent.putExtra("recInterval", 700);
+        locationIntent = new Intent(this, LocationService.class);
+        locationIntent.putExtra("recInterval", 700);
 
         Context c;
         c=this.getBaseContext();
 
-        c.bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+        c.bindService(locationIntent, mConnection, Context.BIND_AUTO_CREATE);
         Log.d("onStart", "Service bound");
 
-        c.startService(intent);
+        c.startService(locationIntent);
         Log.d("onStart", "Service started");
         
 //        ScanMusicTask scanMusicTask = new ScanMusicTask();
@@ -132,8 +128,8 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
 
     @Override
     protected void onResume() {
-
         super.onResume();
+        
         if(mStepCounterSensor != null){
             mSensorManager.registerListener(mStepDetectorCounter, mStepCounterSensor, SensorManager.SENSOR_DELAY_FASTEST);
         }
@@ -145,7 +141,10 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
     protected void onStop() {
         super.onStop();
 
-        //TODO: FLO: Wir wollen die Listener nicht abschalten, wenn die StartActivity stoppt! Sonst messen wir nur, wï¿½hrend der User NICHT lï¿½uft...
+        this.getBaseContext().stopService(locationIntent);
+        unbindService(mConnection);
+
+        //TODO: FLO: Wir wollen die Listener nicht abschalten, wenn die StartActivity stoppt! Sonst messen wir nur, während der User NICHT läuft... Erledigt sich aber, wenn wir alles in die RunActivity schieben
         if(mStepCounterSensor != null){
             mSensorManager.unregisterListener(mStepDetectorCounter, mStepCounterSensor);
         }
@@ -158,7 +157,7 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         @Override
         public void onServiceConnected(ComponentName className,
                                        IBinder service) {
-            // We've bound to LocalService, cast the IBinder and get LocalService instance
+            // We've bound to LocationService, cast the IBinder and get LocationService instance
             LocalBinder binder = (LocalBinder) service;
             mService = binder.getService();
             Log.d("onServiceConnected", "after binder.getService()");
@@ -167,7 +166,6 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         @Override
         public void onServiceDisconnected(ComponentName arg0) {
             Log.e("onServiceDisconnected", "onServiceDisconnected");
-            mBound = false;
         }
     };
 

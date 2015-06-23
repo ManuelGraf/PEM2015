@@ -36,6 +36,7 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     Public methods for Clients to call
      */
 
+
     /**
      * Record a List of Locations
      */
@@ -62,34 +63,39 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     Class methods from here on
      */
 
+    // Initialize the Location and API services once on Create. These services are started in onConnected(); that is as soon as a client connects to the Service
     @Override
     public void onCreate(){
         super.onCreate();
 
-
+        // Create a Location Request, ...
         mLocationRequest = LocationRequest.create();
         mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
+        // ... a Listener...
         mLocationListener = new com.google.android.gms.location.LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
                 if(recording) {
                     aTrack.add(location);
                 }
+                Log.d("LocationListener", "Location measured: " + location.toString());
                 Log.d("LocationListener", "aTrack contains " + ((aTrack==null) ? 0 : aTrack.size()) + " points.");
-                Log.d("LocationListener", "Location Changed: " + location.toString());
             }
         };
 
+        // ... and the Google API
         mGoogleApiClient = new GoogleApiClient.Builder(this)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .build();
 
+        // ... and connect.
         Log.d("Service onCreate", "Google API Client built");
         mGoogleApiClient.connect();
         Log.d("Service onCreate", "Google API Client connected");
     }
+
 
     // Is called by startService() in StartActivity
     @Override
