@@ -22,7 +22,6 @@
             android:id="@+id/btnImportMusic"
             android:focusable="false"
             android:clickable="false"
-
             />
 
     </LinearLayout>

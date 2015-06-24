@@ -17,7 +17,7 @@
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:text="Step_count Accelerometer"
-         android:layout_below="@+id/txtStepCountAccelerometer"
+        android:layout_below="@+id/txtStepCountAccelerometer"
         android:id="@+id/txtStepCount"
         />
 
