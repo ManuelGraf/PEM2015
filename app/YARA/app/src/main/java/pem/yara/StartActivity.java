@@ -14,6 +14,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Button;
 
+import com.astuetz.PagerSlidingTabStrip;
+
 import pem.yara.LocationService.LocalBinder;
 import pem.yara.adapters.HomeScreenPageAdapter;
 import pem.yara.fragments.SongListFragment;
@@ -27,6 +29,8 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
 
     private HomeScreenPageAdapter mPagerAdapter;
     private ViewPager mViewPager;
+    private int mActiveTab = 0;
+
 
 
     private Button btnShowStats;
@@ -61,6 +65,19 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         mViewPager.setAdapter(mPagerAdapter);
 
 
+        PagerSlidingTabStrip tabs = (PagerSlidingTabStrip) findViewById(R.id.tabsHome);
+        tabs.setShouldExpand(true);
+        tabs.setViewPager(mViewPager);
+        tabs.setOnPageChangeListener(
+                new ViewPager.SimpleOnPageChangeListener() {
+                    @Override
+                    public void onPageSelected(int position) {
+                        mActiveTab = position;
+                        supportInvalidateOptionsMenu();
+                        Log.d("onPageSelected", "Selected page #"+position);
+
+                    }
+                });
 
 
     }
@@ -116,7 +133,25 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         }
     };
 
+    public boolean onPrepareOptionsMenu(final Menu menu) {
 
+        MenuItem btnScanForMusic = menu.findItem(R.id.action_scan_music_library);
+        MenuItem btnAddTrack = menu.findItem(R.id.action_add_track);
+        Log.d("menu action disabling","showing actions for page #"+mActiveTab);
+        switch(mActiveTab){
+            case 0:
+                btnAddTrack.setVisible(true).setEnabled(true);
+                btnScanForMusic.setVisible(false).setEnabled(false);
+                break;
+            case 1:
+                btnAddTrack.setVisible(false).setEnabled(false);
+                btnScanForMusic.setVisible(true).setEnabled(true);
+                break;
+            default:
+                break;
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.

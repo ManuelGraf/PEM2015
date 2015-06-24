@@ -1,6 +1,18 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:yara="http://schemas.android.com/apk/res-auto"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools" tools:context=".StartActivity">
     <item android:id="@+id/action_settings" android:title="@string/action_settings"
         android:orderInCategory="100" app:showAsAction="never" />
+
+    <item android:id="@+id/action_add_track"
+        android:icon="@drawable/ic_menu_add_holo_dark"
+        android:title="@string/action_add_track"
+        yara:showAsAction="ifRoom" />
+
+    <item android:id="@+id/action_scan_music_library"
+        android:icon="@drawable/ic_menu_search_holo_dark"
+        android:title="@string/action_search_music"
+        yara:showAsAction="ifRoom" />
+
 </menu>
