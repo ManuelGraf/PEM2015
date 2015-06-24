@@ -98,9 +98,9 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
 
         c.startService(locationIntent);
         Log.d("onStart", "Service started");
-        
-//        ScanMusicTask scanMusicTask = new ScanMusicTask();
-//        scanMusicTask.execute(getApplication());
+
+        ScanMusicTask scanMusicTask = new ScanMusicTask();
+        scanMusicTask.execute(getApplication());
     }
 
     @Override
