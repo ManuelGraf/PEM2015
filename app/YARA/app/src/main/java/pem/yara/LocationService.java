@@ -20,6 +20,11 @@ import java.util.ArrayList;
 public class LocationService extends Service implements  GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
+    // TODO Fabi: Properly stop Location Service
+    // TODO Fabi: Store points only if they are x Meters apart from each other
+    // TODO Fabi: Store track in DB
+    // TODO Fabi: Enable some List to display tracks
+
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
 
@@ -28,7 +33,7 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     private LocationRequest mLocationRequest;
     private com.google.android.gms.location.LocationListener mLocationListener;
 
-    private int recInterval = 1500;
+    private int recInterval = 5000;
     private boolean recording = false;
     private ArrayList<Location> aTrack;
 
@@ -89,9 +94,9 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(this)
                 .build();
+        Log.d("Service onCreate", "Google API Client built");
 
         // ... and connect.
-        Log.d("Service onCreate", "Google API Client built");
         mGoogleApiClient.connect();
         Log.d("Service onCreate", "Google API Client connected");
     }
@@ -102,12 +107,11 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     public int onStartCommand(Intent intent, int flags, int startID){
         super.onStartCommand(intent, flags, startID);
 
-        Log.d("onStartCommand", "Old Interval: " + recInterval);
         Bundle b = intent.getExtras();
 
         if(b.containsKey("recInterval")) {
             recInterval = b.getInt("recInterval");
-            Log.d("onStartCommand", "Intent contains new recInterval: " + recInterval);
+            Log.d("onStartCommand", "Intent got a new recInterval: " + recInterval);
         } else {
             Log.d("onStartCommand", "Intent doesn't contain recInterval. Standard value: " + recInterval);
         }

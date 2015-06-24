@@ -69,17 +69,15 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         tabs.setShouldExpand(true);
         tabs.setViewPager(mViewPager);
         tabs.setOnPageChangeListener(
-                new ViewPager.SimpleOnPageChangeListener() {
-                    @Override
-                    public void onPageSelected(int position) {
-                        mActiveTab = position;
-                        supportInvalidateOptionsMenu();
-                        Log.d("onPageSelected", "Selected page #"+position);
+            new ViewPager.SimpleOnPageChangeListener() {
+                @Override
+                public void onPageSelected(int position) {
+                    mActiveTab = position;
+                    supportInvalidateOptionsMenu();
+                    Log.d("onPageSelected", "Selected page #"+position);
 
-                    }
-                });
-
-
+                }
+            });
     }
 
     @Override
