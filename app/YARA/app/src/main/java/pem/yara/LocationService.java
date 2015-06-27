@@ -29,7 +29,7 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     private LocationRequest mLocationRequest;
     private com.google.android.gms.location.LocationListener mLocationListener;
 
-    private int recInterval = 5000;
+    private int recInterval = 1000;
     private ArrayList<Location> aTrack;
 
     /*
@@ -61,12 +61,13 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
             @Override
             public void onLocationChanged(Location location) {
 
+                Log.d("LocationListener", "Location: " + location.toString());
                 if(aTrack.isEmpty()){
                     aTrack.add(location);
                 } else{
                     float tmpDistance=getDistanceBetween(aTrack.get(aTrack.size() - 1), location);
                     Log.d("LocationListener", "User moved for " + tmpDistance + " Meters");
-                    if(tmpDistance > 5){
+                    if(tmpDistance > 2){
                         aTrack.add(location);
                     }
                 }
@@ -126,6 +127,7 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     // Starts requesting Location updates
     @Override
     public void onConnected(Bundle bundle) {
+        Log.d("onConnected", "requesting Location updates...");
         LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, mLocationListener);
     }
 

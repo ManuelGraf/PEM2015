@@ -37,6 +37,8 @@ public class HomeScreenFragment extends Fragment {
         View.OnClickListener startRunListener = new View.OnClickListener() {
             public void onClick(View v) {
                 Intent intent = new Intent(getActivity(), RunActivity.class);
+                // Set this flag so finish() (called in RunActivity) will return to StartActivity
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 getActivity().startActivity(intent);
             }
         };

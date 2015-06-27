@@ -83,15 +83,6 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
     @Override
     protected void onStart(){
         super.onStart();
-        // Bind Service
-//        Log.d("onStart", "Attempting to bind Service");
-//        locationIntent = new Intent(this, LocationService.class);
-//
-//        Context c;
-//        c=this.getBaseContext();
-//
-//        c.bindService(locationIntent, mConnection, Context.BIND_AUTO_CREATE);
-//        Log.d("StartActivity onStart", "Service bound");
 
         ScanMusicTask scanMusicTask = new ScanMusicTask();
         scanMusicTask.execute(getApplication());

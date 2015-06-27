@@ -1,5 +1,6 @@
 package pem.yara;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -8,6 +9,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
+import android.location.Location;
 import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
@@ -18,6 +20,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
+
+import java.util.ArrayList;
 
 
 public class RunActivity extends ActionBarActivity {
@@ -66,12 +70,19 @@ public class RunActivity extends ActionBarActivity {
         Context c;
         c=this.getBaseContext();
 
+        // Bind service to later be able to address the mService-Object to get a recorded Track
         c.startService(locationIntent);
-        Log.d("RunActivity onStart", "Service started");
+        c.bindService(locationIntent, mConnection, Context.BIND_AUTO_CREATE);
+        Log.d("RunActivity onStart", "Service bound");
 
 //        ScanMusicTask scanMusicTask = new ScanMusicTask();
 //        scanMusicTask.execute(getApplication());
     }
+
+    private void finishMe(){
+        this.finish();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,7 +94,52 @@ public class RunActivity extends ActionBarActivity {
         btnFinishRun.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d("btnFinishRun Listener", "Clicked...");
+                // Receive Track from Service and get statistics
+                ArrayList<Location> aTrack = mService.receiveTrack();
+                float runDuration = 0.f;
+                float runDistance = 0.f;
+                float runAvgSpeed = 0.f;
+                float runMinSpeed = 0.f;
+                float runMaxSpeed = 0.f;
+                float runAvgAccuracy = 0.f;
+
+                Log.d("Run Finished Listener", "Track received: " + aTrack.size() + " points");
+
+                if(aTrack.size()>1){
+                    runDuration = aTrack.get(aTrack.size()-1).getTime() - aTrack.get(0).getTime();
+                    runMinSpeed = 100.f;
+                    // Iterate from *second* to last element
+                    for(int i=1; i<aTrack.size()-1; i++){
+                        Location actLocation = aTrack.get(i);
+                        Location nextLocation = aTrack.get(i+1);
+
+                        // Distance statistics:
+                        float actDistance = actLocation.distanceTo(nextLocation);
+                        runDistance += actDistance;
+
+                        float actSpeed = actDistance/(nextLocation.getTime()-actLocation.getTime());
+
+                        // Speed statistics:
+                        if(actSpeed > runMaxSpeed)
+                            runMaxSpeed = actSpeed;
+
+                        if(actSpeed < runMinSpeed)
+                            runMinSpeed = actSpeed;
+
+                        runAvgAccuracy += actLocation.getAccuracy();
+                    }
+                    runAvgAccuracy += aTrack.get(aTrack.size()-1).getAccuracy();
+                    runAvgAccuracy /= aTrack.size();
+                    runAvgSpeed = runDistance/runDuration;
+                }
+
+                Log.d("Run Finished Listener", "Distance: " + runDistance + ", Duration: " + runDuration/1000 + "s, avgSpeed: " + runAvgSpeed + "m/s, minSpeed: " + runMinSpeed + "m/s, maxSpeed: " + runMaxSpeed + "m/s, avgAccuracy: " + runAvgAccuracy + "m");
+
+                // Unload RunActivity. Code after this WILL be executed!
+                finishMe();
+
+                // TODO Manu: UI-Master, bitte lade hier das SongListFragment in die StartActivity!
+
             }
         });
 
@@ -153,10 +209,10 @@ public class RunActivity extends ActionBarActivity {
     protected void onStop() {
         super.onStop();
 
-        this.getBaseContext().stopService(locationIntent);
-        //unbindService(mConnection);
+        // Unbind and stop service
+        unbindService(mConnection);
+        stopService(locationIntent);
 
-        //TODO: FLO: Wir wollen die Listener nicht abschalten, wenn die StartActivity stoppt! Sonst messen wir nur, w�hrend der User NICHT l�uft... Erledigt sich aber, wenn wir alles in die RunActivity schieben
         if(mStepCounterSensor != null){
             mSensorManager.unregisterListener(mStepDetectorCounter, mStepCounterSensor);
         }
