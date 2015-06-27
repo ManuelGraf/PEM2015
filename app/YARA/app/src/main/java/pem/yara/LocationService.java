@@ -1,10 +1,8 @@
 package pem.yara;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.location.Location;
-import android.location.LocationManager;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
@@ -20,9 +18,7 @@ import java.util.ArrayList;
 public class LocationService extends Service implements  GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    // TODO Fabi: Properly stop Location Service
-    // TODO Fabi: Store points only if they are x Meters apart from each other
-    // TODO Fabi: Store track in DB
+    // TODO Fabi: Store track in DB (Track + statistics)
     // TODO Fabi: Enable some List to display tracks
 
     // Binder given to clients
@@ -34,7 +30,6 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     private com.google.android.gms.location.LocationListener mLocationListener;
 
     private int recInterval = 5000;
-    private boolean recording = false;
     private ArrayList<Location> aTrack;
 
     /*
@@ -42,20 +37,8 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
      */
 
 
-    /**
-     * Record a List of Locations
-     */
-    public void startRecording(){
-        aTrack = new ArrayList<Location>();
-        recording=true;
 
-        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, mLocationListener);
-
-    }
-
-    //
-    public ArrayList<Location> stopRecording(){
-        recording=false;
+    public ArrayList<Location> receiveTrack(){
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, mLocationListener);
         return aTrack;
     }
@@ -68,10 +51,12 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     Class methods from here on
      */
 
-    // Initialize the Location and API services once on Create. These services are started in onConnected(); that is as soon as a client connects to the Service
+    /* Initialize the Location and API services once on Create.
+        These services are started as RunActivity starts */
     @Override
     public void onCreate(){
         super.onCreate();
+        aTrack = new ArrayList<Location>();
 
         // Create a Location Request, ...
         mLocationRequest = LocationRequest.create();
@@ -81,11 +66,18 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
         mLocationListener = new com.google.android.gms.location.LocationListener() {
             @Override
             public void onLocationChanged(Location location) {
-                if(recording) {
+
+                if(aTrack.isEmpty()){
                     aTrack.add(location);
+                } else{
+                    float tmpDistance=getDistanceBetween(aTrack.get(aTrack.size() - 1), location);
+                    Log.d("LocationListener", "User moved for " + tmpDistance + " Meters");
+                    if(tmpDistance > 5){
+                        aTrack.add(location);
+                    }
                 }
-                Log.d("LocationListener", "Location measured: " + location.toString());
-                Log.d("LocationListener", "aTrack contains " + ((aTrack==null) ? 0 : aTrack.size()) + " points.");
+
+                Log.d("LocationListener", "aTrack now contains " + ((aTrack==null) ? 0 : aTrack.size()) + " points.");
             }
         };
 
@@ -108,8 +100,7 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
         super.onStartCommand(intent, flags, startID);
 
         Bundle b = intent.getExtras();
-
-        if(b.containsKey("recInterval")) {
+        if(b != null && b.containsKey("recInterval")) {
             recInterval = b.getInt("recInterval");
             Log.d("onStartCommand", "Intent got a new recInterval: " + recInterval);
         } else {
@@ -132,6 +123,7 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     public void onDestroy(){
         super.onDestroy();
 
+        aTrack=null;
         mGoogleApiClient.disconnect();
         Log.d("onDestroy", "Google API Client disconnected");
         Log.d("onDestroy", "Service destroyed");
@@ -162,6 +154,15 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
             // Return this instance of LocationService so clients can call public methods
             return LocationService.this;
         }
+    }
+
+    private float getDistanceBetween(Location from, Location to){
+        float[] res = {0.f};
+        Location.distanceBetween(from.getLatitude(), from.getLongitude(), to.getLatitude(), to.getLongitude(), res);
+
+        Log.d("getDistanceBetween", "Distance moved: " + res[0]);
+
+        return res[0];
     }
 
 }

@@ -14,6 +14,8 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -23,10 +25,10 @@ public class RunActivity extends ActionBarActivity {
     LocationService mService;
     Intent locationIntent;
 
-    private TextView txtStepCount;
-    private TextView txtStepCountAccelerometer;
-    private TextView txtBPM;
-
+    private TextView    txtStepCount;
+    private TextView    txtStepCountAccelerometer;
+    private TextView    txtBPM;
+    private Button      btnFinishRun;
 
 
     private SensorManager mSensorManager;
@@ -59,16 +61,13 @@ public class RunActivity extends ActionBarActivity {
         // Bind Service
         Log.d("onStart", "Attempting to bind Service");
         locationIntent = new Intent(this, LocationService.class);
-        locationIntent.putExtra("recInterval", 10000);
+//        locationIntent.putExtra("recInterval", 10000);
 
         Context c;
         c=this.getBaseContext();
 
-        c.bindService(locationIntent, mConnection, Context.BIND_AUTO_CREATE);
-        Log.d("onStart", "Service bound");
-
         c.startService(locationIntent);
-        Log.d("onStart", "Service started");
+        Log.d("RunActivity onStart", "Service started");
 
 //        ScanMusicTask scanMusicTask = new ScanMusicTask();
 //        scanMusicTask.execute(getApplication());
@@ -80,6 +79,13 @@ public class RunActivity extends ActionBarActivity {
         txtStepCount = (TextView)findViewById(R.id.txtStepCount);
         txtStepCountAccelerometer  = (TextView)findViewById(R.id.txtStepCountAccelerometer);
         txtBPM = (TextView)findViewById(R.id.txtBPMCount);
+        btnFinishRun =(Button)findViewById(R.id.btnFinishRun);
+        btnFinishRun.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d("btnFinishRun Listener", "Clicked...");
+            }
+        });
 
         //Init StepDetector
         seekBar = (SeekBar) findViewById(R.id.seekBar);
@@ -134,6 +140,8 @@ public class RunActivity extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
 
+        Log.d("RunActivity onResume", "resuming RunActivity");
+
         if(mStepCounterSensor != null){
             mSensorManager.registerListener(mStepDetectorCounter, mStepCounterSensor, SensorManager.SENSOR_DELAY_FASTEST);
         }
@@ -146,7 +154,7 @@ public class RunActivity extends ActionBarActivity {
         super.onStop();
 
         this.getBaseContext().stopService(locationIntent);
-        unbindService(mConnection);
+        //unbindService(mConnection);
 
         //TODO: FLO: Wir wollen die Listener nicht abschalten, wenn die StartActivity stoppt! Sonst messen wir nur, w�hrend der User NICHT l�uft... Erledigt sich aber, wenn wir alles in die RunActivity schieben
         if(mStepCounterSensor != null){
