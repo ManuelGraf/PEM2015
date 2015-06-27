@@ -36,15 +36,9 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     Public methods for Clients to call
      */
 
-
-
     public ArrayList<Location> receiveTrack(){
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, mLocationListener);
         return aTrack;
-    }
-
-    public boolean isAPIConnected(){
-        return mGoogleApiClient.isConnected();
     }
 
     /*
@@ -56,7 +50,7 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     @Override
     public void onCreate(){
         super.onCreate();
-        aTrack = new ArrayList<Location>();
+        aTrack = new ArrayList<>();
 
         // Create a Location Request, ...
         mLocationRequest = LocationRequest.create();
