@@ -7,17 +7,23 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ListView;
+import android.widget.TextView;
 
 import pem.yara.R;
 import pem.yara.RunActivity;
+import pem.yara.entity.YaraTrack;
 
 
-public class HomeScreenFragment extends Fragment {
+public class HomeScreenFragment extends Fragment implements TrackItemFragment.onTrackItemInteractionListener {
         public static final String ARG_OBJECT = "object";
-        private Button btnStartRunning;
+        private Button btnNewTrack;
+        private TextView txtTracksEmpty;
+        private ListView trackList;
         private View mRootView;
 
-        @Override
+
+    @Override
         public View onCreateView(LayoutInflater inflater,
                                  ViewGroup container, Bundle savedInstanceState) {
             // The last two arguments ensure LayoutParams are inflated
@@ -26,12 +32,22 @@ public class HomeScreenFragment extends Fragment {
                     R.layout.fragment_home_screen, container, false);
 
 
-            btnStartRunning = (Button)rootView.findViewById(R.id.btnStartRunning);
-            btnStartRunning.setOnClickListener(startRunListener);
+            btnNewTrack = (Button)rootView.findViewById(R.id.btnNewTrack);
+            btnNewTrack.setOnClickListener(startRunListener);
+            txtTracksEmpty = (TextView)rootView.findViewById(R.id.txtTracklistEmpty);
+            trackList = (ListView)rootView.findViewById(R.id.trackItems);
+
             mRootView = rootView;
             Bundle args = getArguments();
 
             return rootView;
+        }
+
+        @Override
+        public void onTrackItemClick(YaraTrack id) {
+            Intent intent = new Intent(getActivity(), RunActivity.class);
+            intent.putExtra("track_id",id.getId());
+            getActivity().startActivity(intent);
         }
 
         View.OnClickListener startRunListener = new View.OnClickListener() {

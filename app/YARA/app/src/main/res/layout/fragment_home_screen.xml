@@ -15,24 +15,24 @@
         android:paddingBottom="@dimen/activity_vertical_margin" >
 
 
-        <Button
-            android:layout_width="fill_parent"
+        <ListView
+            android:layout_width="match_parent"
+            android:layout_height="350dp"
+            android:id="@+id/trackItems" />
+
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Statistics"
-            android:id="@+id/btnShowStatistics"
-            />
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:text="@string/error_no_tracks"
+            android:id="@+id/txtTracklistEmpty"
+            android:layout_gravity="center_horizontal" />
 
         <Button
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="Songlist"
-            android:id="@+id/btnShowSongList"
-            />
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Start Run"
-            android:id="@+id/btnStartRunning"
+            android:text="@string/title_activity_new_track"
+            android:id="@+id/btnNewTrack"
             android:onClick="newTrack"
             android:focusable="false"
             android:clickable="false"

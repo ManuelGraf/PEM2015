@@ -1,7 +1,6 @@
 package pem.yara;
 
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
@@ -74,7 +73,6 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
                 public void onPageSelected(int position) {
                     mActiveTab = position;
                     supportInvalidateOptionsMenu();
-                    Log.d("onPageSelected", "Selected page #"+position);
 
                 }
             });
@@ -120,9 +118,8 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
 
     public boolean onPrepareOptionsMenu(final Menu menu) {
 
-        MenuItem btnScanForMusic = menu.findItem(R.id.action_scan_music_library);
-        MenuItem btnAddTrack = menu.findItem(R.id.action_add_track);
-        Log.d("menu action disabling","showing actions for page #"+mActiveTab);
+        MenuItem btnScanForMusic = menu.findItem(R.id.actionScanMusicLibrary);
+        MenuItem btnAddTrack = menu.findItem(R.id.actionAddTrack);
         switch(mActiveTab){
             case 0:
                 btnAddTrack.setVisible(true).setEnabled(true);
@@ -144,67 +141,45 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         return true;
     }
 
+
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
+
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case R.id.actionAddTrack:
+                newTrack();
+                return true;
+            case R.id.actionScanMusicLibrary:
+                importMusic();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-
-        return super.onOptionsItemSelected(item);
     }
 
+    // Interactions for SonglistFragment
+    @Override
     public void onSongListInteraction(Uri uri) {
 
     }
 
-   /* View.OnClickListener showStatisticsListener = new View.OnClickListener(){
-      public void onClick(View v){
-          Intent intent = new Intent(getApplicationContext(), StatisticsActivity.class);
-          startActivity(intent);
-      }
-    };
-    View.OnClickListener startRunListener = new View.OnClickListener(){
-      public void onClick(View v){
-          Intent intent = new Intent(getApplicationContext(), RunActivity.class);
-          startActivity(intent);
-      }
-    };
-    View.OnClickListener newTrackListener = new View.OnClickListener(){
-        public void onClick(View v){
-            mService.startRecording();
+    @Override
+    public void onImportMusicInteraction() {
+      importMusic();
+    }
 
-            Intent intent = new Intent(getApplicationContext(), RunActivity.class);
-            startActivity(intent);
-        }
-    };
-    View.OnClickListener showSonglistListener = new View.OnClickListener(){
-      public void onClick(View v){
-         *//* Intent intent = new Intent(getApplicationContext(), StartActivity.class);
-          startActivity(intent);*//*
-      }
-    };
-    View.OnClickListener finishRunListener = new View.OnClickListener(){
-        public void onClick(View v) {
-            Log.d("finishRunListener", "Button 'Finish Run' clicked");
-            mService.stopRecording();
-        }
-    };
-    };*/
+    public void importMusic(){
+        // TODO Martin: import music
+    }
+    public void newTrack(){
+        Intent intent = new Intent(this, RunActivity.class);
+        startActivity(intent);
+    }
 
 
-
-
-
-
-
-
-    //AB HIER ERSTMAL DER STEP DETECTOR
 
 }
 
