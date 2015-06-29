@@ -140,7 +140,6 @@ public class RunActivity extends ActionBarActivity {
                 RunDbHelper mRunDbHelper = new RunDbHelper(getBaseContext());
                 TrackDbHelper mTrackDbHelper = new TrackDbHelper(getBaseContext());
 
-                mRunDbHelper.resetDB();
 
                 mRunDbHelper.insertRun(-1, aTrack, "myTrack", 9001, getBaseContext());
 
