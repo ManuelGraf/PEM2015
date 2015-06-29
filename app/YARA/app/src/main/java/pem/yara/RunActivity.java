@@ -144,7 +144,7 @@ public class RunActivity extends ActionBarActivity {
                 mRunDbHelper.insertRun(-1, aTrack, "myTrack", 9001, getBaseContext());
 
                 mRunDbHelper.listEntries();
-//                mTrackDbHelper.listEntries();
+                mTrackDbHelper.listEntries();
 
                 // Unload RunActivity. Code after this WILL be executed!
                 finishMe();

@@ -17,6 +17,8 @@ import com.astuetz.PagerSlidingTabStrip;
 
 import pem.yara.LocationService.LocalBinder;
 import pem.yara.adapters.HomeScreenPageAdapter;
+import pem.yara.db.RunDbHelper;
+import pem.yara.db.TrackDbHelper;
 import pem.yara.fragments.SongListFragment;
 
 
@@ -81,6 +83,10 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
     @Override
     protected void onStart(){
         super.onStart();
+
+//        // TODO: Remove reset-Statements when going live
+//        new RunDbHelper(getBaseContext()).resetDB();
+//        new TrackDbHelper(getBaseContext()).resetDB();
 
         ScanMusicTask scanMusicTask = new ScanMusicTask();
         scanMusicTask.execute(getApplication());

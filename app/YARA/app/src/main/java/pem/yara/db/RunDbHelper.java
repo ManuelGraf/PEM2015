@@ -90,13 +90,16 @@ public class RunDbHelper  extends SQLiteOpenHelper {
 
         int offset = 0;
 
+        Log.d("RunDBHelper", "Runs in Database:");
         while(offset < c.getCount()){
-            Log.d("RunDbHelper", c.getString(c.getColumnIndexOrThrow(RunDbItem._ID))+" "+
-                    c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_TRACK))+" "+
-                    c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_AVG_BPM))+" "+
-                    c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_AVG_SPEED))+" "+
-                    c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_DATE))+" "+
-                    c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_DURATION)));
+            Log.d("RunDbHelper",
+                    "ID: " + c.getString(c.getColumnIndexOrThrow(RunDbItem._ID))+" \n"+
+                    "TRACK NAME: " + c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_TRACK))+" \n"+
+                    "AVG_BPM: " + c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_AVG_BPM))+" \n"+
+                    "AVG_SPEED: " + c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_AVG_SPEED))+" \n"+
+                    "DATE: " + c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_DATE))+" \n"+
+                    "DURATION: " + c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_DURATION)) + " \n" +
+                            "---------------------------------------------");
             c.moveToNext();
             offset++;
         }
@@ -117,7 +120,7 @@ public class RunDbHelper  extends SQLiteOpenHelper {
         if(trackID == -1) {
             Log.d("insertRun", "Inserting new track into Database");
             TrackDbHelper mTrackDBDbHelper = new TrackDbHelper(c);
-            mTrackDBDbHelper.insertNewTrack(name, aTrack, myDateTime);
+            trackID = mTrackDBDbHelper.insertNewTrack(name, aTrack, myDateTime);
         }
 
         Log.d("insertRun", "Inserting run into Database");

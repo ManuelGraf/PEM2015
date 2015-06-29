@@ -43,6 +43,11 @@ public class TrackDbHelper extends SQLiteOpenHelper {
     public TrackDbHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
+    public void resetDB(){
+        Log.d("TrackDbHelper", "!!! resetting database");
+        getWritableDatabase().execSQL(SQL_DELETE_ENTRIES);
+        onCreate(getWritableDatabase());
+    }
     public void listEntries(){
         SQLiteDatabase db = getReadableDatabase();
         String[] projection = {
@@ -68,12 +73,16 @@ public class TrackDbHelper extends SQLiteOpenHelper {
 
         int offset = 0;
 
+        Log.d("TrackDBHelper", "Tracks in Database:");
         while(offset < c.getCount()){
-            Log.d("TrackDbHelper", c.getString(c.getColumnIndexOrThrow(TrackDbItem._ID))+" "+
-                    c.getString(c.getColumnIndexOrThrow(TrackDbItem.COLUMN_NAME_TRACK_NAME))+" "+
-                    c.getString(c.getColumnIndexOrThrow(TrackDbItem.COLUMN_NAME_PATH))+" "+
-                    c.getString(c.getColumnIndexOrThrow(TrackDbItem.COLUMN_NAME_LENGTH))+" "+
-                    c.getString(c.getColumnIndexOrThrow(TrackDbItem.COLUMN_NAME_DATE_CREATED)));
+            Log.d("TrackDbHelper",
+                    "ID: " + c.getString(c.getColumnIndexOrThrow(TrackDbItem._ID))+" \n"+
+                    "NAME " + c.getString(c.getColumnIndexOrThrow(TrackDbItem.COLUMN_NAME_TRACK_NAME))+" \n"+
+                    "POINTS: " + c.getString(c.getColumnIndexOrThrow(TrackDbItem.COLUMN_NAME_PATH))+" \n"+
+                    "LENGTH: " + c.getString(c.getColumnIndexOrThrow(TrackDbItem.COLUMN_NAME_LENGTH))+" \n"+
+                    "CREATED: " + c.getString(c.getColumnIndexOrThrow(TrackDbItem.COLUMN_NAME_DATE_CREATED)) + " \n" +
+                    "---------------------------------------------");
+
             c.moveToNext();
             offset++;
         }
@@ -102,7 +111,7 @@ public class TrackDbHelper extends SQLiteOpenHelper {
     }
 
     // Insert one track into the table
-    public void insertNewTrack(String name, ArrayList<Location> path, String createdAt){
+    public int insertNewTrack(String name, ArrayList<Location> path, String createdAt){
         ContentValues cv = new ContentValues();
         Double myLength = 0.d;
         String myPath = "";
@@ -129,10 +138,18 @@ public class TrackDbHelper extends SQLiteOpenHelper {
         onCreate(getWritableDatabase());
         getWritableDatabase().insert(TrackDbItem.TABLE_NAME, null, cv);
 
-        Log.d("TrackDBHelper", "Track inserted");
+        String[] projection = {TrackDbItem._ID };
+        Cursor c = getReadableDatabase().query(TrackDbItem.TABLE_NAME,
+                projection,
+                null, null, null, null, TrackDbItem._ID + " DESC");
 
-        listEntries();
+        c.moveToFirst();
+        int newID = c.getInt(c.getColumnIndexOrThrow(TrackDbItem._ID));
+        c.close();
 
+        Log.d("TrackDBHelper", "Track inserted. ID: " + newID);
+
+        return newID;
     }
 
     // TODO: Work out the connection between the list of tracks the user sees, and this method call.
