@@ -1,6 +1,5 @@
 package pem.yara;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -10,9 +9,9 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -22,6 +21,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+
+import pem.yara.db.RunDbHelper;
+import pem.yara.db.TrackDbHelper;
 
 
 public class RunActivity extends ActionBarActivity {
@@ -133,12 +135,22 @@ public class RunActivity extends ActionBarActivity {
                     runAvgSpeed = runDistance/runDuration;
                 }
 
-                Log.d("Run Finished Listener", "Distance: " + runDistance + ", Duration: " + runDuration/1000 + "s, avgSpeed: " + runAvgSpeed + "m/s, minSpeed: " + runMinSpeed + "m/s, maxSpeed: " + runMaxSpeed + "m/s, avgAccuracy: " + runAvgAccuracy + "m");
+                Log.d("Run Finished Listener", "Distance: " + runDistance + ", Duration: " + runDuration / 1000 + "s, avgSpeed: " + runAvgSpeed + "m/s, minSpeed: " + runMinSpeed + "m/s, maxSpeed: " + runMaxSpeed + "m/s, avgAccuracy: " + runAvgAccuracy + "m");
+
+                RunDbHelper mRunDbHelper = new RunDbHelper(getBaseContext());
+                TrackDbHelper mTrackDbHelper = new TrackDbHelper(getBaseContext());
+
+                mRunDbHelper.resetDB();
+
+                mRunDbHelper.insertRun(-1, aTrack, "myTrack", 9001, getBaseContext());
+
+                mRunDbHelper.listEntries();
+//                mTrackDbHelper.listEntries();
 
                 // Unload RunActivity. Code after this WILL be executed!
                 finishMe();
 
-                // TODO Manu: UI-Master, bitte lade hier das SongListFragment in die StartActivity!
+                // TODO Überleitung zu Statistics
 
             }
         });
