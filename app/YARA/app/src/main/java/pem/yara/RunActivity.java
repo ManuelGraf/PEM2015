@@ -149,7 +149,7 @@ public class RunActivity extends ActionBarActivity {
                 // Unload RunActivity. Code after this WILL be executed!
                 finishMe();
 
-                // TODO Überleitung zu Statistics
+                // TODO Ueberleitung zu Statistics
 
             }
         });

@@ -1,6 +1,7 @@
 package pem.yara;
 
 import android.content.ComponentName;
+import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.net.Uri;
@@ -17,9 +18,9 @@ import com.astuetz.PagerSlidingTabStrip;
 
 import pem.yara.LocationService.LocalBinder;
 import pem.yara.adapters.HomeScreenPageAdapter;
-import pem.yara.db.RunDbHelper;
-import pem.yara.db.TrackDbHelper;
 import pem.yara.fragments.SongListFragment;
+import pem.yara.music.AudioPlayer;
+import pem.yara.music.ScanMusicTask;
 
 
 public class StartActivity extends ActionBarActivity implements SongListFragment.OnSongListInteractionListener {
@@ -32,7 +33,9 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
     private ViewPager mViewPager;
     private int mActiveTab = 0;
 
-
+    private ServiceConnection serviceConnection = new AudioPlayerServiceConnection();
+    private AudioPlayer audioPlayer;
+    private Intent audioPlayerIntent;
 
     private Button btnShowStats;
     private Button btnStartRun;
@@ -90,6 +93,12 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
 
         ScanMusicTask scanMusicTask = new ScanMusicTask();
         scanMusicTask.execute(getApplication());
+
+        audioPlayerIntent = new Intent(this, AudioPlayer.class);
+        bindService(audioPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+
+        Intent audioPlayerIntent = new Intent(getApplicationContext(), AudioPlayer.class);
+        startService(audioPlayerIntent);
     }
 
     @Override
@@ -185,7 +194,18 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         startActivity(intent);
     }
 
+    private final class AudioPlayerServiceConnection implements ServiceConnection {
+        public void onServiceConnected(ComponentName className, IBinder baBinder) {
+            Log.v("StartActivity", "AudioPlayerServiceConnection: Service connected");
+            audioPlayer = ((AudioPlayer.AudioPlayerBinder) baBinder).getService();
+            startService(audioPlayerIntent);
+        }
 
+        public void onServiceDisconnected(ComponentName className) {
+            Log.d("StartActivity", "AudioPlayerServiceConnection: Service disconnected");
+            audioPlayer = null;
+        }
+    }
 
 }
 

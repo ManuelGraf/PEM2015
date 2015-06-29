@@ -1,4 +1,4 @@
-package pem.yara.echonest;
+package pem.yara.music;
 
 import com.google.gson.annotations.SerializedName;
 

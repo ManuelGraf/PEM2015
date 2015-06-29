@@ -1,4 +1,4 @@
-package pem.yara.echonest;
+package pem.yara.music;
 
 import android.app.Application;
 import android.content.ContentValues;
@@ -8,18 +8,19 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.loopj.android.http.AsyncHttpClient;
-import com.loopj.android.http.RequestHandle;
 import com.loopj.android.http.TextHttpResponseHandler;
 
 import org.apache.http.Header;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import pem.yara.db.SongDbHelper;
 import pem.yara.entity.YaraSong;
 
-public class Client {
+public class EchoNestClient {
     
     private Application context;
 
@@ -27,27 +28,21 @@ public class Client {
 
     private SQLiteDatabase db;
     
-    public Client(Application context) {
+    public EchoNestClient(Application context) {
         this.context = context;
         SongDbHelper songDbHelper = new SongDbHelper(context);
         db = songDbHelper.getWritableDatabase();
     }
 
     public void getSongInfo(final YaraSong song) {
-        YaraSong yaraSong = findSong(song);
-        if (yaraSong != null) {
-            Log.i("EchoNestClient", song + " already known");
-            return;
-        }
-
         String url = null;
         try {
-            url = String.format(Config.SONG_SEARCH_URL, URLEncoder.encode(song.getArtist(), "UTF-8"), URLEncoder.encode(song.getTitle(), "UTF-8"));
+            url = String.format(EchoNestConstants.SONG_SEARCH_URL, URLEncoder.encode(song.getArtist(), "UTF-8"), URLEncoder.encode(song.getTitle(), "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             e.printStackTrace();
         }
 
-        Log.i("EchoNestClient", "Requesting " + url);
+        Log.d("EchoNestClient", "Requesting " + url);
         asyncHttpClient.get(context, url, null, null, new TextHttpResponseHandler() {
             @Override
             public void onFailure(int i, Header[] headers, String s, Throwable throwable) {
@@ -102,5 +97,37 @@ public class Client {
         values.put("bpm", tempo);
 
         db.insert(SongDbHelper.SongDbItem.TABLE_NAME, null, values);
+    }
+
+    public List<YaraSong> getAllSongs() {
+        String[] projection = {"title", "artist", "uri", "bpm", "count", "score", "blocked"};
+
+        Cursor cursor = db.query(
+                SongDbHelper.SongDbItem.TABLE_NAME,
+                projection,                         // The columns to return
+                null,                               // The columns for the WHERE clause
+                null,                               // The values for the WHERE clause
+                null,                               // don't group the rows
+                null,                               // don't filter by row groups
+                null                                // The sort order
+        );
+
+        cursor.moveToFirst();
+        List<YaraSong> allSongs = new ArrayList<>();
+        while(!cursor.isAfterLast()) {
+            YaraSong song = new YaraSong(cursor.getString(0), cursor.getString(1), cursor.getString(2), Double.parseDouble(cursor.getString(3)));
+            allSongs.add(song);
+            cursor.moveToNext();
+        }
+        cursor.close();
+        return allSongs;
+    }
+
+    public void removeSongsFromDB(List<YaraSong> allSongs) {
+        for (YaraSong yaraSong : allSongs) {
+            db.delete(SongDbHelper.SongDbItem.TABLE_NAME,
+                    SongDbHelper.SongDbItem.COLUMN_NAME_TITLE + "=\"" + yaraSong.getTitle() + "\" AND " + SongDbHelper.SongDbItem.COLUMN_NAME_ARTIST + "=\"" + yaraSong.getArtist() + "\"",
+                    null);
+        }
     }
 }

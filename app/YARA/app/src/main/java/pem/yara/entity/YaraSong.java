@@ -101,4 +101,25 @@ public class YaraSong {
     public String toString() {
         return artist + "  \"" + title + "\" at " + uri;
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        YaraSong song = (YaraSong) o;
+
+        if (title != null ? !title.equals(song.title) : song.title != null) return false;
+        if (artist != null ? !artist.equals(song.artist) : song.artist != null) return false;
+        return !(uri != null ? !uri.equals(song.uri) : song.uri != null);
+
+    }
+
+    @Override
+    public int hashCode() {
+        int result = title != null ? title.hashCode() : 0;
+        result = 31 * result + (artist != null ? artist.hashCode() : 0);
+        result = 31 * result + (uri != null ? uri.hashCode() : 0);
+        return result;
+    }
 }

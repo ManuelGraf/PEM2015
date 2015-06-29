@@ -1,6 +1,6 @@
-package pem.yara.echonest;
+package pem.yara.music;
 
-public class Config {
+public class EchoNestConstants {
 
     public static final String API_KEY = "YUNP8GLWKN942WKOF";
 

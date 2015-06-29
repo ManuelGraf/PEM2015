@@ -1,4 +1,4 @@
-package pem.yara;
+package pem.yara.music;
 
 import android.app.Application;
 import android.database.Cursor;
@@ -7,8 +7,8 @@ import android.provider.MediaStore;
 import android.util.Log;
 
 import java.util.ArrayList;
+import java.util.List;
 
-import pem.yara.echonest.Client;
 import pem.yara.entity.YaraSong;
 
 public class ScanMusicTask extends AsyncTask<Application, Void, ArrayList<YaraSong>> {
@@ -35,7 +35,7 @@ public class ScanMusicTask extends AsyncTask<Application, Void, ArrayList<YaraSo
                 do {
                     YaraSong yaraSong = new YaraSong(musicCursor.getString(0), musicCursor.getString(1), musicCursor.getString(2));
                     songs.add(yaraSong);
-                    Log.i("Music scan", "Found song: " + yaraSong);
+                    Log.v("Music scan", "Found song: " + yaraSong);
                 } while (musicCursor.moveToNext());
             }
         } finally {
@@ -44,11 +44,24 @@ public class ScanMusicTask extends AsyncTask<Application, Void, ArrayList<YaraSo
             }
         }
 
-        // 2. fetch meta data from EchoNest
-        Client echoNestClient = new Client(context);
+        EchoNestClient echoNestClient = new EchoNestClient(context);
+
+        // 2. get all songs from db
+        List<YaraSong> allSongs = echoNestClient.getAllSongs();
+
+        // 3. fetch meta data from EchoNest
         for (YaraSong song : songs) {
-            echoNestClient.getSongInfo(song);
+            if (allSongs.contains(song)) {
+                allSongs.remove(song);
+                continue;
+            }
+           echoNestClient.getSongInfo(song);
         }
+
+        // 4. clean db: the remaining songs in this list are not on the device anymore
+        echoNestClient.removeSongsFromDB(allSongs);
+
+        Log.i("Music scan", "Done!");
 
         return songs;
     }
