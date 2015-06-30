@@ -35,11 +35,11 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     // TODO: Figure out a reasonable interval
     private int recInterval = 1000;
     private ArrayList<Location> aTrack;
+    private int secondsRun;
 
     /*
     Public methods for Clients to call
      */
-
     public ArrayList<Location> receiveTrack(){
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, mLocationListener);
         return aTrack;
@@ -77,6 +77,7 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
                 }
 
                 Log.d("LocationListener", "aTrack now contains " + aTrack.size() + " points.");
+                secondsRun++;
             }
         };
 

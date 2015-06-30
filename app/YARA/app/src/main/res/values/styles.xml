@@ -5,4 +5,15 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="textAppearanceMegaLargeMono" parent="@android:style/TextAppearance.Large">
+        <item name="android:textColor">#FFFFFF</item>
+        <item name="android:textSize">18pt</item>
+        <item name="android:typeface">monospace</item>
+    </style>
+
+    <style name="textAppearanceMediumMono" parent="@android:style/TextAppearance.Medium">
+        <item name="android:typeface">monospace</item>
+    </style>
+
+
 </resources>

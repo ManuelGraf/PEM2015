@@ -9,6 +9,7 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
+import android.os.Handler;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
@@ -38,6 +39,13 @@ public class RunActivity extends ActionBarActivity {
     private TextView    txtStepCountAccelerometer;
     private TextView    txtBPM;
     private Button      btnFinishRun;
+
+    // run overview part obendrueber
+    private Handler timerHandler = new Handler();
+
+    private TextView    txtStepCountPerMinute;
+    private TextView    txtTime;
+    private TextView    txtDistance;
 
 
     private SensorManager mSensorManager;
@@ -94,6 +102,11 @@ public class RunActivity extends ActionBarActivity {
         txtStepCount = (TextView)findViewById(R.id.txtStepCount);
         txtStepCountAccelerometer  = (TextView)findViewById(R.id.txtStepCountAccelerometer);
         txtBPM = (TextView)findViewById(R.id.txtBPMCount);
+
+        txtStepCountPerMinute = (TextView)findViewById(R.id.txtStepCountPerMinute);
+        txtTime = (TextView)findViewById(R.id.txtTime);
+        txtDistance =(TextView)findViewById(R.id.txtTime);
+
         btnFinishRun =(Button)findViewById(R.id.btnFinishRun);
 
         btnFinishRun.setOnClickListener(new View.OnClickListener() {
@@ -155,6 +168,9 @@ public class RunActivity extends ActionBarActivity {
             //TODO: Nach dem Testen das hier einkommentieren und anpassen, dass immer der verfuegbare Sensor verwendet wird
             //mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
         }
+
+        // timer
+        timerHandler.postDelayed(timerTask, 1000);
     }
 
 
@@ -200,11 +216,15 @@ public class RunActivity extends ActionBarActivity {
         unbindService(mConnection);
         stopService(locationIntent);
 
+        //stop the timer
+        timerHandler.removeCallbacks(timerTask);
+
         if(mStepCounterSensor != null){
             mSensorManager.unregisterListener(mStepDetectorCounter, mStepCounterSensor);
         }
         //mSensorManager.unregisterListener(this, mStepCounterSensor);
         mSensorManager.unregisterListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor);
+
     }
 
     //AB HIER ERSTMAL DER STEP DETECTOR
@@ -235,6 +255,27 @@ public class RunActivity extends ActionBarActivity {
         }
     };
 
+    // Timertask executes every second
+    private Runnable timerTask = new Runnable() {
+        private int secs=0;
+        private int mins=0;
+        private int hours=0;
+
+        @Override
+        public void run() {
+            if(secs==60){
+                secs =0;
+                mins++;
+            }
+            if(mins==60){
+                mins=0;
+                hours++;
+            }
+            secs++;
+            txtTime.setText((hours <10 ? "0":"")+hours+":"+(mins <10 ? "0":"")+mins+":"+(secs <10 ? "0":"")+secs);
+            timerHandler.postDelayed(this, 1000);
+        }
+    };
 
     private class StepAccelerometer implements SensorEventListener {
 

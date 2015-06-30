@@ -49,9 +49,6 @@ public class TrackHistoryItemAdapter extends ArrayAdapter<YaraTrack> {
 
         list.setOnItemClickListener(startRunListener);
 
-
-
-
         return rowView;
     }
 
