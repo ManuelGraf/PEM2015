@@ -9,6 +9,7 @@ import android.location.Location;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 
@@ -151,6 +152,49 @@ public class TrackDbHelper extends SQLiteOpenHelper {
                 cv,
                 TrackDbItem._ID + "=?",
                 whereArgs);
+    }
+
+    public ArrayList<YaraTrack> getAllTracks(){
+
+        ArrayList<YaraTrack> myResult = new ArrayList<YaraTrack>();
+
+        String[] projection = {
+                TrackDbHelper.TrackDbItem._ID,
+                TrackDbHelper.TrackDbItem.COLUMN_NAME_TRACK_NAME,
+                TrackDbHelper.TrackDbItem.COLUMN_NAME_PATH,
+                TrackDbHelper.TrackDbItem.COLUMN_NAME_LENGTH,
+                TrackDbHelper.TrackDbItem.COLUMN_NAME_DATE_CREATED
+        };
+
+        String sortOrder = TrackDbHelper.TrackDbItem.COLUMN_NAME_DATE_CREATED + " DESC";
+
+        Cursor c = getReadableDatabase().query(
+                TrackDbHelper.TrackDbItem.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                sortOrder
+        );
+        c.moveToFirst();
+
+        int offset = 0;
+
+        while(offset < c.getCount()){
+            myResult.add(new YaraTrack(
+                    c.getInt(c.getColumnIndexOrThrow(TrackDbHelper.TrackDbItem._ID)),
+                    c.getString(c.getColumnIndexOrThrow(TrackDbHelper.TrackDbItem.COLUMN_NAME_TRACK_NAME)),
+                    c.getString(c.getColumnIndexOrThrow(TrackDbHelper.TrackDbItem.COLUMN_NAME_PATH)),
+                    c.getString(c.getColumnIndexOrThrow(TrackDbHelper.TrackDbItem.COLUMN_NAME_DATE_CREATED)),
+                    c.getInt(c.getColumnIndexOrThrow(TrackDbHelper.TrackDbItem.COLUMN_NAME_LENGTH))
+            ));
+            c.moveToNext();
+            offset++;
+        }
+        c.close();
+
+        return myResult;
     }
 
     // TODO: Work out the connection between the list of tracks the user sees, and this method call.
