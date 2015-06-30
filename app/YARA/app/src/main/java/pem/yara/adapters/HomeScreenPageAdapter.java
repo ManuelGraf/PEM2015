@@ -11,7 +11,9 @@ import pem.yara.fragments.SongListFragment;
  * Created by yummie on 21.06.2015.
  */
 public class HomeScreenPageAdapter extends FragmentStatePagerAdapter {
+    private FragmentManager mManager;
     public HomeScreenPageAdapter(FragmentManager fm) {
+
         super(fm);
     }
 
@@ -37,6 +39,6 @@ public class HomeScreenPageAdapter extends FragmentStatePagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
 
-        return (position == 0) ? "TRACKS" : "SONGS";
+        return (position == 0) ? "TRACKS" : "ALL SONGS";
     }
 }

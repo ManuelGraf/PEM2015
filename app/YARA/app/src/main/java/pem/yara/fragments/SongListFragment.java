@@ -194,6 +194,10 @@ public class SongListFragment extends Fragment {
         mListener = null;
     }
 
+    public int getSongCount(){
+        return values.size();
+    }
+
 
     /**
      * This interface must be implemented by activities that contain this

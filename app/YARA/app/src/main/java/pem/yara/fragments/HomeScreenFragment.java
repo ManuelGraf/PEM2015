@@ -1,6 +1,5 @@
 package pem.yara.fragments;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -14,29 +13,30 @@ import android.widget.TextView;
 import java.util.ArrayList;
 
 import pem.yara.R;
-import pem.yara.RunActivity;
 import pem.yara.adapters.TrackHistoryItemAdapter;
 import pem.yara.db.TrackDbHelper;
 import pem.yara.entity.YaraTrack;
 
 
-public class HomeScreenFragment extends Fragment implements TrackItemFragment.onTrackItemInteractionListener {
+public class HomeScreenFragment extends Fragment {
     public static final String ARG_OBJECT = "object";
     private Button btnNewTrack;
     private TextView txtTracksEmpty;
     private ListView trackList;
     private View mRootView;
+    private TrackHistoryItemAdapter mTrackAdapter;
     private TrackDbHelper mTrackDBHelper;
+    private ArrayList<YaraTrack> values;
 
     @Override
     public void onResume() {
         super.onResume();
         ArrayList<YaraTrack> values = mTrackDBHelper.getAllTracks();
         Log.d("HomeScreenFragment", "Tracklist contains " + values.size() + " elements.");
-        trackList.setAdapter(new TrackHistoryItemAdapter(getActivity(), values));
+        mTrackAdapter = new TrackHistoryItemAdapter(getActivity(), values);
+        trackList.setAdapter(mTrackAdapter);
         Log.d("HomeScreenFragment", "Adapter Set");
         trackList.setEmptyView(mRootView.findViewById(R.id.txtTracklistEmpty));
-
     }
 
     @Override
@@ -48,17 +48,18 @@ public class HomeScreenFragment extends Fragment implements TrackItemFragment.on
                 R.layout.fragment_home_screen, container, false);
 
 
-        btnNewTrack = (Button)rootView.findViewById(R.id.btnNewTrack);
-        btnNewTrack.setOnClickListener(startRunListener);
         txtTracksEmpty = (TextView)rootView.findViewById(R.id.txtTracklistEmpty);
         trackList = (ListView)rootView.findViewById(R.id.trackItems);
 
         // Populating Track List:
         mTrackDBHelper = new TrackDbHelper(getActivity().getApplicationContext());
-        ArrayList<YaraTrack> values = mTrackDBHelper.getAllTracks();
+        values = mTrackDBHelper.getAllTracks();
         Log.d("HomeScreenFragment", "Tracklist contains " + values.size() + " elements.");
-        trackList.setAdapter(new TrackHistoryItemAdapter(getActivity(), values));
-        Log.d("HomeScreenFragment", "Adapter Set");
+        mTrackAdapter = new TrackHistoryItemAdapter(getActivity(), values);
+        trackList.setAdapter(mTrackAdapter);
+
+
+        //Log.d("HomeScreenFragment", "Adapter Set");
         trackList.setEmptyView(rootView.findViewById(R.id.txtTracklistEmpty));
 
 
@@ -68,20 +69,7 @@ public class HomeScreenFragment extends Fragment implements TrackItemFragment.on
         return rootView;
     }
 
-    @Override
-    public void onTrackItemClick(YaraTrack id) {
-        Intent intent = new Intent(getActivity(), RunActivity.class);
-        intent.putExtra("track_id",id.getId());
-        getActivity().startActivity(intent);
-    }
 
-    View.OnClickListener startRunListener = new View.OnClickListener() {
-        public void onClick(View v) {
-            Intent intent = new Intent(getActivity(), RunActivity.class);
-            // Set this flag so finish() (called in RunActivity) will return to StartActivity
-            intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-            getActivity().startActivity(intent);
-        }
-    };
+
 
 }

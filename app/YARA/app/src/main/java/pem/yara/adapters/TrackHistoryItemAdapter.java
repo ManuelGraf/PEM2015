@@ -1,15 +1,19 @@
 package pem.yara.adapters;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.util.List;
 
 import pem.yara.R;
+import pem.yara.StatisticsActivity;
 import pem.yara.entity.YaraTrack;
 
 /**
@@ -41,6 +45,11 @@ public class TrackHistoryItemAdapter extends ArrayAdapter<YaraTrack> {
             trackName.setText("Track name: "+values.get(position).getTitle());
             trackDistance.setText("Track size: "+values.get(position).getLength());
             trackCreated.setText("Recorded: " + values.get(position).getDate_created());
+        ListView list = (ListView)parent;
+
+        list.setOnItemClickListener(startRunListener);
+
+
 
 
         return rowView;
@@ -50,4 +59,13 @@ public class TrackHistoryItemAdapter extends ArrayAdapter<YaraTrack> {
     public YaraTrack getItem(int position){
         return values.get(position);
     }
+
+    AdapterView.OnItemClickListener startRunListener = new AdapterView.OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
+            Intent intent = new Intent(getContext(), StatisticsActivity.class);
+            intent.putExtra("track_id", values.get(pos).getId());
+            getContext().startActivity(intent);
+        }
+    };
 }
