@@ -28,6 +28,7 @@ import pem.yara.music.ScanMusicTask;
 
 public class StartActivity extends ActionBarActivity implements SongListFragment.OnSongListInteractionListener {
 
+    private ScanMusicTask scanMusicTask;
     private HomeScreenPageAdapter mPagerAdapter;
     private ViewPager mViewPager;
     private int mActiveTab = 0;
@@ -61,7 +62,8 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
                     }
                 });
 
-        ScanMusicTask scanMusicTask = new ScanMusicTask();
+        // TODO Martin: Wenn ein Lied nicht bei Echonest gefunden werden kann, dann sollte nicht jedes Mal erneut danach gesucht werden!
+        scanMusicTask = new ScanMusicTask();
         scanMusicTask.execute(getApplication());
 
         audioPlayerIntent = new Intent(this, AudioPlayer.class);
@@ -85,6 +87,9 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         super.onStop();
         unbindService(serviceConnection);
         stopService(audioPlayerIntent);
+
+        // Stop scanning if App quits
+        scanMusicTask.cancel(true);
     }
 
     public boolean onPrepareOptionsMenu(final Menu menu) {
