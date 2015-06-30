@@ -14,6 +14,7 @@ import pem.yara.entity.YaraSong;
 
 /**
  * Created by yummie on 29.06.2015.
+
  */
 public class SongListItemAdapter  extends ArrayAdapter<YaraSong> {
 
@@ -33,16 +34,15 @@ public class SongListItemAdapter  extends ArrayAdapter<YaraSong> {
 
         View rowView = inflater.inflate(R.layout.fragment_song_item, parent, false);
 
-        TextView ssongId = (TextView) rowView.findViewById(R.id.songItemId);
+        TextView songId = (TextView) rowView.findViewById(R.id.songItemId);
         TextView songName = (TextView) rowView.findViewById(R.id.songItemName);
         TextView songBPM = (TextView) rowView.findViewById(R.id.songItemBpm);
         TextView songPlayCount = (TextView) rowView.findViewById(R.id.songItemPlaycount);
 
-        ssongId.setText(""+values.get(position).getId());
+        songId.setText(""+values.get(position).getId());
         songName.setText(values.get(position).getArtist()+" - "+values.get(position).getTitle());
         songBPM.setText("BPM: "+values.get(position).getTempo());
         songPlayCount.setText("playcount: "+ values.get(position).getPlayCount());
-
 
         return rowView;
     }

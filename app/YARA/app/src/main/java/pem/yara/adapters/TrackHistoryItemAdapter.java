@@ -1,7 +1,6 @@
 package pem.yara.adapters;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -28,17 +27,21 @@ public class TrackHistoryItemAdapter extends ArrayAdapter<YaraTrack> {
     }
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        LayoutInflater inflater = (LayoutInflater) context
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View rowView;
 
-        View rowView = inflater.inflate(R.layout.fragment_track_item, parent, false);
-        TextView trackName = (TextView) rowView.findViewById(R.id.track_item_name);
-        TextView trackDistance = (TextView) rowView.findViewById(R.id.track_item_distance);
-        TextView trackCreated = (TextView) rowView.findViewById(R.id.track_item_created);
 
-        trackName.setText("Track name: "+values.get(position).getTitle());
-        trackDistance.setText("Track size: "+values.get(position).getLength());
-        trackCreated.setText("Recorded: " + values.get(position).getDate_created());
+            LayoutInflater inflater = (LayoutInflater) context
+                    .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+            rowView = inflater.inflate(R.layout.fragment_track_item, parent, false);
+            TextView trackName = (TextView) rowView.findViewById(R.id.track_item_name);
+            TextView trackDistance = (TextView) rowView.findViewById(R.id.track_item_distance);
+            TextView trackCreated = (TextView) rowView.findViewById(R.id.track_item_created);
+
+            trackName.setText("Track name: "+values.get(position).getTitle());
+            trackDistance.setText("Track size: "+values.get(position).getLength());
+            trackCreated.setText("Recorded: " + values.get(position).getDate_created());
+
 
         return rowView;
     }

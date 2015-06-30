@@ -4,7 +4,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.view.ViewPager;
@@ -20,6 +19,7 @@ import pem.yara.LocationService.LocalBinder;
 import pem.yara.adapters.HomeScreenPageAdapter;
 import pem.yara.db.RunDbHelper;
 import pem.yara.db.TrackDbHelper;
+import pem.yara.entity.YaraSong;
 import pem.yara.fragments.SongListFragment;
 import pem.yara.music.AudioPlayer;
 import pem.yara.music.ScanMusicTask;
@@ -34,6 +34,7 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
     private HomeScreenPageAdapter mPagerAdapter;
     private ViewPager mViewPager;
     private int mActiveTab = 0;
+
 
     private ServiceConnection serviceConnection = new AudioPlayerServiceConnection();
     private AudioPlayer audioPlayer;
@@ -51,8 +52,22 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         setContentView(R.layout.activity_start);
 
         // TODO: Remove reset-Statements when going live
-//        new RunDbHelper(getBaseContext()).resetDB();
-//        new TrackDbHelper(getBaseContext()).resetDB();
+        new RunDbHelper(getBaseContext()).resetDB();
+        new TrackDbHelper(getBaseContext()).resetDB();
+
+
+        // Navigation buttons
+        /*btnStartRun = (Button)findViewById(R.id.btnStartRunning);
+        btnStartRun.setOnClickListener(startRunListener);
+        btnNewRun = (Button)findViewById(R.id.btnRegisterTrack);
+        btnNewRun.setOnClickListener(newTrackListener);
+        btnShowStats = (Button)findViewById(R.id.btnShowStatistics);
+        btnShowStats.setOnClickListener(showStatisticsListener);
+        btnShowSongs = (Button)findViewById(R.id.btnShowSongList);
+        btnShowSongs.setOnClickListener(showSonglistListener);
+        btnFinishRun = (Button)findViewById(R.id.btnFinishRun);*/
+
+
 
 
         mPagerAdapter = new HomeScreenPageAdapter(getSupportFragmentManager());
@@ -164,7 +179,7 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
 
     // Interactions for SonglistFragment
     @Override
-    public void onSongListInteraction(Uri uri) {
+    public void onSongListInteraction(YaraSong s) {
 
     }
 

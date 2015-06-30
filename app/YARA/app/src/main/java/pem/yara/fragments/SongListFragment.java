@@ -1,17 +1,25 @@
 package pem.yara.fragments;
 
 import android.app.Activity;
-import android.net.Uri;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import pem.yara.R;
+import pem.yara.adapters.SongListItemAdapter;
+import pem.yara.db.SongDbHelper;
+import pem.yara.entity.YaraSong;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -31,6 +39,10 @@ public class SongListFragment extends Fragment {
     private ListView listSongs;
     private Button btnImportMusic;
     private View mRootView;
+    SongDbHelper dbHelper;
+    SQLiteDatabase db;
+    ArrayList<YaraSong> values;
+
 
     // TODO: Rename and change types of parameters
     private String mParam1;
@@ -67,6 +79,59 @@ public class SongListFragment extends Fragment {
             mParam1 = getArguments().getString(ARG_PARAM1);
             mParam2 = getArguments().getString(ARG_PARAM2);
         }
+
+
+        dbHelper = new SongDbHelper(getActivity().getApplicationContext());
+        db = dbHelper.getReadableDatabase();
+        String[] projection = {
+                SongDbHelper.SongDbItem._ID,
+                SongDbHelper.SongDbItem.COLUMN_NAME_ARTIST,
+                SongDbHelper.SongDbItem.COLUMN_NAME_TITLE,
+                SongDbHelper.SongDbItem.COLUMN_NAME_URI,
+                SongDbHelper.SongDbItem.COLUMN_NAME_BPM,
+                SongDbHelper.SongDbItem.COLUMN_NAME_PLAYCOUNT,
+                SongDbHelper.SongDbItem.COLUMN_NAME_BLOCKED,
+                SongDbHelper.SongDbItem.COLUMN_NAME_SCORE
+        };
+
+        String sortOrder = SongDbHelper.SongDbItem.COLUMN_NAME_ARTIST + " DESC";
+
+        Cursor c = db.query(
+                SongDbHelper.SongDbItem.TABLE_NAME,
+                projection,
+                null,
+                null,
+                null,
+                null,
+                sortOrder
+        );
+        c.moveToFirst();
+
+        values = new ArrayList<YaraSong>();
+        int offset = 0;
+
+        while(offset < c.getCount()){
+            values.add(new YaraSong(
+                    c.getInt(c.getColumnIndexOrThrow(SongDbHelper.SongDbItem._ID)),
+                    c.getString(c.getColumnIndexOrThrow(SongDbHelper.SongDbItem.COLUMN_NAME_TITLE)),
+                    c.getString(c.getColumnIndexOrThrow(SongDbHelper.SongDbItem.COLUMN_NAME_ARTIST)),
+                    c.getString(c.getColumnIndexOrThrow(SongDbHelper.SongDbItem.COLUMN_NAME_URI)),
+                    c.getDouble(c.getColumnIndexOrThrow(SongDbHelper.SongDbItem.COLUMN_NAME_BPM)),
+                    c.getDouble(c.getColumnIndexOrThrow(SongDbHelper.SongDbItem.COLUMN_NAME_SCORE)),
+                    c.getInt(c.getColumnIndexOrThrow(SongDbHelper.SongDbItem.COLUMN_NAME_BLOCKED)),
+                    c.getInt(c.getColumnIndexOrThrow(SongDbHelper.SongDbItem.COLUMN_NAME_PLAYCOUNT))
+            ));
+            c.moveToNext();
+            offset++;
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
+        listSongs.setAdapter(new SongListItemAdapter(getActivity().getApplicationContext(), values));
+
     }
 
     @Override
@@ -81,6 +146,23 @@ public class SongListFragment extends Fragment {
         txtSongsEmpty = (TextView)rootView.findViewById(R.id.txtSonglistEmpty);
         listSongs = (ListView)rootView.findViewById(R.id.songItems);
 
+        listSongs.setAdapter(new SongListItemAdapter(getActivity().getApplicationContext(), values));
+        // Songlist Click listener
+        listSongs.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
+                Log.d("listitemclick","clicked song " + values.get(position).getTitle());
+            }
+        });
+
+        if(values.size() > 1){
+            txtSongsEmpty.setVisibility(View.GONE);
+            btnImportMusic.setVisibility(View.GONE);
+        }else{
+            txtSongsEmpty.setVisibility(View.VISIBLE);
+            btnImportMusic.setVisibility(View.VISIBLE);
+        }
+
         mRootView = rootView;
         Bundle args = getArguments();
 
@@ -94,13 +176,6 @@ public class SongListFragment extends Fragment {
     };
 
 
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onSongListInteraction(uri);
-        }
-    }
 
     @Override
     public void onAttach(Activity activity) {
@@ -119,6 +194,7 @@ public class SongListFragment extends Fragment {
         mListener = null;
     }
 
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -131,7 +207,7 @@ public class SongListFragment extends Fragment {
      */
     public interface OnSongListInteractionListener {
         // TODO: Update argument type and name
-        public void onSongListInteraction(Uri uri);
+        public void onSongListInteraction(YaraSong s);
         public void onImportMusicInteraction();
     }
 

@@ -1,14 +1,21 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:orientation="vertical" android:layout_width="fill_parent"
+    android:layout_margin="5dp"
+    android:layout_height="match_parent"
+    android:nestedScrollingEnabled="false"
+    android:paddingTop="15dp"
+    android:paddingBottom="15dp"
+    android:paddingLeft="5dp"
+    android:paddingRight="5dp">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Large Text"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Song Name"
         android:id="@+id/track_item_name"
-        android:textColor="#ffffff" />
+        android:textColor="#ffffff"
+        android:layout_marginBottom="5dp" />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal" android:layout_width="match_parent"
@@ -16,8 +23,8 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
-            android:text="Medium Text"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="Distance"
             android:layout_weight="0.7"
             android:id="@+id/track_item_distance"
             android:textColor="#ffffff" />
@@ -26,7 +33,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="Small Text"
+            android:text="Last run:"
             android:layout_weight="0.3"
             android:id="@+id/track_item_created"
             android:textColor="#ffffff" />
