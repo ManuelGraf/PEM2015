@@ -13,11 +13,9 @@ import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Date;
 
+import pem.yara.entity.YaraRun;
 import pem.yara.entity.YaraTrack;
 
-/**
- * Created by yummie on 17.06.2015.
- */
 public class TrackDbHelper extends SQLiteOpenHelper {
 
     public static final int DATABASE_VERSION = 1;
@@ -156,12 +154,12 @@ public class TrackDbHelper extends SQLiteOpenHelper {
 
     /**
      * Receives the Track with the given ID from the database. If no ID is given (ID < 0), all Tracks are received.
-     * @param ID ID of the Track to receive. If empty, all Tracks are received.
+     * @param trackID ID of the Track to receive. If empty, all Tracks are received.
      * @return One or all Tracks from the Database.
      */
-    public ArrayList<YaraTrack> getTracks(int ID){
+    public ArrayList<YaraTrack> getTracks(int trackID){
 
-        ArrayList<YaraTrack> myResult = new ArrayList<YaraTrack>();
+        ArrayList<YaraTrack> myResult = new ArrayList<>();
 
         String[] projection = {
                 TrackDbHelper.TrackDbItem._ID,
@@ -173,16 +171,16 @@ public class TrackDbHelper extends SQLiteOpenHelper {
 
         String sortOrder = TrackDbHelper.TrackDbItem.COLUMN_NAME_DATE_CREATED + " DESC";
 
-        String selection = null;
+        String selection;
         String[] selectionArgs;
 
-        if(ID < 0){
+        if(trackID < 0){
             // No ID given: Get all Tracks ==> No selection parameters
             selection=null;
             selectionArgs = null;
         } else {
-            selection= "ID=?";
-            selectionArgs = new String[]{ID + ""};
+            selection= TrackDbItem._ID + "=?";
+            selectionArgs = new String[]{trackID + ""};
         }
 
         Cursor c = getReadableDatabase().query(

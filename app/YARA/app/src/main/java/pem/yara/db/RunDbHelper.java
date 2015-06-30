@@ -8,12 +8,11 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 import pem.yara.entity.YaraRun;
 import pem.yara.entity.YaraTrack;
 
-/**
- * Created by yummie on 17.06.2015.
- */
 public class RunDbHelper  extends SQLiteOpenHelper {
     public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_NAME = "YARA.db";
@@ -106,7 +105,7 @@ public class RunDbHelper  extends SQLiteOpenHelper {
     /**
      * Writes one run into the Runs-Table, linking it to the corresponding track (if the user runs a known track) or inserting a new track into the database.
      */
-    public void insertRun(YaraRun mYaraRun, Context c){
+    public YaraRun insertRun(YaraRun mYaraRun, Context c){
 
         // If this happens to be a Run on a new Track, we have to register the Track first.
         // This means assigning a new ID (and a name):
@@ -132,5 +131,114 @@ public class RunDbHelper  extends SQLiteOpenHelper {
         this.getWritableDatabase().insert(RunDbItem.TABLE_NAME, null, cv);
         Log.d("insertRun", "Run inserted!");
 
+        return mYaraRun;
+    }
+
+
+    /**
+     * Receives the Run with the given ID from the database. If no ID is given (ID < 0), all Runs are received.
+     * @param runID ID of the Run to receive. If empty, all Runs are received.
+     * @param trackID ID of a Track. If > 0, only Runs on this Track will be returned.
+     * @return One or all Runs from the Database.
+     */
+    public ArrayList<YaraRun> getRuns(int runID, int trackID){
+
+        ArrayList<YaraRun> myResult = new ArrayList<>();
+
+        String[] projection = {
+                RunDbItem._ID,
+                RunDbItem.COLUMN_NAME_TRACK_ID,
+                RunDbItem.COLUMN_NAME_DATE,
+                RunDbItem.COLUMN_NAME_DURATION,
+                RunDbItem.COLUMN_NAME_AVG_BPM,
+                RunDbItem.COLUMN_NAME_AVG_SPEED
+        };
+
+        String sortOrder = RunDbItem.COLUMN_NAME_DATE + " DESC";
+
+        String selection;
+        String[] selectionArgs;
+
+        // Build selection: Ask for Run_ID and Track_ID respectively.
+        if(runID < 0){
+            // No ID given: Get all Tracks ==> No selection parameters
+            selection=null;
+            selectionArgs = null;
+        } else {
+            selection= RunDbItem._ID + "=?";
+            selectionArgs = new String[]{runID + ""};
+        }
+
+        if(trackID > 0){
+            if(selection==null){
+                selection = RunDbItem.COLUMN_NAME_TRACK_ID + "=?";
+                selectionArgs = new String[]{trackID+""};
+            } else {
+                selection += " AND " + RunDbItem.COLUMN_NAME_TRACK_ID + "=?";
+                selectionArgs = new String[]{selectionArgs[0], trackID + ""};
+            }
+        }
+
+        Cursor c = getReadableDatabase().query(
+                RunDbItem.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                null,
+                null,
+                sortOrder
+        );
+        c.moveToFirst();
+
+        int offset = 0;
+
+        while(offset < c.getCount()){
+            myResult.add(new YaraRun(
+                    c.getInt(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_TRACK_ID)),
+                    c.getFloat(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_AVG_BPM)),
+                    "",
+                    c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_DATE))
+            ));
+            c.moveToNext();
+            offset++;
+        }
+        c.close();
+
+        return myResult;
+    }
+
+    /**
+     * Receives the last run on a given Track
+     * @param trackID Track of which the last run will be returned
+     * @return Goddamnit, read!
+     */
+    public YaraRun getLastRunToTrack(int trackID){
+        YaraRun myResult;
+
+        String[] projection = {RunDbItem._ID};
+        String selection = RunDbItem.COLUMN_NAME_TRACK_ID + "=?";
+        String[] selectionArgs = {trackID + ""};
+        String order = RunDbItem.COLUMN_NAME_DATE + " DESC";
+        String group = RunDbItem.COLUMN_NAME_TRACK_ID;
+        String having = RunDbItem.COLUMN_NAME_DATE + "=MAX(" + RunDbItem.COLUMN_NAME_DATE + ")";
+
+        Cursor c = getReadableDatabase().query(
+                RunDbItem.TABLE_NAME,
+                projection,
+                selection,
+                selectionArgs,
+                group,
+                having,
+                order
+        );
+
+        c.moveToFirst();
+        Log.d("getLastRunToTrack", "Letzter Run (ID): " + c.getInt(c.getColumnIndexOrThrow(RunDbItem._ID)));
+
+        myResult = getRuns(c.getInt(c.getColumnIndexOrThrow(RunDbItem._ID)), -1).get(0);
+
+        c.close();
+
+        return myResult;
     }
 }

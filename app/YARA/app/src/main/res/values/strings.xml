@@ -19,6 +19,7 @@
     <string name="error_no_songs">You did not scan your music Library yet.</string>
     <string name="pace">Pace:</string>
     <string name="avgPace">avg. Pace:</string>
+    <string name="avgSpeed">avg. Speed:</string>
     <string name="time">Time:</string>
     <string name="avgTime">avg. Time:</string>
     <string name="distance">Distance:</string>

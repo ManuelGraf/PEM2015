@@ -16,9 +16,6 @@ import pem.yara.R;
 import pem.yara.StatisticsActivity;
 import pem.yara.entity.YaraTrack;
 
-/**
- * Created by yummie on 29.06.2015.
- */
 public class TrackHistoryItemAdapter extends ArrayAdapter<YaraTrack> {
     private final Context context;
     private final List<YaraTrack> values;
@@ -32,7 +29,6 @@ public class TrackHistoryItemAdapter extends ArrayAdapter<YaraTrack> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         View rowView;
-
 
             LayoutInflater inflater = (LayoutInflater) context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -49,6 +45,9 @@ public class TrackHistoryItemAdapter extends ArrayAdapter<YaraTrack> {
 
         list.setOnItemClickListener(startRunListener);
 
+
+
+
         return rowView;
     }
 
@@ -61,7 +60,7 @@ public class TrackHistoryItemAdapter extends ArrayAdapter<YaraTrack> {
         @Override
         public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
             Intent intent = new Intent(getContext(), StatisticsActivity.class);
-            intent.putExtra("track_id", values.get(pos).getId());
+            intent.putExtra("TrackID", values.get(pos).getId());
             getContext().startActivity(intent);
         }
     };

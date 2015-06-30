@@ -18,10 +18,7 @@ import java.util.ArrayList;
 public class LocationService extends Service implements  GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    // TODO Fabi: Store track in DB (Track)
-    // TODO Fabi: Enable some List to display tracks
-    // TODO Fabi: Get statistics from one RUN
-    // TODO Fabi: Visualize one RUN in comparison to all runs on that track
+    // TODO Fabi: Visualize one RUN in comparison to all runs on that track ==> ok, now make sure it works!
     // TODO Fabi: Visualize TRACK through Google Maps API
 
     // Binder given to clients

@@ -130,7 +130,8 @@ public class RunActivity extends ActionBarActivity {
                 RunDbHelper mRunDbHelper = new RunDbHelper(getBaseContext());
                 TrackDbHelper mTrackDbHelper = new TrackDbHelper(getBaseContext());
 
-                mRunDbHelper.insertRun(mYaraRun, getBaseContext());
+                // Assigning the Track ID to mYaraRun
+                mYaraRun = mRunDbHelper.insertRun(mYaraRun, getBaseContext());
 
                 mRunDbHelper.listEntries();
                 mTrackDbHelper.listEntries();
@@ -138,7 +139,13 @@ public class RunActivity extends ActionBarActivity {
                 // Unload RunActivity. Code after this WILL be executed!
                 finishMe();
 
-                // TODO Ueberleitung zu Statistics
+                mRunDbHelper.getLastRunToTrack(mYaraRun.getTrackID());
+
+                // TODO Get BPM from this run!
+                Intent intent = new Intent(getBaseContext(), StatisticsActivity.class);
+                intent.putExtra("TrackID", mYaraRun.getTrackID());
+                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                getBaseContext().startActivity(intent);
 
             }
         });

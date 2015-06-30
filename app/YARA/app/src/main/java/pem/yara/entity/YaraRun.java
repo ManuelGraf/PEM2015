@@ -4,9 +4,6 @@ import android.location.Location;
 
 import java.util.ArrayList;
 
-/**
- * Created by yummie on 29.06.2015.
- */
 public class YaraRun {
     private int trackID;
     private float avgAccuracy;      // Meters
@@ -17,16 +14,23 @@ public class YaraRun {
     private float completionTime;   // Seconds
     private float runDistance;      // Meters
     private String date;
-//    private String trackString;
+    private String trackString;
     private ArrayList<Location> myTrack;
 
-    public YaraRun(int trackID, float avgBpm, ArrayList<Location> aTrack, String date) {
+    public YaraRun(int trackID, float avgBPM, ArrayList<Location> aTrack, String date) {
         this.trackID = trackID;
-        this.avgBpm = avgBpm;
+        this.avgBpm = avgBPM;
         this.myTrack = aTrack;
         this.date = date;
 
         evaluateTrack();
+    }
+
+    public YaraRun(int trackID, float avgBPM, String trackString, String date){
+        this.trackID = trackID;
+        this.avgBpm = avgBPM;
+        this.trackString = trackString;
+        this.date = date;
     }
 
     private void evaluateTrack(){
