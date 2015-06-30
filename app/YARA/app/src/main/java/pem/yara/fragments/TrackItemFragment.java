@@ -33,44 +33,7 @@ public class TrackItemFragment extends ListFragment {
         super.onCreate(savedInstanceState);
 
         dbHelper = new TrackDbHelper(getActivity().getApplicationContext());
-//        db = dbHelper.getReadableDatabase();
-//        String[] projection = {
-//                TrackDbHelper.TrackDbItem._ID,
-//                TrackDbHelper.TrackDbItem.COLUMN_NAME_TRACK_NAME,
-//                TrackDbHelper.TrackDbItem.COLUMN_NAME_PATH,
-//                TrackDbHelper.TrackDbItem.COLUMN_NAME_LENGTH,
-//                TrackDbHelper.TrackDbItem.COLUMN_NAME_DATE_CREATED
-//        };
-//
-//        String sortOrder = TrackDbHelper.TrackDbItem.COLUMN_NAME_DATE_CREATED + " DESC";
-//
-//        Cursor c = db.query(
-//                TrackDbHelper.TrackDbItem.TABLE_NAME,
-//                projection,
-//                null,
-//                null,
-//                null,
-//                null,
-//                sortOrder
-//        );
-//        c.moveToFirst();
-//
-//        values = new ArrayList<YaraTrack>();
-//        int offset = 0;
-//
-//        while(offset < c.getCount()){
-//            values.add(new YaraTrack(
-//                    c.getInt(c.getColumnIndexOrThrow(TrackDbHelper.TrackDbItem._ID)),
-//                    c.getString(c.getColumnIndexOrThrow(TrackDbHelper.TrackDbItem.COLUMN_NAME_TRACK_NAME)),
-//                    c.getString(c.getColumnIndexOrThrow(TrackDbHelper.TrackDbItem.COLUMN_NAME_PATH)),
-//                    c.getString(c.getColumnIndexOrThrow(TrackDbHelper.TrackDbItem.COLUMN_NAME_DATE_CREATED)),
-//                    c.getInt(c.getColumnIndexOrThrow(TrackDbHelper.TrackDbItem.COLUMN_NAME_LENGTH))
-//                    ));
-//            c.moveToNext();
-//            offset++;
-//        }
-
-        values = dbHelper.getAllTracks();
+        values = dbHelper.getTracks(-1);
 
         setListAdapter(new TrackHistoryItemAdapter(getActivity().getApplicationContext(), values));
 

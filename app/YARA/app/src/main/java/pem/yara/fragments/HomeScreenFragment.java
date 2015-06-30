@@ -1,5 +1,6 @@
 package pem.yara.fragments;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -31,7 +32,7 @@ public class HomeScreenFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        ArrayList<YaraTrack> values = mTrackDBHelper.getAllTracks();
+        ArrayList<YaraTrack> values = mTrackDBHelper.getTracks(-1);
         Log.d("HomeScreenFragment", "Tracklist contains " + values.size() + " elements.");
         mTrackAdapter = new TrackHistoryItemAdapter(getActivity(), values);
         trackList.setAdapter(mTrackAdapter);
@@ -53,7 +54,7 @@ public class HomeScreenFragment extends Fragment {
 
         // Populating Track List:
         mTrackDBHelper = new TrackDbHelper(getActivity().getApplicationContext());
-        values = mTrackDBHelper.getAllTracks();
+        ArrayList<YaraTrack> values = mTrackDBHelper.getAllTracks();
         Log.d("HomeScreenFragment", "Tracklist contains " + values.size() + " elements.");
         mTrackAdapter = new TrackHistoryItemAdapter(getActivity(), values);
         trackList.setAdapter(mTrackAdapter);

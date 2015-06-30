@@ -154,7 +154,12 @@ public class TrackDbHelper extends SQLiteOpenHelper {
                 whereArgs);
     }
 
-    public ArrayList<YaraTrack> getAllTracks(){
+    /**
+     * Receives the Track with the given ID from the database. If no ID is given (ID < 0), all Tracks are received.
+     * @param ID ID of the Track to receive. If empty, all Tracks are received.
+     * @return One or all Tracks from the Database.
+     */
+    public ArrayList<YaraTrack> getTracks(int ID){
 
         ArrayList<YaraTrack> myResult = new ArrayList<YaraTrack>();
 
@@ -168,11 +173,23 @@ public class TrackDbHelper extends SQLiteOpenHelper {
 
         String sortOrder = TrackDbHelper.TrackDbItem.COLUMN_NAME_DATE_CREATED + " DESC";
 
+        String selection = null;
+        String[] selectionArgs;
+
+        if(ID < 0){
+            // No ID given: Get all Tracks ==> No selection parameters
+            selection=null;
+            selectionArgs = null;
+        } else {
+            selection= "ID=?";
+            selectionArgs = new String[]{ID + ""};
+        }
+
         Cursor c = getReadableDatabase().query(
                 TrackDbHelper.TrackDbItem.TABLE_NAME,
                 projection,
-                null,
-                null,
+                selection,
+                selectionArgs,
                 null,
                 null,
                 sortOrder
@@ -195,12 +212,6 @@ public class TrackDbHelper extends SQLiteOpenHelper {
         c.close();
 
         return myResult;
-    }
-
-    // TODO: Work out the connection between the list of tracks the user sees, and this method call.
-    // How will a track be identified? Hidden field (containing ID) in the list?
-    public void getTrackInfos(int trackID){
-        // TODO: Work out the return type of this method
     }
 
 }

@@ -10,7 +10,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceLarge"
-        android:text="Run Breakdown:"
+        android:text="Last Run Breakdown:"
         android:id="@+id/runbreakdownheadline"
         android:layout_alignParentTop="true"
 
@@ -18,42 +18,147 @@
 
     <TableLayout
         android:layout_width="fill_parent"
-        android:layout_height="216dp"
+        android:layout_height="80dp"
         android:layout_below="@+id/runbreakdownheadline"
         android:stretchColumns="1"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentStart="true"
+        android:id="@+id/tableLayout">
 
-        <TableRow>
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
             <TextView
                 android:layout_column="1"
-                android:text="Distance:"
-                android:padding="3dip" />
+                android:text="Track Name:"
+                android:padding="3dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
             <TextView
-                android:text="0 km"
+                android:text="HansPeterMeier"
                 android:gravity="right"
-                android:padding="3dip" />
+                android:padding="3dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/track_item_name"
+                android:layout_column="2" />
         </TableRow>
-        <TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
             <TextView
                 android:layout_column="1"
-                android:text="Pace:"
-                android:padding="3dip" />
-            <TextView
-                android:text="0 steps/min"
-                android:gravity="right"
-                android:padding="3dip" />
-        </TableRow>
-        <TableRow>
-            <TextView
-                android:layout_column="1"
-                android:text="Time:"
-                android:padding="3dip" />
+                android:text="@string/time"
+                android:padding="3dip"/>
+
             <TextView
                 android:text="0 min"
                 android:gravity="right"
-                android:padding="3dip" />
+                android:padding="3dip"
+                android:id="@+id/track_item_time" />
         </TableRow>
 
-        </TableLayout>
+        <TableRow>
+            <TextView
+                android:layout_column="1"
+                android:text="@string/pace"
+                android:padding="3dip"/>
+            <TextView
+                android:text="0 steps/min"
+                android:gravity="right"
+                android:padding="3dip"
+                android:id="@+id/track_item_pace" />
+        </TableRow>
+
+    </TableLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:text="Overall Track Statistics:"
+        android:id="@+id/textView"
+        android:layout_below="@+id/tableLayout"
+        android:layout_alignParentStart="true" />
+
+    <TableLayout
+        android:layout_width="fill_parent"
+        android:layout_height="80dp"
+        android:stretchColumns="1"
+        android:id="@+id/tableLayout2"
+        android:layout_below="@+id/textView"
+        android:layout_alignParentEnd="true">
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_column="1"
+                android:text="@string/distance"
+                android:padding="3dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:text="0 km"
+                android:gravity="right"
+                android:padding="3dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/track_item_distance_2" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
+
+            <TextView
+                android:layout_column="1"
+                android:text="@string/avgTime"
+                android:padding="3dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="0 min"
+                android:gravity="right"
+                android:padding="3dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/track_avg_time" />
+        </TableRow>
+
+        <TableRow
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_column="1"
+                android:text="@string/avgPace"
+                android:padding="3dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:text="0 steps/min"
+                android:gravity="right"
+                android:padding="3dip"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/track_avg_pace" />
+        </TableRow>
+    </TableLayout>
+
+    <view
+        android:layout_width="match_parent"
+        android:layout_height="fill_parent"
+        class="com.google.android.gms.maps.MapView"
+        android:id="@+id/googleMapsView"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/tableLayout2" />
 
 </RelativeLayout>
