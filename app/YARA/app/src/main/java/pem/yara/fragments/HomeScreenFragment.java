@@ -31,7 +31,7 @@ public class HomeScreenFragment extends Fragment implements TrackItemFragment.on
     @Override
     public void onResume() {
         super.onResume();
-        ArrayList<YaraTrack> values = mTrackDBHelper.getAllTracks();
+        ArrayList<YaraTrack> values = mTrackDBHelper.getTracks(-1);
         Log.d("HomeScreenFragment", "Tracklist contains " + values.size() + " elements.");
         trackList.setAdapter(new TrackHistoryItemAdapter(getActivity(), values));
         Log.d("HomeScreenFragment", "Adapter Set");
@@ -55,7 +55,7 @@ public class HomeScreenFragment extends Fragment implements TrackItemFragment.on
 
         // Populating Track List:
         mTrackDBHelper = new TrackDbHelper(getActivity().getApplicationContext());
-        ArrayList<YaraTrack> values = mTrackDBHelper.getAllTracks();
+        ArrayList<YaraTrack> values = mTrackDBHelper.getTracks(-1);
         Log.d("HomeScreenFragment", "Tracklist contains " + values.size() + " elements.");
         trackList.setAdapter(new TrackHistoryItemAdapter(getActivity(), values));
         Log.d("HomeScreenFragment", "Adapter Set");

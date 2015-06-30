@@ -1,19 +1,35 @@
 package pem.yara;
 
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.MapFragment;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.model.LatLng;
 
-public class StatisticsActivity extends ActionBarActivity {
+
+public class StatisticsActivity extends ActionBarActivity implements OnMapReadyCallback {
+
+    private MapFragment mMapFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_statistics);
+
+        mMapFragment = (MapFragment) getFragmentManager()
+                .findFragmentById(R.id.googleMapsView);
     }
 
+    @Override
+    protected void onResume(){
+        mMapFragment.getMapAsync(this);
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -35,5 +51,10 @@ public class StatisticsActivity extends ActionBarActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap map) {
+        map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(44.123, 11.123), 2));
     }
 }
