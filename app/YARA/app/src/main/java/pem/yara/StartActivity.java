@@ -18,6 +18,8 @@ import com.astuetz.PagerSlidingTabStrip;
 
 import pem.yara.LocationService.LocalBinder;
 import pem.yara.adapters.HomeScreenPageAdapter;
+import pem.yara.db.RunDbHelper;
+import pem.yara.db.TrackDbHelper;
 import pem.yara.fragments.SongListFragment;
 import pem.yara.music.AudioPlayer;
 import pem.yara.music.ScanMusicTask;
@@ -48,20 +50,9 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-
-
-        // Navigation buttons
-        /*btnStartRun = (Button)findViewById(R.id.btnStartRunning);
-        btnStartRun.setOnClickListener(startRunListener);
-        btnNewRun = (Button)findViewById(R.id.btnRegisterTrack);
-        btnNewRun.setOnClickListener(newTrackListener);
-        btnShowStats = (Button)findViewById(R.id.btnShowStatistics);
-        btnShowStats.setOnClickListener(showStatisticsListener);
-        btnShowSongs = (Button)findViewById(R.id.btnShowSongList);
-        btnShowSongs.setOnClickListener(showSonglistListener);
-        btnFinishRun = (Button)findViewById(R.id.btnFinishRun);*/
-
-
+//        // TODO: Remove reset-Statements when going live
+        new RunDbHelper(getBaseContext()).resetDB();
+        new TrackDbHelper(getBaseContext()).resetDB();
 
 
         mPagerAdapter = new HomeScreenPageAdapter(getSupportFragmentManager());
@@ -86,10 +77,6 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
     @Override
     protected void onStart(){
         super.onStart();
-
-//        // TODO: Remove reset-Statements when going live
-//        new RunDbHelper(getBaseContext()).resetDB();
-//        new TrackDbHelper(getBaseContext()).resetDB();
 
         ScanMusicTask scanMusicTask = new ScanMusicTask();
         scanMusicTask.execute(getApplication());

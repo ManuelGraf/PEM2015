@@ -12,6 +12,8 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.Date;
 
+import pem.yara.entity.YaraTrack;
+
 /**
  * Created by yummie on 17.06.2015.
  */
@@ -77,7 +79,7 @@ public class TrackDbHelper extends SQLiteOpenHelper {
         while(offset < c.getCount()){
             Log.d("TrackDbHelper",
                     "ID: " + c.getString(c.getColumnIndexOrThrow(TrackDbItem._ID))+" \n"+
-                    "NAME " + c.getString(c.getColumnIndexOrThrow(TrackDbItem.COLUMN_NAME_TRACK_NAME))+" \n"+
+                    "NAME: " + c.getString(c.getColumnIndexOrThrow(TrackDbItem.COLUMN_NAME_TRACK_NAME))+" \n"+
                     "POINTS: " + c.getString(c.getColumnIndexOrThrow(TrackDbItem.COLUMN_NAME_PATH))+" \n"+
                     "LENGTH: " + c.getString(c.getColumnIndexOrThrow(TrackDbItem.COLUMN_NAME_LENGTH))+" \n"+
                     "CREATED: " + c.getString(c.getColumnIndexOrThrow(TrackDbItem.COLUMN_NAME_DATE_CREATED)) + " \n" +
@@ -110,34 +112,21 @@ public class TrackDbHelper extends SQLiteOpenHelper {
         Log.d("deleteTrack", "Track " + trackID + " deleted.");
     }
 
-    // Insert one track into the table
-    public int insertNewTrack(String name, ArrayList<Location> path, String createdAt){
+    // Insert one track into the table, return the new ID
+    public int insertNewTrack(YaraTrack mYaraTrack){
         ContentValues cv = new ContentValues();
-        Double myLength = 0.d;
-        String myPath = "";
 
-        if(path != null)
-            myPath = path.get(0).getLatitude() + "," + path.get(0).getLongitude();
+        cv.put(TrackDbItem.COLUMN_NAME_TRACK_NAME, mYaraTrack.getTitle());
+        cv.put(TrackDbItem.COLUMN_NAME_LENGTH, mYaraTrack.getLength());
+        cv.put(TrackDbItem.COLUMN_NAME_PATH, mYaraTrack.getPathString());
+        cv.put(TrackDbItem.COLUMN_NAME_DATE_CREATED, mYaraTrack.getDate_created());
 
-        // Get length and list of points:
-        if(!(path==null) && path.size() == 1)
-            myLength = 0.d;
-        else
-            for(int i=1; i < path.size(); i++){
-                myLength += path.get(i-1).distanceTo(path.get(i));
-                myPath += ";" + path.get(0).getLatitude() + "," + path.get(0).getLongitude();
-            }
-
-        Log.d("TrackDBHelper", "Inserting Track: " + name + ", length: " + myLength + ", #points: " + path.size());
-
-        cv.put(TrackDbItem.COLUMN_NAME_TRACK_NAME, name);
-        cv.put(TrackDbItem.COLUMN_NAME_LENGTH, myLength);
-        cv.put(TrackDbItem.COLUMN_NAME_PATH, myPath);
-        cv.put(TrackDbItem.COLUMN_NAME_DATE_CREATED, createdAt);
+        Log.d("TrackDBHelper", "Registering new Track: " + cv.toString());
 
         onCreate(getWritableDatabase());
         getWritableDatabase().insert(TrackDbItem.TABLE_NAME, null, cv);
 
+        // Read current newest ID
         String[] projection = {TrackDbItem._ID };
         Cursor c = getReadableDatabase().query(TrackDbItem.TABLE_NAME,
                 projection,
@@ -147,9 +136,21 @@ public class TrackDbHelper extends SQLiteOpenHelper {
         int newID = c.getInt(c.getColumnIndexOrThrow(TrackDbItem._ID));
         c.close();
 
-        Log.d("TrackDBHelper", "Track inserted. ID: " + newID);
+        Log.d("TrackDBHelper", "Track newly registered. New ID: " + newID);
 
         return newID;
+    }
+
+    public void setTrackName(int ID, String newName){
+
+        ContentValues cv = new ContentValues();
+        cv.put(TrackDbItem.TABLE_NAME, newName);
+
+        String whereArgs[] = {"" + ID};
+        getWritableDatabase().update(TrackDbItem.TABLE_NAME,
+                cv,
+                TrackDbItem._ID + "=?",
+                whereArgs);
     }
 
     // TODO: Work out the connection between the list of tracks the user sees, and this method call.

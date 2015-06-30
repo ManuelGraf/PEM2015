@@ -20,10 +20,13 @@ import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import pem.yara.db.RunDbHelper;
 import pem.yara.db.TrackDbHelper;
+import pem.yara.entity.YaraRun;
 
 
 public class RunActivity extends ActionBarActivity {
@@ -67,7 +70,6 @@ public class RunActivity extends ActionBarActivity {
         // Bind Service
         Log.d("onStart", "Attempting to bind Service");
         locationIntent = new Intent(this, LocationService.class);
-//        locationIntent.putExtra("recInterval", 10000);
 
         Context c;
         c=this.getBaseContext();
@@ -93,55 +95,29 @@ public class RunActivity extends ActionBarActivity {
         txtStepCountAccelerometer  = (TextView)findViewById(R.id.txtStepCountAccelerometer);
         txtBPM = (TextView)findViewById(R.id.txtBPMCount);
         btnFinishRun =(Button)findViewById(R.id.btnFinishRun);
+
         btnFinishRun.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Receive Track from Service and get statistics
                 ArrayList<Location> aTrack = mService.receiveTrack();
-                float runDuration = 0.f;
-                float runDistance = 0.f;
-                float runAvgSpeed = 0.f;
-                float runMinSpeed = 0.f;
-                float runMaxSpeed = 0.f;
-                float runAvgAccuracy = 0.f;
 
                 Log.d("Run Finished Listener", "Track received: " + aTrack.size() + " points");
+                // TODO: Wenn dies ein bekannter Track ist, muss hier irgendwo die TrackID zu finden sein!
 
-                if(aTrack.size()>1){
-                    runDuration = aTrack.get(aTrack.size()-1).getTime() - aTrack.get(0).getTime();
-                    runMinSpeed = 100.f;
-                    // Iterate from *second* to last element
-                    for(int i=1; i<aTrack.size()-1; i++){
-                        Location actLocation = aTrack.get(i);
-                        Location nextLocation = aTrack.get(i+1);
+                YaraRun mYaraRun = new YaraRun(-1, 9001, aTrack, new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(Calendar.getInstance().getTime()));
 
-                        // Distance statistics:
-                        float actDistance = actLocation.distanceTo(nextLocation);
-                        runDistance += actDistance;
-
-                        float actSpeed = actDistance/(nextLocation.getTime()-actLocation.getTime());
-
-                        // Speed statistics:
-                        if(actSpeed > runMaxSpeed)
-                            runMaxSpeed = actSpeed;
-
-                        if(actSpeed < runMinSpeed)
-                            runMinSpeed = actSpeed;
-
-                        runAvgAccuracy += actLocation.getAccuracy();
-                    }
-                    runAvgAccuracy += aTrack.get(aTrack.size()-1).getAccuracy();
-                    runAvgAccuracy /= aTrack.size();
-                    runAvgSpeed = runDistance/runDuration;
-                }
-
-                Log.d("Run Finished Listener", "Distance: " + runDistance + ", Duration: " + runDuration / 1000 + "s, avgSpeed: " + runAvgSpeed + "m/s, minSpeed: " + runMinSpeed + "m/s, maxSpeed: " + runMaxSpeed + "m/s, avgAccuracy: " + runAvgAccuracy + "m");
+                Log.d("Run Finished Listener", "Distance: " + mYaraRun.getRunDistance() +
+                        ", Duration: " + mYaraRun.getCompletionTime() +
+                        "s, avgSpeed: " + mYaraRun.getAvgSpeed() +
+                        "m/s, minSpeed: " + mYaraRun.getRunMinSpeed() +
+                        "m/s, maxSpeed: " + mYaraRun.getRunMaxSpeed() +
+                        "m/s, avgAccuracy: " + mYaraRun.getAvgAccuracy() + "m");
 
                 RunDbHelper mRunDbHelper = new RunDbHelper(getBaseContext());
                 TrackDbHelper mTrackDbHelper = new TrackDbHelper(getBaseContext());
 
-
-                mRunDbHelper.insertRun(-1, aTrack, "myTrack", 9001, getBaseContext());
+                mRunDbHelper.insertRun(mYaraRun, getBaseContext());
 
                 mRunDbHelper.listEntries();
                 mTrackDbHelper.listEntries();

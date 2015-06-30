@@ -21,7 +21,7 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     // TODO Fabi: Store track in DB (Track)
     // TODO Fabi: Enable some List to display tracks
     // TODO Fabi: Get statistics from one RUN
-    // TODO Fabi: Visualize RUN in comparison to all runs on that track
+    // TODO Fabi: Visualize one RUN in comparison to all runs on that track
     // TODO Fabi: Visualize TRACK through Google Maps API
 
     // Binder given to clients
@@ -32,6 +32,7 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     private LocationRequest mLocationRequest;
     private com.google.android.gms.location.LocationListener mLocationListener;
 
+    // TODO: Figure out a reasonable interval
     private int recInterval = 1000;
     private ArrayList<Location> aTrack;
 
@@ -68,14 +69,14 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
                 if(aTrack.isEmpty()){
                     aTrack.add(location);
                 } else{
-                    float tmpDistance=getDistanceBetween(aTrack.get(aTrack.size() - 1), location);
+                    float tmpDistance=aTrack.get(aTrack.size() - 1).distanceTo(location);
                     Log.d("LocationListener", "User moved for " + tmpDistance + " Meters");
-                    if(tmpDistance > 2){
+                    if(tmpDistance > 2.f){
                         aTrack.add(location);
                     }
                 }
 
-                Log.d("LocationListener", "aTrack now contains " + ((aTrack==null) ? 0 : aTrack.size()) + " points.");
+                Log.d("LocationListener", "aTrack now contains " + aTrack.size() + " points.");
             }
         };
 
@@ -153,15 +154,6 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
             // Return this instance of LocationService so clients can call public methods
             return LocationService.this;
         }
-    }
-
-    private float getDistanceBetween(Location from, Location to){
-        float[] res = {0.f};
-        Location.distanceBetween(from.getLatitude(), from.getLongitude(), to.getLatitude(), to.getLongitude(), res);
-
-        Log.d("getDistanceBetween", "Distance moved: " + res[0]);
-
-        return res[0];
     }
 
 }

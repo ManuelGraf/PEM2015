@@ -13,7 +13,7 @@
     <string name="action_search_music">Settings</string>
     <string name="title_activity_run">Run started!</string>
     <string name="title_activity_statistics">Run Statisics</string>
-    <string name="title_activity_new_track">Create a New Track</string>
+    <string name="title_activity_new_track">Record a New Track</string>
     <string name="title_activity_import_music">Scan your music library for songs</string>
     <string name="error_no_tracks">You have not recorded a run yet.</string>
     <string name="error_no_songs">You did not scan your music Library yet.</string>
