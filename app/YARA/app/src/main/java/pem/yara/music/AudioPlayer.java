@@ -162,5 +162,4 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         Log.i("AudioPlayer", "onBind() called");
         return audioPlayerBinder;
     }
-
 }

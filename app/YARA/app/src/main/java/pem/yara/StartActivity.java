@@ -4,6 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.v4.view.ViewPager;
@@ -25,10 +26,12 @@ import pem.yara.fragments.SongListFragment;
 import pem.yara.music.AudioPlayer;
 import pem.yara.music.ScanMusicTask;
 
+import static android.os.AsyncTask.Status.PENDING;
+
 
 public class StartActivity extends ActionBarActivity implements SongListFragment.OnSongListInteractionListener {
 
-    private ScanMusicTask scanMusicTask;
+    private ScanMusicTask scanMusicTask = new ScanMusicTask();
     private HomeScreenPageAdapter mPagerAdapter;
     private ViewPager mViewPager;
     private int mActiveTab = 0;
@@ -62,9 +65,13 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
                     }
                 });
 
-        // TODO Martin: Wenn ein Lied nicht bei Echonest gefunden werden kann, dann sollte nicht jedes Mal erneut danach gesucht werden!
-        scanMusicTask = new ScanMusicTask();
-        scanMusicTask.execute(getApplication());
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        importMusic();
 
         audioPlayerIntent = new Intent(this, AudioPlayer.class);
         bindService(audioPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -74,22 +81,15 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
     }
 
     @Override
-    protected void onStart(){
-        super.onStart();
-    }
-
-    @Override
     protected void onResume() {
         super.onResume();
     }
 
     protected void onStop() {
         super.onStop();
+
         unbindService(serviceConnection);
         stopService(audioPlayerIntent);
-
-        // Stop scanning if App quits
-        scanMusicTask.cancel(true);
     }
 
     public boolean onPrepareOptionsMenu(final Menu menu) {
@@ -146,7 +146,9 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
     }
 
     public void importMusic(){
-        // TODO Martin: import music
+        if (scanMusicTask.getStatus() == PENDING) {
+            scanMusicTask.execute(getApplication());
+        }
     }
     public void newTrack(){
         Intent intent = new Intent(this, RunActivity.class);
