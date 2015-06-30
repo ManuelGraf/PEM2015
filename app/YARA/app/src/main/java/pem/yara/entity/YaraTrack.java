@@ -47,7 +47,8 @@ public class YaraTrack {
             pathString += path.get(i).getLatitude() + "," + path.get(i).getLongitude() + ";";
         }
 
-        pathString += path.get(path.size()-1).getLatitude() + "," + path.get(path.size()-1).getLongitude();
+        if(path.size()>0)
+            pathString += path.get(path.size()-1).getLatitude() + "," + path.get(path.size()-1).getLongitude();
     }
 
     public int getId() { return id; }

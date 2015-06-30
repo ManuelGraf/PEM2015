@@ -50,9 +50,9 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-//        // TODO: Remove reset-Statements when going live
-        new RunDbHelper(getBaseContext()).resetDB();
-        new TrackDbHelper(getBaseContext()).resetDB();
+        // TODO: Remove reset-Statements when going live
+//        new RunDbHelper(getBaseContext()).resetDB();
+//        new TrackDbHelper(getBaseContext()).resetDB();
 
 
         mPagerAdapter = new HomeScreenPageAdapter(getSupportFragmentManager());

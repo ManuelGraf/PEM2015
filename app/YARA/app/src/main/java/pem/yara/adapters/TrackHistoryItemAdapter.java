@@ -1,6 +1,7 @@
 package pem.yara.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -35,11 +36,15 @@ public class TrackHistoryItemAdapter extends ArrayAdapter<YaraTrack> {
         TextView trackDistance = (TextView) rowView.findViewById(R.id.track_item_distance);
         TextView trackCreated = (TextView) rowView.findViewById(R.id.track_item_created);
 
-        trackName.setText("Zu erratende Zahl: "+values.get(position).getTitle());
-        trackDistance.setText("Datum: "+values.get(position).getLength());
-        trackCreated.setText("Anzahl versuche: "+ values.get(position).getDate_created());
-
+        trackName.setText("Track name: "+values.get(position).getTitle());
+        trackDistance.setText("Track size: "+values.get(position).getLength());
+        trackCreated.setText("Recorded: " + values.get(position).getDate_created());
 
         return rowView;
+    }
+
+    @Override
+    public YaraTrack getItem(int position){
+        return values.get(position);
     }
 }

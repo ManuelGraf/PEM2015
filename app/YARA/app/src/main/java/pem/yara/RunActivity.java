@@ -105,7 +105,7 @@ public class RunActivity extends ActionBarActivity {
                 Log.d("Run Finished Listener", "Track received: " + aTrack.size() + " points");
                 // TODO: Wenn dies ein bekannter Track ist, muss hier irgendwo die TrackID zu finden sein!
 
-                YaraRun mYaraRun = new YaraRun(-1, 9001, aTrack, new SimpleDateFormat("yyyy.MM.dd HH:mm:ss").format(Calendar.getInstance().getTime()));
+                YaraRun mYaraRun = new YaraRun(-1, 9001, aTrack, new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime()));
 
                 Log.d("Run Finished Listener", "Distance: " + mYaraRun.getRunDistance() +
                         ", Duration: " + mYaraRun.getCompletionTime() +

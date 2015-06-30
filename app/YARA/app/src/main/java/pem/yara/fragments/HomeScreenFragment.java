@@ -28,7 +28,6 @@ public class HomeScreenFragment extends Fragment implements TrackItemFragment.on
     private View mRootView;
     private TrackDbHelper mTrackDBHelper;
 
-
     @Override
     public View onCreateView(LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -45,10 +44,10 @@ public class HomeScreenFragment extends Fragment implements TrackItemFragment.on
 
         // Populating Track List:
         mTrackDBHelper = new TrackDbHelper(getActivity().getApplicationContext());
-        ArrayList<YaraTrack> values = new ArrayList<YaraTrack>();
-        values = mTrackDBHelper.getAllTracks();
+        ArrayList<YaraTrack> values = mTrackDBHelper.getAllTracks();
+        Log.d("HomeScreenFragment", "Tracklist contains " + values.size() + " elements.");
         trackList.setAdapter(new TrackHistoryItemAdapter(getActivity(), values));
-        Log.d("HomeScreenFragment", "Adater Set");
+        Log.d("HomeScreenFragment", "Adapter Set");
 
         mRootView = rootView;
         Bundle args = getArguments();
