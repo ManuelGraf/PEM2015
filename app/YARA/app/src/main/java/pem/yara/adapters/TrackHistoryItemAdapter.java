@@ -38,9 +38,9 @@ public class TrackHistoryItemAdapter extends ArrayAdapter<YaraTrack> {
             TextView trackDistance = (TextView) rowView.findViewById(R.id.track_item_distance);
             TextView trackCreated = (TextView) rowView.findViewById(R.id.track_item_created);
 
-            trackName.setText("Track name: "+values.get(position).getTitle());
-            trackDistance.setText("Track size: "+values.get(position).getLength());
-            trackCreated.setText("Recorded: " + values.get(position).getDate_created());
+            trackName.setText(""+values.get(position).getTitle());
+            trackDistance.setText(""+values.get(position).getLength()+" km");
+            trackCreated.setText("" + values.get(position).getDate_created());
         ListView list = (ListView)parent;
 
         list.setOnItemClickListener(startRunListener);

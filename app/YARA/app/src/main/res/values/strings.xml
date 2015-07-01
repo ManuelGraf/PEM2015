@@ -24,6 +24,9 @@
     <string name="error_no_tracks">You have not recorded a Track yet.</string>
     <string name="error_no_songs">You did not scan your Music Library yet.</string>
 
+    <string name="info_loading_songs">Please wait while your music Library is being scanned.</string>
+    <string name="info_loading_songs_finished">Your music Library has been scanned. For a complete List of Songs that this App can use, refer to the tab \"All Songs\"</string>
+
     <string name="enter_your_name">New Track Name</string>
     <string name="pace">Pace:</string>
     <string name="avgPace">avg. Pace:</string>

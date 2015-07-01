@@ -1,11 +1,13 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="fill_parent"
     android:layout_height="match_parent"
-    android:nestedScrollingEnabled="false"
+    android:nestedScrollingEnabled="true"
     android:paddingTop="15dp"
     android:paddingBottom="15dp"
-    android:paddingLeft="5dp"
-    android:paddingRight="5dp">
+    android:paddingLeft="15dp"
+    android:paddingRight="15dp">
+
+
 
     <TextView
         android:layout_width="wrap_content"
@@ -13,37 +15,47 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Song Name"
         android:id="@+id/track_item_name"
-        android:textColor="#ffffff"
         android:layout_marginBottom="5dp" />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
         android:orientation="horizontal" android:layout_width="match_parent"
         android:layout_height="match_parent">
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_distance_holo_light"
+            android:layout_marginTop="3dp"
+            android:layout_weight="0.1"
+             />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="Distance"
             android:layout_weight="0.7"
-            android:id="@+id/track_item_distance"
-            android:textColor="#ffffff" />
-
+            android:id="@+id/track_item_distance" />
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:src="@drawable/ic_run_holo_light"
+            android:layout_marginTop="3dp"
+            android:layout_weight="0.1"
+            />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="Last run:"
             android:layout_weight="0.3"
-            android:id="@+id/track_item_created"
-            android:textColor="#ffffff" />
+            android:id="@+id/track_item_created" />
+
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:visibility="invisible"
+            android:visibility="gone"
             android:layout_weight="0.01"
-            android:id="@+id/track_item_id"
-            android:textColor="#ffffff" />
+            android:id="@+id/track_item_id" />
     </LinearLayout>
 
 

@@ -10,6 +10,8 @@
         <ListView
             android:layout_width="fill_parent"
             android:layout_height="350dp"
+            android:divider="#cccccc"
+            android:dividerHeight="1px"
             android:id="@+id/songItems" />
 
 
@@ -21,15 +23,6 @@
             android:id="@+id/txtSonglistEmpty"
             android:layout_gravity="center_horizontal" />
 
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/title_activity_import_music"
-            android:id="@+id/btnImportMusic"
-            android:onClick="importMusic"
-            android:focusable="false"
-            android:clickable="false"
 
-            />
     </LinearLayout>
 

@@ -41,8 +41,8 @@ public class SongListItemAdapter  extends ArrayAdapter<YaraSong> {
 
         songId.setText(""+values.get(position).getId());
         songName.setText(values.get(position).getArtist()+" - "+values.get(position).getTitle());
-        songBPM.setText("BPM: "+values.get(position).getTempo());
-        songPlayCount.setText("playcount: "+ values.get(position).getPlayCount());
+        songBPM.setText(""+values.get(position).getTempo()+" bpm");
+        songPlayCount.setText(""+ values.get(position).getPlayCount()+" times");
 
         return rowView;
     }

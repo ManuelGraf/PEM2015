@@ -10,7 +10,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -37,7 +36,6 @@ public class SongListFragment extends Fragment {
 
     private TextView txtSongsEmpty;
     private ListView listSongs;
-    private Button btnImportMusic;
     private View mRootView;
     SongDbHelper dbHelper;
     SQLiteDatabase db;
@@ -141,8 +139,6 @@ public class SongListFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_song_list, container, false);
 
 
-        btnImportMusic = (Button)rootView.findViewById(R.id.btnImportMusic);
-        btnImportMusic.setOnClickListener(importMusicListener);
         txtSongsEmpty = (TextView)rootView.findViewById(R.id.txtSonglistEmpty);
         listSongs = (ListView)rootView.findViewById(R.id.songItems);
 
@@ -154,14 +150,8 @@ public class SongListFragment extends Fragment {
                 Log.d("listitemclick","clicked song " + values.get(position).getTitle());
             }
         });
+        listSongs.setEmptyView(txtSongsEmpty);
 
-        if(values.size() > 1){
-            txtSongsEmpty.setVisibility(View.GONE);
-            btnImportMusic.setVisibility(View.GONE);
-        }else{
-            txtSongsEmpty.setVisibility(View.VISIBLE);
-            btnImportMusic.setVisibility(View.VISIBLE);
-        }
 
         mRootView = rootView;
         Bundle args = getArguments();
