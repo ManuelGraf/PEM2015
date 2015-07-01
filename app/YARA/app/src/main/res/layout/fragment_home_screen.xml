@@ -7,7 +7,6 @@
         android:layout_height="match_parent"
         android:layout_width="fill_parent"
         android:orientation="vertical"
-        android:id="@+id/page1"
         tools:context="pem.yara.fragments.HomeScreenFragment"
 >
 
@@ -23,9 +22,10 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textAppearance="?android:attr/textAppearanceSmall"
             android:text="@string/error_no_tracks"
             android:id="@+id/txtTracklistEmpty"
+            android:padding="20dp"
             android:layout_gravity="center_horizontal" />
 
 
