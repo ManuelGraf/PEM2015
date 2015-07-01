@@ -114,7 +114,6 @@ public class RunActivity extends ActionBarActivity {
         c.bindService(locationIntent, mConnection, Context.BIND_AUTO_CREATE);
         Log.d("RunActivity onStart", "LocationService bound");
 
-
         audioPlayerIntent = new Intent(this, AudioPlayer.class);
         startService(audioPlayerIntent);
         bindService(audioPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);

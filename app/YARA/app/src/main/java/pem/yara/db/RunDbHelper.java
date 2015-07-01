@@ -25,6 +25,7 @@ public class RunDbHelper  extends SQLiteOpenHelper {
         public static final String COLUMN_NAME_AVG_SPEED = "avg_speed";
         public static final String COLUMN_NAME_DURATION = "completion_time";
         public static final String COLUMN_NAME_DATE = "date";
+        public static final String COLUMN_NAME_DISTANCE = "distance";
     }
 
     private static final String SQL_CREATE_ENTRIES =
@@ -34,6 +35,7 @@ public class RunDbHelper  extends SQLiteOpenHelper {
                     RunDbItem.COLUMN_NAME_AVG_BPM + " REAL, "+
                     RunDbItem.COLUMN_NAME_AVG_SPEED + " INTEGER, "+
                     RunDbItem.COLUMN_NAME_DURATION + " REAL, " +
+                    RunDbItem.COLUMN_NAME_DISTANCE + " REAL, "+
                     RunDbItem.COLUMN_NAME_DATE + " TEXT, "+
                     "FOREIGN KEY ("+RunDbItem.COLUMN_NAME_TRACK_ID +") REFERENCES "+ TrackDbHelper.TrackDbItem.TABLE_NAME+" ("+TrackDbHelper.TrackDbItem._ID+"))";
 
@@ -45,12 +47,13 @@ public class RunDbHelper  extends SQLiteOpenHelper {
     }
 
     public void resetDB(){
-        Log.d("RunDbHelper", "!!! resetting database");
+        Log.d("RunDbHelper", "!!! resetting database: " + SQL_DELETE_ENTRIES);
         getWritableDatabase().execSQL(SQL_DELETE_ENTRIES);
         onCreate(getWritableDatabase());
     }
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_ENTRIES);
+        Log.d("RunDBHelper", SQL_CREATE_ENTRIES);
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         // This database is only a cache for online data, so its upgrade policy is
@@ -69,6 +72,7 @@ public class RunDbHelper  extends SQLiteOpenHelper {
                 RunDbItem.COLUMN_NAME_AVG_BPM,
                 RunDbItem.COLUMN_NAME_AVG_SPEED,
                 RunDbItem.COLUMN_NAME_DATE,
+                RunDbItem.COLUMN_NAME_DISTANCE,
                 RunDbItem.COLUMN_NAME_DURATION
 
         };
@@ -95,6 +99,7 @@ public class RunDbHelper  extends SQLiteOpenHelper {
                     "AVG_BPM: " + c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_AVG_BPM))+" \n"+
                     "AVG_SPEED: " + c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_AVG_SPEED))+" \n"+
                     "DATE: " + c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_DATE))+" \n"+
+                    "DISTANCE: " + c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_DISTANCE))+" \n"+
                     "DURATION: " + c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_DURATION)) + " \n" +
                             "---------------------------------------------");
             c.moveToNext();
@@ -105,6 +110,7 @@ public class RunDbHelper  extends SQLiteOpenHelper {
     /**
      * Writes one run into the Runs-Table, linking it to the corresponding track (if the user runs a known track) or inserting a new track into the database.
      */
+
     public YaraRun insertRun(YaraRun mYaraRun, Context c){
 
         // If this happens to be a Run on a new Track, we have to register the Track first.
@@ -122,6 +128,7 @@ public class RunDbHelper  extends SQLiteOpenHelper {
         cv.put(RunDbItem.COLUMN_NAME_TRACK_ID, mYaraRun.getTrackID());
         cv.put(RunDbItem.COLUMN_NAME_AVG_BPM, mYaraRun.getAvgBpm());
         cv.put(RunDbItem.COLUMN_NAME_DATE, mYaraRun.getDate());
+        cv.put(RunDbItem.COLUMN_NAME_DISTANCE, mYaraRun.getRunDistance());
         cv.put(RunDbItem.COLUMN_NAME_DURATION, mYaraRun.getCompletionTime());
         cv.put(RunDbItem.COLUMN_NAME_AVG_SPEED, mYaraRun.getAvgSpeed());
 
@@ -150,6 +157,7 @@ public class RunDbHelper  extends SQLiteOpenHelper {
                 RunDbItem.COLUMN_NAME_TRACK_ID,
                 RunDbItem.COLUMN_NAME_DATE,
                 RunDbItem.COLUMN_NAME_DURATION,
+                RunDbItem.COLUMN_NAME_DISTANCE,
                 RunDbItem.COLUMN_NAME_AVG_BPM,
                 RunDbItem.COLUMN_NAME_AVG_SPEED
         };
@@ -195,8 +203,11 @@ public class RunDbHelper  extends SQLiteOpenHelper {
         while(offset < c.getCount()){
             myResult.add(new YaraRun(
                     c.getInt(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_TRACK_ID)),
-                    c.getFloat(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_AVG_BPM)),
+                    c.getDouble(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_AVG_BPM)),
                     "",
+                    c.getDouble(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_DURATION)),
+                    c.getDouble(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_DISTANCE)),
+                    c.getDouble(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_AVG_SPEED)),
                     c.getString(c.getColumnIndexOrThrow(RunDbItem.COLUMN_NAME_DATE))
             ));
             c.moveToNext();

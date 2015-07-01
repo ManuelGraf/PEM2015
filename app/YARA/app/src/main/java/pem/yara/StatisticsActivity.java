@@ -19,8 +19,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
+import java.math.RoundingMode;
 import java.util.ArrayList;
 
 import pem.yara.db.RunDbHelper;
@@ -33,12 +36,12 @@ public class StatisticsActivity extends ActionBarActivity {
 
     private MapView mMapView;
     private GoogleMap mGoogleMap;
+    CameraUpdate mCameraUpdate;
 
     private RunDbHelper mRunDbHelper;
     private TrackDbHelper mTrackDbHelper;
 
     // UI Elements:
-
     private TextView trackTime;
     private TextView trackPace;
     private TextView trackDistance;
@@ -76,7 +79,7 @@ public class StatisticsActivity extends ActionBarActivity {
         trackAvgPace = (TextView)findViewById(R.id.track_avg_pace);
         editTrackName = (EditText)findViewById(R.id.editTrackName);
 
-
+        // Enable the user to name his own tracks:
         editTrackName.setOnEditorActionListener(
                 new EditText.OnEditorActionListener() {
                     @Override
@@ -97,21 +100,12 @@ public class StatisticsActivity extends ActionBarActivity {
                     }
                 });
 
-        // Map Stuff:
+        // Initialize Map View and Map itself:
         mMapView = (MapView)findViewById(R.id.googleMapsView);
         mMapView.onCreate(savedInstanceState);
-
         mGoogleMap = mMapView.getMap();
-        LatLng fabiHome = new LatLng(47.920643,11.424640);
-        MapsInitializer.initialize(getBaseContext());
-        mGoogleMap.addMarker(new MarkerOptions()
-                .title("Fabi Home")
-                .snippet("Hier wohn ich!")
-                .position(fabiHome));
-        CameraUpdate mCameraUpdate = CameraUpdateFactory.newLatLngZoom(fabiHome, 15);
-        mGoogleMap.animateCamera(mCameraUpdate);
 
-
+        // Get Database handlers
         mRunDbHelper = new RunDbHelper(getBaseContext());
         mTrackDbHelper = new TrackDbHelper(getBaseContext());
 
@@ -122,15 +116,15 @@ public class StatisticsActivity extends ActionBarActivity {
 
         // Set Data for this specific run:
         editTrackName.setText(myTrack.getTitle());
-        trackTime.setText(myRun.getCompletionTime() + "min");
+        trackTime.setText((int)myRun.getCompletionTime()/60 + ":" + (int)myRun.getCompletionTime()%60 + " min");
         trackPace.setText(myRun.getAvgBpm() + " Steps/min");
         trackDistance.setText(myTrack.getLength() + " Meters");
 
         // Calculate Statistics over all Runs on this track:
         ArrayList<YaraRun> allRuns = mRunDbHelper.getRuns(-1, myTrack.getId());
-        float avgTime = 0.f;
-        float avgPace = 0.f;
-        float avgSpeed = 0.f;
+        double avgTime = 0.f;
+        double avgPace = 0.f;
+        double avgSpeed = 0.f;
 
         // Get means for all Runs on that Track
         for(YaraRun r:allRuns){
@@ -142,9 +136,64 @@ public class StatisticsActivity extends ActionBarActivity {
         avgPace /= allRuns.size();
         avgSpeed /= allRuns.size();
 
-        trackAvgTime.setText(avgTime/1000/60 + "min");
-        trackAvgSpeed.setText(avgSpeed/3.6 + " km/h");
+        // Average Statistics over given Track:
+        trackAvgTime.setText((int)avgTime/60 + ":" + (int)avgTime%60 + "min");
+        trackAvgSpeed.setText(String.format("%.2f", avgSpeed/3.6) + " km/h");
         trackAvgPace.setText(avgPace + " Steps/min");
+        String[] trackPoints;
+
+        // Get list of Locations if possible, else set dummy
+        if(myTrack.getPathString().length()>0)
+            trackPoints= myTrack.getPathString().split(";", 0);
+        else
+            trackPoints = new String[]{"49,11"};
+
+        Log.d("StatisticsActivity", "Anzahl Punkte myTrack: " + trackPoints.length);
+
+        // Draw a line along the track points
+        PolylineOptions mPolylineOptions = new PolylineOptions().geodesic(true);
+        LatLng startPoint = null;
+        LatLngBounds.Builder mLatLngBuilder = new LatLngBounds.Builder();
+
+        // Build Strings into Coordinates and Polygon Lines:
+        for(int i=0; i<trackPoints.length; i++){
+            String s = trackPoints[i];
+            Log.d("StatisticsActivity", "Track Point: " + s);
+            LatLng tmpCoordinate;
+            double thisLat = Double.parseDouble(s.substring(0, s.indexOf(",") - 1));
+            double thisLong = Double.parseDouble(s.substring(s.indexOf(",") + 1));
+
+            tmpCoordinate = new LatLng(thisLat, thisLong);
+            Log.d("StatisticsActivity", tmpCoordinate.toString());
+
+            if(i==0){
+                startPoint = tmpCoordinate;
+            }
+
+            mLatLngBuilder.include(tmpCoordinate);
+            mPolylineOptions.add(tmpCoordinate);
+        }
+        LatLngBounds bounds = mLatLngBuilder.build();
+
+        // Add Marker for Start of Run:
+        MapsInitializer.initialize(getBaseContext());
+        mGoogleMap.addPolyline(mPolylineOptions);
+        mGoogleMap.addMarker(new MarkerOptions()
+                .title("Run Start")
+                .snippet("Length: " + myRun.getRunDistance() + "m, Duration: " + myRun.getCompletionTime() / 1000 / 60 + "min")
+                .position(startPoint));
+
+        // Zoom Map on starting point. This needs to be done; otherwise, the map won't load completely (trying to show the whole world, thus taking forever)
+        mCameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
+        // Zoom in/out on whole track
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 15));
+
+        mGoogleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
+            @Override
+            public void onMapLoaded() {
+                mGoogleMap.animateCamera(mCameraUpdate);
+            }
+        });
 
     }
     private void hideKeyboard(EditText editText)
@@ -169,8 +218,6 @@ public class StatisticsActivity extends ActionBarActivity {
         super.onLowMemory();
         mMapView.onLowMemory();
     }
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {

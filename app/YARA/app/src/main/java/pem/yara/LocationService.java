@@ -18,9 +18,6 @@ import java.util.ArrayList;
 public class LocationService extends Service implements  GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
-    // TODO Fabi: Visualize one RUN in comparison to all runs on that track ==> ok, now make sure it works!
-    // TODO Fabi: Visualize TRACK through Google Maps API
-
     // Binder given to clients
     private final IBinder mBinder = new LocalBinder();
 
@@ -32,6 +29,12 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     // TODO: Figure out a reasonable interval
     private int recInterval = 1000;
     private ArrayList<Location> aTrack;
+
+    public double getDistanceUntilNow() {
+        return distanceUntilNow;
+    }
+
+    private double distanceUntilNow;
     private int secondsRun;
 
     /*
@@ -70,6 +73,7 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
                     Log.d("LocationListener", "User moved for " + tmpDistance + " Meters");
                     if(tmpDistance > 2.f){
                         aTrack.add(location);
+                        distanceUntilNow+= tmpDistance;
                     }
                 }
 

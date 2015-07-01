@@ -14,7 +14,7 @@ public class YaraTrack {
     private ArrayList<Location> path;
     private String pathString;
     private String date_created;
-    private float length;
+    private double length;
 
     public YaraTrack(int id, String title, ArrayList<Location> path, String date_created) {
         this.id = id;
@@ -65,7 +65,7 @@ public class YaraTrack {
         return date_created;
     }
 
-    public float getLength() {
+    public double getLength() {
         return length;
     }
 

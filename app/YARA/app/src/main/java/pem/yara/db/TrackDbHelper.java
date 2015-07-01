@@ -41,7 +41,7 @@ public class TrackDbHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
     public void resetDB(){
-        Log.d("TrackDbHelper", "!!! resetting database");
+        Log.d("TrackDbHelper", "!!! resetting database: " + SQL_DELETE_ENTRIES);
         getWritableDatabase().execSQL(SQL_DELETE_ENTRIES);
         onCreate(getWritableDatabase());
     }
@@ -89,6 +89,7 @@ public class TrackDbHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         sqLiteDatabase.execSQL(SQL_CREATE_ENTRIES);
+        Log.d("TrackDBHelper", SQL_CREATE_ENTRIES);
     }
 
     @Override

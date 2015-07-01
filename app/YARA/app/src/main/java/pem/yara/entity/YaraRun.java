@@ -6,18 +6,18 @@ import java.util.ArrayList;
 
 public class YaraRun {
     private int trackID;
-    private float avgAccuracy;      // Meters
-    private float avgBpm;
-    private float avgSpeed;         // m/s
-    private float runMinSpeed;      // m/s
-    private float runMaxSpeed;      // m/s
-    private float completionTime;   // Seconds
-    private float runDistance;      // Meters
+    private double avgAccuracy;      // Meters
+    private double avgBpm;
+    private double avgSpeed;         // m/s
+    private double runMinSpeed;      // m/s
+    private double runMaxSpeed;      // m/s
+    private double completionTime;   // Seconds
+    private double runDistance;      // Meters
     private String date;
     private String trackString;
     private ArrayList<Location> myTrack;
 
-    public YaraRun(int trackID, float avgBPM, ArrayList<Location> aTrack, String date) {
+    public YaraRun(int trackID, double avgBPM, ArrayList<Location> aTrack, String date) {
         this.trackID = trackID;
         this.avgBpm = avgBPM;
         this.myTrack = aTrack;
@@ -26,17 +26,21 @@ public class YaraRun {
         evaluateTrack();
     }
 
-    public YaraRun(int trackID, float avgBPM, String trackString, String date){
+    public YaraRun(int trackID, double avgBPM, String trackString, double duration, double distance, double avgSpeed, String date){
         this.trackID = trackID;
         this.avgBpm = avgBPM;
         this.trackString = trackString;
         this.date = date;
+        this.completionTime=duration;
+        this.runDistance=distance;
+        this.avgSpeed=avgSpeed;
     }
 
     private void evaluateTrack(){
         if(myTrack.size() > 1){
             completionTime = (myTrack.get(myTrack.size()-1).getTime() - myTrack.get(0).getTime())/1000;
             runMinSpeed = 100.f;
+            trackString="";
             // Iterate from first to *second* last element
             for(int i=0; i < myTrack.size()-1; i++){
                 Location actLocation = myTrack.get(i);
@@ -47,6 +51,7 @@ public class YaraRun {
                 runDistance += actDistance;
 
                 float actSpeed = actDistance/(nextLocation.getTime()-actLocation.getTime());
+                trackString += actLocation.toString() + ";";
 
                 // Speed statistics:
                 if(actSpeed > runMaxSpeed)
@@ -58,6 +63,7 @@ public class YaraRun {
                 avgAccuracy += actLocation.getAccuracy();
             }
             // Don't forget the last element:
+            trackString += myTrack.get(myTrack.size()-1).toString();
             avgAccuracy += myTrack.get(myTrack.size()-1).getAccuracy();
             avgAccuracy /= myTrack.size();
             avgSpeed = runDistance/completionTime;
@@ -73,31 +79,31 @@ public class YaraRun {
         return trackID;
     }
 
-    public float getAvgAccuracy() {
+    public double getAvgAccuracy() {
         return avgAccuracy;
     }
 
-    public float getAvgBpm() {
+    public double getAvgBpm() {
         return avgBpm;
     }
 
-    public float getAvgSpeed() {
+    public double getAvgSpeed() {
         return avgSpeed;
     }
 
-    public float getRunMinSpeed() {
+    public double getRunMinSpeed() {
         return runMinSpeed;
     }
 
-    public float getRunMaxSpeed() {
+    public double getRunMaxSpeed() {
         return runMaxSpeed;
     }
 
-    public float getCompletionTime() {
+    public double getCompletionTime() {
         return completionTime;
     }
 
-    public float getRunDistance() {
+    public double getRunDistance() {
         return runDistance;
     }
 
