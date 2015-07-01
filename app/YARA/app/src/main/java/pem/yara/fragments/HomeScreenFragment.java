@@ -47,7 +47,6 @@ public class HomeScreenFragment extends Fragment {
         View rootView = inflater.inflate(
                 R.layout.fragment_home_screen, container, false);
 
-
         txtTracksEmpty = (TextView)rootView.findViewById(R.id.txtTracklistEmpty);
         trackList = (ListView)rootView.findViewById(R.id.trackItems);
 
@@ -59,7 +58,6 @@ public class HomeScreenFragment extends Fragment {
         trackList.setAdapter(mTrackAdapter);
 
 
-        //Log.d("HomeScreenFragment", "Adapter Set");
         trackList.setEmptyView(rootView.findViewById(R.id.txtTracklistEmpty));
 
 

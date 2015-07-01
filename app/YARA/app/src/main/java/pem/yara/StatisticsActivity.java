@@ -61,6 +61,22 @@ public class StatisticsActivity extends ActionBarActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_statistics);
 
+        // Initialize Map View and Map itself:
+        mMapView = (MapView)findViewById(R.id.googleMapsView);
+        mMapView.onCreate(savedInstanceState);
+        mGoogleMap = mMapView.getMap();
+    }
+
+    private void hideKeyboard(EditText editText)
+    {
+        InputMethodManager imm= (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+    }
+    @Override
+    protected void onResume(){
+        mMapView.onResume();
+        super.onResume();
+
         int trackID;
 
         // Read extras, if available
@@ -84,6 +100,7 @@ public class StatisticsActivity extends ActionBarActivity {
         statisticsContainer = (RelativeLayout)findViewById(R.id.statisticsContainer);
         editTrackName = (EditText)findViewById(R.id.editTrackName);
         setupParent(statisticsContainer);
+        
         // Enable the user to name his own tracks:
         editTrackName.setOnEditorActionListener(
                 new EditText.OnEditorActionListener() {
@@ -104,12 +121,6 @@ public class StatisticsActivity extends ActionBarActivity {
                         return false; // pass on to other listeners.
                     }
                 });
-
-
-        // Initialize Map View and Map itself:
-        mMapView = (MapView)findViewById(R.id.googleMapsView);
-        mMapView.onCreate(savedInstanceState);
-        mGoogleMap = mMapView.getMap();
 
         // Get Database handlers
         mRunDbHelper = new RunDbHelper(getBaseContext());
@@ -206,11 +217,6 @@ public class StatisticsActivity extends ActionBarActivity {
     {
         InputMethodManager imm= (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
-    }
-    @Override
-    protected void onResume(){
-        mMapView.onResume();
-        super.onResume();
     }
 
     @Override
