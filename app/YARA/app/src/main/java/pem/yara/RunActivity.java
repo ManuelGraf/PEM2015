@@ -319,6 +319,8 @@ public class RunActivity extends ActionBarActivity {
         }
     };
 
+
+
     private class StepAccelerometer implements SensorEventListener {
 
         private final static String TAG = "StepDetector";

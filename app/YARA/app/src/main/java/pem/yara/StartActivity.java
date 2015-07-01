@@ -9,7 +9,6 @@ import android.view.MenuItem;
 
 import com.astuetz.PagerSlidingTabStrip;
 
-import pem.yara.LocationService.LocalBinder;
 import pem.yara.adapters.HomeScreenPageAdapter;
 import pem.yara.entity.YaraSong;
 import pem.yara.fragments.SongListFragment;

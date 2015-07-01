@@ -8,9 +8,13 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
+import android.view.View;
+import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -23,7 +27,6 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
-import java.math.RoundingMode;
 import java.util.ArrayList;
 
 import pem.yara.db.RunDbHelper;
@@ -48,6 +51,7 @@ public class StatisticsActivity extends ActionBarActivity {
     private TextView trackAvgTime;
     private TextView trackAvgSpeed;
     private TextView trackAvgPace;
+    private RelativeLayout statisticsContainer;
     private EditText editTrackName;
 
     private int mTrackID;
@@ -77,8 +81,9 @@ public class StatisticsActivity extends ActionBarActivity {
         trackAvgTime = (TextView)findViewById(R.id.track_avg_time);
         trackAvgSpeed = (TextView)findViewById(R.id.track_avg_speed);
         trackAvgPace = (TextView)findViewById(R.id.track_avg_pace);
+        statisticsContainer = (RelativeLayout)findViewById(R.id.statisticsContainer);
         editTrackName = (EditText)findViewById(R.id.editTrackName);
-
+        setupParent(statisticsContainer);
         // Enable the user to name his own tracks:
         editTrackName.setOnEditorActionListener(
                 new EditText.OnEditorActionListener() {
@@ -92,13 +97,14 @@ public class StatisticsActivity extends ActionBarActivity {
 
                             // the user is done typing.
                             mTrackDbHelper.saveTrackName(mTrackID,editTrackName.getText().toString());
-                            hideKeyboard(editTrackName);
+                            hideKeyboard();
                             return true; // consume.
 
                         }
                         return false; // pass on to other listeners.
                     }
                 });
+
 
         // Initialize Map View and Map itself:
         mMapView = (MapView)findViewById(R.id.googleMapsView);
@@ -196,10 +202,10 @@ public class StatisticsActivity extends ActionBarActivity {
         });
 
     }
-    private void hideKeyboard(EditText editText)
+    private void hideKeyboard()
     {
         InputMethodManager imm= (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+        imm.hideSoftInputFromWindow(getCurrentFocus().getWindowToken(), 0);
     }
     @Override
     protected void onResume(){
@@ -242,6 +248,25 @@ public class StatisticsActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    protected void setupParent(View view) {
+        //Set up touch listener for non-text box views to hide keyboard.
+        if(!(view instanceof EditText)) {
+            view.setOnTouchListener(new View.OnTouchListener() {
+                public boolean onTouch(View v, MotionEvent event) {
+                    mTrackDbHelper.saveTrackName(mTrackID,editTrackName.getText().toString());
+                    hideKeyboard();
+                    return false;
+                }
+            });
+        }
+        //If a layout container, iterate over children
+        if (view instanceof ViewGroup) {
+            for (int i = 0; i < ((ViewGroup) view).getChildCount(); i++) {
+                View innerView = ((ViewGroup) view).getChildAt(i);
+                setupParent(innerView);
+            }
+        }
+    }
     public void startRun(){
         Intent intent = new Intent(getBaseContext(), RunActivity.class);
         intent.putExtra("TrackID", mTrackID);
