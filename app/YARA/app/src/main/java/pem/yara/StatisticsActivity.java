@@ -7,12 +7,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapFragment;
-import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.MapView;
+import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.util.ArrayList;
 
@@ -22,9 +23,11 @@ import pem.yara.entity.YaraRun;
 import pem.yara.entity.YaraTrack;
 
 
-public class StatisticsActivity extends ActionBarActivity implements OnMapReadyCallback {
+public class StatisticsActivity extends ActionBarActivity {
 
-    private MapFragment mMapFragment;
+    private MapView mMapView;
+    private GoogleMap mGoogleMap;
+
     private RunDbHelper mRunDbHelper;
     private TrackDbHelper mTrackDbHelper;
 
@@ -62,6 +65,21 @@ public class StatisticsActivity extends ActionBarActivity implements OnMapReadyC
         trackAvgSpeed = (TextView)findViewById(R.id.track_avg_speed);
         trackAvgPace = (TextView)findViewById(R.id.track_avg_pace);
 
+        // Map Stuff:
+        mMapView = (MapView)findViewById(R.id.googleMapsView);
+        mMapView.onCreate(savedInstanceState);
+
+        mGoogleMap = mMapView.getMap();
+        LatLng fabiHome = new LatLng(47.920643,11.424640);
+        MapsInitializer.initialize(getBaseContext());
+        mGoogleMap.addMarker(new MarkerOptions()
+                .title("Fabi Home")
+                .snippet("Hier wohn ich!")
+                .position(fabiHome));
+        CameraUpdate mCameraUpdate = CameraUpdateFactory.newLatLngZoom(fabiHome, 15);
+        mGoogleMap.animateCamera(mCameraUpdate);
+
+
         mRunDbHelper = new RunDbHelper(getBaseContext());
         mTrackDbHelper = new TrackDbHelper(getBaseContext());
 
@@ -96,15 +114,24 @@ public class StatisticsActivity extends ActionBarActivity implements OnMapReadyC
         trackAvgSpeed.setText(avgSpeed/3.6 + " km/h");
         trackAvgPace.setText(avgPace + " Steps/min");
 
-
-//        mMapFragment = (MapFragment) getFragmentManager()
-//                .findFragmentById(R.id.googleMapsView);
-//        mMapFragment.getMapAsync(this);
     }
 
     @Override
     protected void onResume(){
+        mMapView.onResume();
         super.onResume();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mMapView.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mMapView.onLowMemory();
     }
 
     @Override
@@ -129,16 +156,6 @@ public class StatisticsActivity extends ActionBarActivity implements OnMapReadyC
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onMapReady(GoogleMap map) {
-        Log.d("onmapReady", "Map ready");
-//        map.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(47.920656, 11.424632), 2));
-//
-//        map.addPolyline(new PolylineOptions().geodesic(true)
-//                .add(new LatLng(47.920656, 11.424632))  // Home
-//                .add(new LatLng(47.920657, 11.424633))  // Home
-//                .add(new LatLng(47.920658, 11.424634))  // Home
-//                .add(new LatLng(47.920659, 11.424635))  // also Home
-//        );
-    }
+
+
 }

@@ -45,6 +45,8 @@
             android:screenOrientation="portrait">
         </activity>
         <service android:name=".music.AudioPlayer"/>
+        <meta-data android:name="com.google.android.geo.API_KEY"
+            android:value="AIzaSyCYUNQbbY7iyqcOoOjcvD0GvKF_Pv2Jxts" />
     </application>
 
 </manifest>
