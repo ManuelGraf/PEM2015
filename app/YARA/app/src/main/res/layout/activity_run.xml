@@ -74,9 +74,8 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Step_count Accelerometer"
         android:id="@+id/txtStepCountAccelerometer"
-        android:layout_below="@+id/seekBar"
         android:layout_alignParentStart="true"
-         />
+        />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -85,7 +84,7 @@
         android:id="@+id/txtStepCount"
         android:layout_below="@+id/txtStepCountAccelerometer"
         android:layout_alignParentLeft="true"
-         />
+        />
 
     <TextView
         android:layout_width="wrap_content"
@@ -96,30 +95,11 @@
         android:layout_alignParentStart="true"
         android:layout_below="@+id/txtStepCount"
         android:layout_alignParentLeft="true"
-         />
+        />
 
 
 
-    <SeekBar
-        android:id="@+id/seekBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:max="50"
-        android:layout_below="@+id/textSensitive"
-        android:layout_alignParentStart="true"
-         />
 
-    <TextView
-        android:id="@+id/textSensitive"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:gravity="center_vertical|center_horizontal"
-        android:layout_below="@+id/runOverview"
-        android:text="---"
-        android:textSize="20sp"
-        android:layout_centerVertical="true"
-        android:layout_alignParentStart="true"
-         />
 
 
 
