@@ -74,28 +74,19 @@
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:text="Step_count Accelerometer"
         android:id="@+id/txtStepCountAccelerometer"
+        android:layout_below="@+id/runOverview"
         android:layout_alignParentStart="true"
         />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="Step_count Accelerometer"
+        android:text="Step_count StepDetector"
         android:id="@+id/txtStepCount"
         android:layout_below="@+id/txtStepCountAccelerometer"
         android:layout_alignParentLeft="true"
         />
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:text="BPM"
-        android:id="@+id/txtBPMCount"
-        android:layout_alignParentStart="true"
-        android:layout_below="@+id/txtStepCount"
-        android:layout_alignParentLeft="true"
-        />
 
 
 

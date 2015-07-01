@@ -39,7 +39,6 @@ public class RunActivity extends ActionBarActivity {
 
     private TextView    txtStepCount;
     private TextView    txtStepCountAccelerometer;
-    private TextView    txtBPM;
 
     // run overview part obendrueber
     private Handler timerHandler = new Handler();
@@ -57,7 +56,6 @@ public class RunActivity extends ActionBarActivity {
     private StepCounter mStepDetectorCounter;
 
     private Handler handler;
-    private Runnable timedTask;
     //in ms
     private int intervalDuration;
 
@@ -145,7 +143,6 @@ public class RunActivity extends ActionBarActivity {
         setContentView(R.layout.activity_run);
         txtStepCount = (TextView)findViewById(R.id.txtStepCount);
         txtStepCountAccelerometer  = (TextView)findViewById(R.id.txtStepCountAccelerometer);
-        txtBPM = (TextView)findViewById(R.id.txtBPMCount);
 
         txtStepCountPerMinute = (TextView)findViewById(R.id.txtStepCountPerMinute);
         txtTime = (TextView)findViewById(R.id.txtTime);
@@ -176,61 +173,13 @@ public class RunActivity extends ActionBarActivity {
 
         runningBPM = 0;
         currentBPM = 0;
-        threshold = 10;
+        threshold = 5;
         changeSpeed = false;
 
         handler = new Handler();
         intervalDuration = 10000;
 
-        timedTask  = new Runnable(){
-            @Override
-            public void run() {
-                Log.d("MY VERY OWN TIMED TASK", "TASK CALL ALLE 10 SEKUNDEN!!!");
-                int steps = mStepDetectorAccelerometer.getSteps();
-                if(steps != 0){
-                    currentBPM = steps*(60000/intervalDuration);
 
-                    txtBPM.setText("BPM: "+ currentBPM);
-                    txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mStepDetectorAccelerometer.mCount));
-
-                    if(!changeSpeed){
-                        if(currentBPM < runningBPM - threshold){//under BPM
-                            timesUnder++;
-                            timesOver = 0;
-                        }else if(currentBPM > runningBPM + threshold){//over BPM
-                            timesOver++;
-                            timesUnder = 0;
-                        }else{//within Threshold
-                            timesOver = 0;
-                            timesUnder = 0;
-                        }
-
-                        if(timesUnder == timesMax){
-                            //adjust music
-                            changeSpeed = true;
-                        }else if (timesOver == timesMax*2 ){
-                            //select new music title to new BPM
-                            runningBPM = currentBPM;
-                        }
-                    }else{
-                        if(currentBPM < runningBPM - threshold){//under BPM
-                            timesUnder++;
-                        }else{//within Threshold
-                            timesUnder--;
-                        }
-
-                        if(timesUnder == 0){
-                            //adjust music to normal
-                            changeSpeed = false;
-                        }else if(timesUnder == timesMax*2){
-                            //select new music title to new BPM
-                            runningBPM = currentBPM;
-                        }
-                    }
-                }
-                handler.postDelayed(timedTask, intervalDuration);
-            }
-        };
 
         //handler.postDelayed(timedTask, intervalDuration);
     }
@@ -356,7 +305,68 @@ public class RunActivity extends ActionBarActivity {
             }
             secs++;
             txtTime.setText((hours <10 ? "0":"")+hours+":"+(mins <10 ? "0":"")+mins+":"+(secs <10 ? "0":"")+secs);
+
+            //Update von den Schrittfeldern
+            txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mStepDetectorAccelerometer.mCount));
+            if(mStepCounterSensor != null){
+                txtStepCountAccelerometer.setText("Step Counter StepDetector : " + (mStepDetectorCounter.mCount));
+            }
+
             timerHandler.postDelayed(this, 1000);
+        }
+    };
+
+
+    private Runnable timedTask  = new Runnable(){
+        @Override
+        public void run() {
+            Log.d("MY VERY OWN TIMED TASK", "BPM: "+currentBPM);
+            int steps = mStepDetectorAccelerometer.getSteps();
+            if(steps != 0){
+                currentBPM = steps*(60000/intervalDuration);
+
+                txtStepCountPerMinute.setText(""+currentBPM);
+                txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mStepDetectorAccelerometer.mCount));
+                if(mStepCounterSensor != null){
+                    txtStepCountAccelerometer.setText("Step Counter StepDetector : " + (mStepDetectorCounter.mCount));
+                }
+
+                if(!changeSpeed){
+                    if(currentBPM < runningBPM - threshold){//under BPM
+                        timesUnder++;
+                        timesOver = 0;
+                    }else if(currentBPM > runningBPM + threshold){//over BPM
+                        timesOver++;
+                        timesUnder = 0;
+                    }else{//within Threshold
+                        timesOver = 0;
+                        timesUnder = 0;
+                    }
+
+                    if(timesUnder == timesMax){
+                        //adjust music
+                        changeSpeed = true;
+                    }else if (timesOver == timesMax*2 ){
+                        //select new music title to new BPM
+                        runningBPM = currentBPM;
+                    }
+                }else{
+                    if(currentBPM < runningBPM - threshold){//under BPM
+                        timesUnder++;
+                    }else{//within Threshold
+                        timesUnder--;
+                    }
+
+                    if(timesUnder == 0){
+                        //adjust music to normal
+                        changeSpeed = false;
+                    }else if(timesUnder == timesMax*2){
+                        //select new music title to new BPM
+                        runningBPM = currentBPM;
+                    }
+                }
+            }
+            handler.postDelayed(timedTask, intervalDuration);
         }
     };
 }
