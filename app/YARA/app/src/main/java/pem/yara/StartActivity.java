@@ -35,9 +35,6 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
     private ViewPager mViewPager;
     private int mActiveTab = 0;
 
-    private ServiceConnection serviceConnection = new AudioPlayerServiceConnection();
-    private AudioPlayer audioPlayer;
-    private Intent audioPlayerIntent;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -71,12 +68,6 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         super.onStart();
 
         importMusic();
-
-        audioPlayerIntent = new Intent(this, AudioPlayer.class);
-        bindService(audioPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
-
-        Intent audioPlayerIntent = new Intent(getApplicationContext(), AudioPlayer.class);
-        startService(audioPlayerIntent);
     }
 
     @Override
@@ -86,8 +77,6 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
 
     protected void onStop() {
         super.onStop();
-        unbindService(serviceConnection);
-        stopService(audioPlayerIntent);
     }
 
     public boolean onPrepareOptionsMenu(final Menu menu) {
@@ -151,19 +140,6 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
     public void newTrack(){
         Intent intent = new Intent(this, RunActivity.class);
         startActivity(intent);
-    }
-
-    private final class AudioPlayerServiceConnection implements ServiceConnection {
-        public void onServiceConnected(ComponentName className, IBinder baBinder) {
-            Log.v("StartActivity", "AudioPlayerServiceConnection: Service connected");
-            audioPlayer = ((AudioPlayer.AudioPlayerBinder) baBinder).getService();
-            startService(audioPlayerIntent);
-        }
-
-        public void onServiceDisconnected(ComponentName className) {
-            Log.d("StartActivity", "AudioPlayerServiceConnection: Service disconnected");
-            audioPlayer = null;
-        }
     }
 
 }

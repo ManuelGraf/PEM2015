@@ -28,12 +28,17 @@ import java.util.Calendar;
 import pem.yara.db.RunDbHelper;
 import pem.yara.db.TrackDbHelper;
 import pem.yara.entity.YaraRun;
+import pem.yara.music.AudioPlayer;
 
 
 public class RunActivity extends ActionBarActivity {
 
     LocationService mService;
     Intent locationIntent;
+
+    private ServiceConnection serviceConnection = new AudioPlayerServiceConnection();
+    private AudioPlayer audioPlayer;
+    private Intent audioPlayerIntent;
 
     private TextView    txtStepCount;
     private TextView    txtStepCountAccelerometer;
@@ -72,6 +77,20 @@ public class RunActivity extends ActionBarActivity {
         }
     };
 
+
+    private final class AudioPlayerServiceConnection implements ServiceConnection {
+        public void onServiceConnected(ComponentName className, IBinder baBinder) {
+            Log.v("StartActivity", "AudioPlayerServiceConnection: Service connected");
+            audioPlayer = ((AudioPlayer.AudioPlayerBinder) baBinder).getService();
+            startService(audioPlayerIntent);
+        }
+
+        public void onServiceDisconnected(ComponentName className) {
+            Log.d("StartActivity", "AudioPlayerServiceConnection: Service disconnected");
+            audioPlayer = null;
+        }
+    }
+
     @Override
     protected void onStart(){
         super.onStart();
@@ -85,10 +104,13 @@ public class RunActivity extends ActionBarActivity {
         // Bind service to later be able to address the mService-Object to get a recorded Track
         c.startService(locationIntent);
         c.bindService(locationIntent, mConnection, Context.BIND_AUTO_CREATE);
-        Log.d("RunActivity onStart", "Service bound");
+        Log.d("RunActivity onStart", "LocationService bound");
 
-//        ScanMusicTask scanMusicTask = new ScanMusicTask();
-//        scanMusicTask.execute(getApplication());
+
+        audioPlayerIntent = new Intent(this, AudioPlayer.class);
+        startService(audioPlayerIntent);
+        bindService(audioPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
+        Log.d("RunActivity onStart", "AudioService bound");
     }
 
     private void finishMe(){
@@ -219,9 +241,13 @@ public class RunActivity extends ActionBarActivity {
     protected void onStop() {
         super.onStop();
 
-        // Unbind and stop service
+        // Unbind and stop LocationService
         unbindService(mConnection);
         stopService(locationIntent);
+
+        // Unbind and stop AudioService
+        unbindService(serviceConnection);
+        stopService(audioPlayerIntent);
 
         //stop the timer
         timerHandler.removeCallbacks(timerTask);
