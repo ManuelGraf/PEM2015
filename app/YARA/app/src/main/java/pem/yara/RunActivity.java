@@ -309,7 +309,7 @@ public class RunActivity extends ActionBarActivity {
             //Update von den Schrittfeldern
             txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mStepDetectorAccelerometer.mCount));
             if(mStepCounterSensor != null){
-                txtStepCountAccelerometer.setText("Step Counter StepDetector : " + (mStepDetectorCounter.mCount));
+                txtStepCount.setText("Step Counter StepDetector : " + (mStepDetectorCounter.mCount));
             }
 
             timerHandler.postDelayed(this, 1000);
@@ -328,7 +328,7 @@ public class RunActivity extends ActionBarActivity {
                 txtStepCountPerMinute.setText(""+currentBPM);
                 txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mStepDetectorAccelerometer.mCount));
                 if(mStepCounterSensor != null){
-                    txtStepCountAccelerometer.setText("Step Counter StepDetector : " + (mStepDetectorCounter.mCount));
+                    txtStepCount.setText("Step Counter StepDetector : " + (mStepDetectorCounter.mCount));
                 }
 
                 if(!changeSpeed){
