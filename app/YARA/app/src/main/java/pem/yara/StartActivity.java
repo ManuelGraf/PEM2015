@@ -10,8 +10,6 @@ import android.view.MenuItem;
 import com.astuetz.PagerSlidingTabStrip;
 
 import pem.yara.adapters.HomeScreenPageAdapter;
-import pem.yara.db.RunDbHelper;
-import pem.yara.db.TrackDbHelper;
 import pem.yara.entity.YaraSong;
 import pem.yara.fragments.SongListFragment;
 import pem.yara.music.ScanMusicTask;
@@ -32,8 +30,8 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         setContentView(R.layout.activity_start);
 
         // TODO: Remove reset-Statements when going live
-        new RunDbHelper(getBaseContext()).resetDB();
-        new TrackDbHelper(getBaseContext()).resetDB();
+//        new RunDbHelper(getBaseContext()).resetDB();
+//        new TrackDbHelper(getBaseContext()).resetDB();
 
         mPagerAdapter = new HomeScreenPageAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.pager);
