@@ -58,6 +58,14 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         play();
     }
 
+    public void adjustRate(float rate){
+        //Should call Soundpool: public final void setRate (int streamID, float rate)
+    }
+
+    public void adjustPlaylist(int runningBPM) {
+        //Should adjust Playlist with new runningBPM
+    }
+
     private List<YaraSong> findSongsWithinRange(double lowerBound, double upperBound) {
         String[] projection = {"title", "artist", "uri", "bpm", "count", "score", "blocked"};
 

@@ -73,7 +73,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
     private int timesMax;
     private boolean changeSpeed;
 
-
+    private ArrayList<Integer> BPMList;
 
     private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -184,6 +184,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         handler = new Handler();
         intervalDuration = 10000;
 
+        BPMList = new ArrayList<>();
 
 
         //handler.postDelayed(timedTask, intervalDuration);
@@ -191,10 +192,16 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
     public void finishRun(){
         ArrayList<Location> aTrack = mService.receiveTrack();
 
+        int sum = 0;
+        for(Integer value: BPMList){
+            sum += value;
+        }
+        double avgBPM = sum / BPMList.size();
+
         Log.d("Run Finished Listener", "Track received: " + aTrack.size() + " points");
         // TODO: Wenn dies ein bekannter Track ist, muss hier irgendwo die TrackID zu finden sein!
 
-        YaraRun mYaraRun = new YaraRun(mTrackID, 9001, aTrack, new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime()));
+        YaraRun mYaraRun = new YaraRun(mTrackID, avgBPM, aTrack, new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime()));
 
         Log.d("Run Finished Listener", "ID: " + mTrackID +"Distance: " + mYaraRun.getRunDistance() +
                 ", Duration: " + mYaraRun.getCompletionTime() +
@@ -266,7 +273,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         handler.post(timedTask);
-
+        BPMList = new ArrayList<Integer>();
     }
 
     protected void onStop() {
@@ -290,6 +297,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         mSensorManager.unregisterListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor);
 
         handler.removeCallbacks(timedTask);
+        BPMList=null;
     }
 
     // Timertask executes every second
@@ -330,6 +338,8 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
             if(steps != 0){
                 currentBPM = steps*(60000/intervalDuration);
 
+                BPMList.add(currentBPM);
+
                 txtStepCountPerMinute.setText(""+currentBPM);
                 txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mStepDetectorAccelerometer.mCount));
                 if(mStepCounterSensor != null){
@@ -350,10 +360,14 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
                     if(timesUnder == timesMax){
                         //adjust music
+                        float rate = 1+(runningBPM*currentBPM/100)/100;
+                        audioPlayer.adjustRate(rate);
+
                         changeSpeed = true;
                     }else if (timesOver == timesMax*2 ){
                         //select new music title to new BPM
                         runningBPM = currentBPM;
+                        audioPlayer.adjustPlaylist(runningBPM);
                     }
                 }else{
                     if(currentBPM < runningBPM - threshold){//under BPM
@@ -362,13 +376,20 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
                         timesUnder--;
                     }
 
+                    float rate = 1+(runningBPM*currentBPM/100)/100;
+
                     if(timesUnder == 0){
                         //adjust music to normal
+                        rate = 1.0f;
                         changeSpeed = false;
                     }else if(timesUnder == timesMax*2){
                         //select new music title to new BPM
+                        rate = 1.0f;
                         runningBPM = currentBPM;
+                        audioPlayer.adjustPlaylist(runningBPM);
                     }
+
+                    audioPlayer.adjustRate(rate);
                 }
             }
             handler.postDelayed(timedTask, intervalDuration);
