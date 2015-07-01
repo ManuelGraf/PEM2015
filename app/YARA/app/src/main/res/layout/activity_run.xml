@@ -75,7 +75,8 @@
         android:text="Step_count Accelerometer"
         android:id="@+id/txtStepCountAccelerometer"
         android:layout_below="@+id/seekBar"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+         />
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -83,7 +84,8 @@
         android:text="Step_count Accelerometer"
         android:id="@+id/txtStepCount"
         android:layout_below="@+id/txtStepCountAccelerometer"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentLeft="true"
+         />
 
     <TextView
         android:layout_width="wrap_content"
@@ -93,7 +95,8 @@
         android:id="@+id/txtBPMCount"
         android:layout_alignParentStart="true"
         android:layout_below="@+id/txtStepCount"
-        android:layout_alignParentLeft="true" />
+        android:layout_alignParentLeft="true"
+         />
 
 
 
@@ -103,7 +106,8 @@
         android:layout_height="wrap_content"
         android:max="50"
         android:layout_below="@+id/textSensitive"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+         />
 
     <TextView
         android:id="@+id/textSensitive"
@@ -114,16 +118,10 @@
         android:text="---"
         android:textSize="20sp"
         android:layout_centerVertical="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentStart="true"
+         />
 
 
-    <Button
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="Finish Run"
-        android:id="@+id/btnFinishRun"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentStart="true" />
 
 
 

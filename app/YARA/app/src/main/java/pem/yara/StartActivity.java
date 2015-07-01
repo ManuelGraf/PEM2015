@@ -1,29 +1,19 @@
 package pem.yara;
 
-import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.Button;
-import android.widget.TextView;
 
 import com.astuetz.PagerSlidingTabStrip;
 
-import pem.yara.LocationService.LocalBinder;
 import pem.yara.adapters.HomeScreenPageAdapter;
 import pem.yara.db.RunDbHelper;
 import pem.yara.db.TrackDbHelper;
 import pem.yara.entity.YaraSong;
 import pem.yara.fragments.SongListFragment;
-import pem.yara.music.AudioPlayer;
 import pem.yara.music.ScanMusicTask;
 
 import static android.os.AsyncTask.Status.PENDING;
@@ -42,8 +32,8 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         setContentView(R.layout.activity_start);
 
         // TODO: Remove reset-Statements when going live
-//        new RunDbHelper(getBaseContext()).resetDB();
-//        new TrackDbHelper(getBaseContext()).resetDB();
+        new RunDbHelper(getBaseContext()).resetDB();
+        new TrackDbHelper(getBaseContext()).resetDB();
 
         mPagerAdapter = new HomeScreenPageAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -139,6 +129,7 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
     }
     public void newTrack(){
         Intent intent = new Intent(this, RunActivity.class);
+        intent.putExtra("TrackID",-1);
         startActivity(intent);
     }
 

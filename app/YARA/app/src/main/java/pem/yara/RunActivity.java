@@ -9,15 +9,13 @@ import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.location.Location;
-import android.os.Handler;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.Button;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -33,6 +31,8 @@ import pem.yara.music.AudioPlayer;
 
 public class RunActivity extends ActionBarActivity {
 
+    private int mTrackID;
+
     LocationService mService;
     Intent locationIntent;
 
@@ -43,7 +43,6 @@ public class RunActivity extends ActionBarActivity {
     private TextView    txtStepCount;
     private TextView    txtStepCountAccelerometer;
     private TextView    txtBPM;
-    private Button      btnFinishRun;
 
     // run overview part obendrueber
     private Handler timerHandler = new Handler();
@@ -101,6 +100,15 @@ public class RunActivity extends ActionBarActivity {
         Context c;
         c=this.getBaseContext();
 
+        try {
+            mTrackID = getIntent().getExtras().getInt("TrackID");
+
+            Log.d("Statistics onCreate", "TrackID: " + mTrackID);
+        } catch (Exception e){
+            Log.d("Statistics onCreate", "No TrackID passed, new track!");
+            return;
+        }
+
         // Bind service to later be able to address the mService-Object to get a recorded Track
         c.startService(locationIntent);
         c.bindService(locationIntent, mConnection, Context.BIND_AUTO_CREATE);
@@ -117,6 +125,8 @@ public class RunActivity extends ActionBarActivity {
         this.finish();
     }
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,48 +139,6 @@ public class RunActivity extends ActionBarActivity {
         txtTime = (TextView)findViewById(R.id.txtTime);
         txtDistance =(TextView)findViewById(R.id.txtTime);
 
-        btnFinishRun =(Button)findViewById(R.id.btnFinishRun);
-
-        btnFinishRun.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Receive Track from Service and get statistics
-                ArrayList<Location> aTrack = mService.receiveTrack();
-
-                Log.d("Run Finished Listener", "Track received: " + aTrack.size() + " points");
-                // TODO: Wenn dies ein bekannter Track ist, muss hier irgendwo die TrackID zu finden sein!
-
-                YaraRun mYaraRun = new YaraRun(-1, 9001, aTrack, new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime()));
-
-                Log.d("Run Finished Listener", "Distance: " + mYaraRun.getRunDistance() +
-                        ", Duration: " + mYaraRun.getCompletionTime() +
-                        "s, avgSpeed: " + mYaraRun.getAvgSpeed() +
-                        "m/s, minSpeed: " + mYaraRun.getRunMinSpeed() +
-                        "m/s, maxSpeed: " + mYaraRun.getRunMaxSpeed() +
-                        "m/s, avgAccuracy: " + mYaraRun.getAvgAccuracy() + "m");
-
-                RunDbHelper mRunDbHelper = new RunDbHelper(getBaseContext());
-                TrackDbHelper mTrackDbHelper = new TrackDbHelper(getBaseContext());
-
-                // Assigning the Track ID to mYaraRun
-                mYaraRun = mRunDbHelper.insertRun(mYaraRun, getBaseContext());
-
-                mRunDbHelper.listEntries();
-                mTrackDbHelper.listEntries();
-
-                // Unload RunActivity. Code after this WILL be executed!
-                finishMe();
-
-                mRunDbHelper.getLastRunToTrack(mYaraRun.getTrackID());
-
-                // TODO Get BPM from this run!
-                Intent intent = new Intent(getBaseContext(), StatisticsActivity.class);
-                intent.putExtra("TrackID", mYaraRun.getTrackID());
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                getBaseContext().startActivity(intent);
-
-            }
-        });
 
         //Init StepDetector
         seekBar = (SeekBar) findViewById(R.id.seekBar);
@@ -201,6 +169,41 @@ public class RunActivity extends ActionBarActivity {
         // timer
         timerHandler.postDelayed(timerTask, 1000);
     }
+    public void finishRun(){
+        ArrayList<Location> aTrack = mService.receiveTrack();
+
+        Log.d("Run Finished Listener", "Track received: " + aTrack.size() + " points");
+        // TODO: Wenn dies ein bekannter Track ist, muss hier irgendwo die TrackID zu finden sein!
+
+        YaraRun mYaraRun = new YaraRun(mTrackID, 9001, aTrack, new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime()));
+
+        Log.d("Run Finished Listener", "ID: " + mTrackID +"Distance: " + mYaraRun.getRunDistance() +
+                ", Duration: " + mYaraRun.getCompletionTime() +
+                "s, avgSpeed: " + mYaraRun.getAvgSpeed() +
+                "m/s, minSpeed: " + mYaraRun.getRunMinSpeed() +
+                "m/s, maxSpeed: " + mYaraRun.getRunMaxSpeed() +
+                "m/s, avgAccuracy: " + mYaraRun.getAvgAccuracy() + "m");
+
+        RunDbHelper mRunDbHelper = new RunDbHelper(getBaseContext());
+        TrackDbHelper mTrackDbHelper = new TrackDbHelper(getBaseContext());
+
+        // Assigning the Track ID to mYaraRun
+        mYaraRun = mRunDbHelper.insertRun(mYaraRun, getBaseContext());
+
+        mRunDbHelper.listEntries();
+        mTrackDbHelper.listEntries();
+
+        // Unload RunActivity. Code after this WILL be executed!
+        finishMe();
+
+        mRunDbHelper.getLastRunToTrack(mYaraRun.getTrackID());
+
+        // TODO Get BPM from this run!
+        Intent intent = new Intent(getBaseContext(), StatisticsActivity.class);
+        intent.putExtra("TrackID", mYaraRun.getTrackID());
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getBaseContext().startActivity(intent);
+    }
 
 
     @Override
@@ -218,8 +221,15 @@ public class RunActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.actionFinishRun) {
+            finishRun();
             return true;
+        }else if(id == R.id.actionSkipSong){
+            // @TODO Skip to the next Song
+
+        }else if(id == R.id.actionRefreshPlaylist){
+            // @TODO get a more suitable playlist for current bpm
+
         }
 
         return super.onOptionsItemSelected(item);

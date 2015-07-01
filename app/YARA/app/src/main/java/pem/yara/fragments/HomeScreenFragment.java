@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -21,7 +20,7 @@ import pem.yara.entity.YaraTrack;
 
 public class HomeScreenFragment extends Fragment {
     public static final String ARG_OBJECT = "object";
-    private Button btnNewTrack;
+
     private TextView txtTracksEmpty;
     private ListView trackList;
     private View mRootView;

@@ -25,16 +25,6 @@
             android:id="@+id/txtTracklistEmpty"
             android:layout_gravity="center_horizontal" />
 
-        <Button
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="@string/title_activity_new_track"
-            android:id="@+id/btnNewTrack"
-            android:onClick="newTrack"
-            android:focusable="false"
-            android:clickable="false"
-
-            />
 
     </LinearLayout>
 

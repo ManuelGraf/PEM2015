@@ -5,15 +5,11 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
-import android.location.Location;
 import android.provider.BaseColumns;
 import android.util.Log;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Date;
 
-import pem.yara.entity.YaraRun;
 import pem.yara.entity.YaraTrack;
 
 public class TrackDbHelper extends SQLiteOpenHelper {
@@ -109,6 +105,18 @@ public class TrackDbHelper extends SQLiteOpenHelper {
         Log.d("deleteTrack", "Deleting Track " + trackID + "...");
         getWritableDatabase().delete(TrackDbItem.TABLE_NAME, TrackDbItem._ID + "=?", w);
         Log.d("deleteTrack", "Track " + trackID + " deleted.");
+    }
+
+    /**
+     * Deletes a certain Track from the Database
+     * @param trackID ID of the track to delete
+     */
+    public void saveTrackName(int trackID,String name){
+        String[] w = {"" + trackID};
+        ContentValues cv = new ContentValues();
+        cv.put(TrackDbItem.COLUMN_NAME_TRACK_NAME, name);
+        getWritableDatabase().update(TrackDbItem.TABLE_NAME,cv, TrackDbItem._ID + "=?", w);
+        Log.d("saveTrackName", "named track #" + trackID + ": "+name);
     }
 
     // Insert one track into the table, return the new ID

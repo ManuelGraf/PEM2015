@@ -1,10 +1,16 @@
 package pem.yara;
 
+import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -32,13 +38,16 @@ public class StatisticsActivity extends ActionBarActivity {
     private TrackDbHelper mTrackDbHelper;
 
     // UI Elements:
-    private TextView trackName;
+
     private TextView trackTime;
     private TextView trackPace;
     private TextView trackDistance;
     private TextView trackAvgTime;
     private TextView trackAvgSpeed;
     private TextView trackAvgPace;
+    private EditText editTrackName;
+
+    private int mTrackID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +59,7 @@ public class StatisticsActivity extends ActionBarActivity {
         // Read extras, if available
         try {
             trackID = getIntent().getExtras().getInt("TrackID");
+            mTrackID = trackID;
             Log.d("Statistics onCreate", "TrackID: " + trackID);
         } catch (Exception e){
             Log.d("Statistics onCreate", "No TrackID passed");
@@ -57,13 +67,35 @@ public class StatisticsActivity extends ActionBarActivity {
         }
 
         // Get UI Elements:
-        trackName = (TextView)findViewById(R.id.track_item_name);
+
         trackTime = (TextView)findViewById(R.id.track_item_time);
         trackPace = (TextView)findViewById(R.id.track_item_pace);
         trackDistance = (TextView)findViewById(R.id.track_item_distance);
         trackAvgTime = (TextView)findViewById(R.id.track_avg_time);
         trackAvgSpeed = (TextView)findViewById(R.id.track_avg_speed);
         trackAvgPace = (TextView)findViewById(R.id.track_avg_pace);
+        editTrackName = (EditText)findViewById(R.id.editTrackName);
+
+
+        editTrackName.setOnEditorActionListener(
+                new EditText.OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                        if (actionId == EditorInfo.IME_ACTION_SEARCH ||
+                                actionId == EditorInfo.IME_ACTION_DONE ||
+                                event.getAction() == KeyEvent.ACTION_DOWN &&
+                                        event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                            Log.d("editNameListener","user typed new name "+editTrackName.getText().toString());
+
+                            // the user is done typing.
+                            mTrackDbHelper.saveTrackName(mTrackID,editTrackName.getText().toString());
+                            hideKeyboard(editTrackName);
+                            return true; // consume.
+
+                        }
+                        return false; // pass on to other listeners.
+                    }
+                });
 
         // Map Stuff:
         mMapView = (MapView)findViewById(R.id.googleMapsView);
@@ -89,7 +121,7 @@ public class StatisticsActivity extends ActionBarActivity {
         YaraRun myRun = mRunDbHelper.getLastRunToTrack(trackID);
 
         // Set Data for this specific run:
-        trackName.setText(myTrack.getTitle());
+        editTrackName.setText(myTrack.getTitle());
         trackTime.setText(myRun.getCompletionTime() + "min");
         trackPace.setText(myRun.getAvgBpm() + " Steps/min");
         trackDistance.setText(myTrack.getLength() + " Meters");
@@ -115,7 +147,11 @@ public class StatisticsActivity extends ActionBarActivity {
         trackAvgPace.setText(avgPace + " Steps/min");
 
     }
-
+    private void hideKeyboard(EditText editText)
+    {
+        InputMethodManager imm= (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.hideSoftInputFromWindow(editText.getWindowToken(), 0);
+    }
     @Override
     protected void onResume(){
         mMapView.onResume();
@@ -134,6 +170,8 @@ public class StatisticsActivity extends ActionBarActivity {
         mMapView.onLowMemory();
     }
 
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -149,13 +187,20 @@ public class StatisticsActivity extends ActionBarActivity {
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
+        if (id == R.id.actionStartRun) {
+            startRun();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+    public void startRun(){
+        Intent intent = new Intent(getBaseContext(), RunActivity.class);
+        intent.putExtra("TrackID", mTrackID);
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+        getBaseContext().startActivity(intent);
 
+    }
 
 }
