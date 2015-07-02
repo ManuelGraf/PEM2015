@@ -361,6 +361,7 @@ public class RunActivity extends ActionBarActivity {
                         changeSpeed = true;
                     }else if (timesOver == timesMax*2 ){
                         //select new music title to new BPM
+                        timesOver = 0;
                         runningBPM = currentBPM;
                         audioPlayer.adjustPlaylist(runningBPM);
                     }
@@ -380,6 +381,8 @@ public class RunActivity extends ActionBarActivity {
                     }else if(timesUnder == timesMax*2){
                         //select new music title to new BPM
                         rate = 1.0f;
+                        changeSpeed = false;
+                        timesUnder = 0;
                         runningBPM = currentBPM;
                         audioPlayer.adjustPlaylist(runningBPM);
                     }
