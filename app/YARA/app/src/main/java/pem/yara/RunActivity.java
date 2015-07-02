@@ -251,7 +251,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
             finishRun();
             return true;
         }else if(id == R.id.actionSkipSong){
-            // @TODO Skip to the next Song
+            audioPlayer.skip();
 
         }else if(id == R.id.actionRefreshPlaylist){
             // @TODO get a more suitable playlist for current bpm

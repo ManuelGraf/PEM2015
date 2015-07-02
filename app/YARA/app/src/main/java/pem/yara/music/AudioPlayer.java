@@ -13,6 +13,7 @@ import android.util.Log;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -33,6 +34,8 @@ public class AudioPlayer extends Service implements OnCompletionListener {
 
     private boolean paused = false;
 
+    private int currentSong = 0;
+
     @Override
     public void onCreate() {
         Log.i("AudioPlayer", "onCreate() called");
@@ -40,7 +43,7 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         SongDbHelper songDbHelper = new SongDbHelper(context);
         db = songDbHelper.getWritableDatabase();
 
-        start();
+        adjustPlaylist(105);
     }
 
     @Override
@@ -49,21 +52,24 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         release();
     }
 
-    // TODO receive km/h and find fitting bpm mapping
-    public void start() {
-        Log.i("AudioPlayer", "Creating new playlist");
-
-        List<YaraSong> songsWithinRange = findSongsWithinRange(100.0, 110.0);
-        playlist.addAll(songsWithinRange);
-        play();
-    }
-
     public void adjustRate(float rate){
         //Should call Soundpool: public final void setRate (int streamID, float rate)
     }
 
     public void adjustPlaylist(int runningBPM) {
-        //Should adjust Playlist with new runningBPM
+        Log.i("AudioPlayer", "Creating new playlist with " + runningBPM + " BPM");
+
+        // reset playlist
+        playlist.clear();
+        currentSong = 0;
+
+        // add new songs and shuffle
+        List<YaraSong> songsWithinRange = findSongsWithinRange(runningBPM - 5, runningBPM + 5);
+        playlist.addAll(songsWithinRange);
+        Collections.shuffle(playlist);
+
+        // start playback
+        play();
     }
 
     private List<YaraSong> findSongsWithinRange(double lowerBound, double upperBound) {
@@ -109,16 +115,26 @@ public class AudioPlayer extends Service implements OnCompletionListener {
     }
 
     private void nextTrack() {
-        playlist.remove(0);
+        currentSong++;
+        if (currentSong >= playlist.size()) {
+            currentSong = 0;
+            Collections.shuffle(playlist);
+        }
         play();
     }
 
+    public void skip() {
+        stop();
+        nextTrack();
+    }
+
     public void play() {
-        if( playlist.size() == 0) {
+        if (playlist.size() == 0) {
+            Log.d("AudioPlayer", "Trying to play empty playlist... returning!");
             return;
         }
 
-        YaraSong yaraSong = playlist.get(0);
+        YaraSong yaraSong = playlist.get(currentSong);
 
         if (mediaPlayer != null && paused) {
             mediaPlayer.start();
