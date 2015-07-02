@@ -7,9 +7,10 @@ import android.content.ServiceConnection;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.Location;
-import android.os.Handler;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
@@ -23,10 +24,12 @@ import java.util.Calendar;
 import pem.yara.db.RunDbHelper;
 import pem.yara.db.TrackDbHelper;
 import pem.yara.entity.YaraRun;
+import pem.yara.entity.YaraSong;
+import pem.yara.fragments.SongListFragment;
 import pem.yara.music.AudioPlayer;
 
 
-public class RunActivity extends ActionBarActivity {
+public class RunActivity extends ActionBarActivity implements SongListFragment.OnSongListInteractionListener {
 
     private int mTrackID;
 
@@ -36,6 +39,8 @@ public class RunActivity extends ActionBarActivity {
     private ServiceConnection serviceConnection = new AudioPlayerServiceConnection();
     private AudioPlayer audioPlayer;
     private Intent audioPlayerIntent;
+
+    private Fragment songlistFragment;
 
     private TextView    txtStepCount;
     private TextView    txtStepCountAccelerometer;
@@ -393,4 +398,14 @@ public class RunActivity extends ActionBarActivity {
             handler.postDelayed(timedTask, intervalDuration);
         }
     };
+
+    @Override
+    public void onSongListInteraction(YaraSong s) {
+
+    }
+
+    @Override
+    public void onImportMusicInteraction() {
+
+    }
 }

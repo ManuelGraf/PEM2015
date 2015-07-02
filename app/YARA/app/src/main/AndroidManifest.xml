@@ -37,7 +37,7 @@
 
         <activity
             android:name=".RunActivity"
-
+            android:launchMode="singleTask"
             android:label="@string/title_activity_run"
             android:screenOrientation="portrait">
         </activity>
