@@ -118,7 +118,6 @@ public class RunDbHelper  extends SQLiteOpenHelper {
         if(mYaraRun.getTrackID() == -1) {
             Log.d("insertRun", "Inserting new track into Database");
             TrackDbHelper mTrackDBDbHelper = new TrackDbHelper(c);
-            // TODO: Wie bzw. wann benennt der User seine Tracks?
             YaraTrack mYaraTrack = new YaraTrack(-1, "new Track name", mYaraRun.getMyTrack(), mYaraRun.getDate());
 
             mYaraRun.setTrackID(mTrackDBDbHelper.insertNewTrack(mYaraTrack));

@@ -36,8 +36,4 @@
     <string name="distance">Distance:</string>
     <string name="trackName">Track Name:</string>
 
-    <color name="actionBarBg">#0e4c94</color>
-
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
