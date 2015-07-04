@@ -149,9 +149,12 @@ public class StatisticsActivity extends ActionBarActivity {
             avgPace += r.getAvgBpm();
             avgSpeed += r.getAvgSpeed();
         }
-        avgTime /= allRuns.size();
-        avgPace /= allRuns.size();
-        avgSpeed /= allRuns.size();
+
+        if(allRuns.size()>0) {
+            avgTime /= allRuns.size();
+            avgPace /= allRuns.size();
+            avgSpeed /= allRuns.size();
+        }
 
         // Average Statistics over given Track:
         trackAvgTime.setText((int)avgTime/60 + ":" + (int)avgTime%60 + "min");
@@ -203,7 +206,7 @@ public class StatisticsActivity extends ActionBarActivity {
         // Zoom Map on starting point. This needs to be done; otherwise, the map won't load completely (trying to show the whole world, thus taking forever)
         mCameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
         // Zoom in/out on whole track
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 15));
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 13));
 
         mGoogleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override

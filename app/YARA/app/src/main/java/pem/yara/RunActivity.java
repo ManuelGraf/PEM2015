@@ -1,5 +1,6 @@
 package pem.yara;
 
+import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -7,8 +8,8 @@ import android.content.ServiceConnection;
 import android.hardware.Sensor;
 import android.hardware.SensorManager;
 import android.location.Location;
-import android.os.Handler;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
 import android.support.v7.app.ActionBarActivity;
@@ -24,13 +25,15 @@ import java.util.Calendar;
 import pem.yara.db.RunDbHelper;
 import pem.yara.db.TrackDbHelper;
 import pem.yara.entity.YaraRun;
+import pem.yara.entity.YaraSong;
+import pem.yara.fragments.SongListFragment;
 import pem.yara.music.AudioPlayer;
 
 
-public class RunActivity extends ActionBarActivity {
+public class RunActivity extends ActionBarActivity implements SongListFragment.OnSongListInteractionListener {
 
     private int mTrackID;
-    private PowerManager.WakeLock mWakeLock;
+
 
     LocationService mService;
     Intent locationIntent;
@@ -38,6 +41,8 @@ public class RunActivity extends ActionBarActivity {
     private ServiceConnection serviceConnection = new AudioPlayerServiceConnection();
     private AudioPlayer audioPlayer;
     private Intent audioPlayerIntent;
+
+    private Fragment songlistFragment;
 
     private TextView    txtStepCount;
     private TextView    txtStepCountAccelerometer;
@@ -70,7 +75,7 @@ public class RunActivity extends ActionBarActivity {
     private int timesMax;
     private boolean changeSpeed;
 
-
+    private ArrayList<Integer> BPMList;
 
     private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -106,9 +111,8 @@ public class RunActivity extends ActionBarActivity {
     @Override
     protected void onStart(){
         super.onStart();
-
         // Bind Service
-        Log.d("RunActivity", "onStart");
+        Log.d("onStart", "Attempting to bind Service");
         locationIntent = new Intent(this, LocationService.class);
 
         Context c;
@@ -138,9 +142,10 @@ public class RunActivity extends ActionBarActivity {
         this.finish();
     }
 
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("RunActivity", "onCreate");
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_run);
         txtStepCount = (TextView)findViewById(R.id.txtStepCount);
@@ -149,11 +154,6 @@ public class RunActivity extends ActionBarActivity {
         txtStepCountPerMinute = (TextView)findViewById(R.id.txtStepCountPerMinute);
         txtTime = (TextView)findViewById(R.id.txtTime);
         txtDistance =(TextView)findViewById(R.id.txtTime);
-
-        // Acquire a partial WakeLock, to keep the background services running even if the phone goes to sleep
-        PowerManager mPowerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
-        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakeLock");
-        mWakeLock.acquire();
 
         //Init StepDetector
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
@@ -186,19 +186,32 @@ public class RunActivity extends ActionBarActivity {
         handler = new Handler();
         intervalDuration = 10000;
 
+        BPMList = new ArrayList<>();
+
 
         //handler.postDelayed(timedTask, intervalDuration);
     }
     public void finishRun(){
         ArrayList<Location> aTrack = mService.receiveTrack();
 
+        int sum = 0;
+        double avgBPM;
+        if(BPMList.size()>0) {
+            for (Integer value : BPMList) {
+                sum += value;
+            }
+            avgBPM = sum / BPMList.size();
+        }
+        else {
+            avgBPM = 0;
+            }
+
         Log.d("Run Finished Listener", "Track received: " + aTrack.size() + " points");
+        // TODO: Wenn dies ein bekannter Track joajist, muss hier irgendwo die TrackID zu finden sein!
 
-        // TODO: average BPM; until then: 9001
-        YaraRun mYaraRun = new YaraRun(mTrackID, 9001, aTrack, new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime()));
+        YaraRun mYaraRun = new YaraRun(mTrackID, avgBPM, aTrack, new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime()));
 
-        Log.d("Run Finished Listener", "ID: " + mTrackID +
-                ", Distance: " + mYaraRun.getRunDistance() +
+        Log.d("Run Finished Listener", "ID: " + mTrackID +"Distance: " + mYaraRun.getRunDistance() +
                 ", Duration: " + mYaraRun.getCompletionTime() +
                 "s, avgSpeed: " + mYaraRun.getAvgSpeed() +
                 "m/s, minSpeed: " + mYaraRun.getRunMinSpeed() +
@@ -246,7 +259,7 @@ public class RunActivity extends ActionBarActivity {
             finishRun();
             return true;
         }else if(id == R.id.actionSkipSong){
-            // @TODO Skip to the next Song
+            audioPlayer.skip();
 
         }else if(id == R.id.actionRefreshPlaylist){
             // @TODO get a more suitable playlist for current bpm
@@ -259,7 +272,7 @@ public class RunActivity extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
 
-        Log.d("RunActivity", "onResume");
+        Log.d("RunActivity onResume", "resuming RunActivity");
 
         if(mStepCounterSensor != null){
             mSensorManager.registerListener(mStepDetectorCounter, mStepCounterSensor, SensorManager.SENSOR_DELAY_FASTEST);
@@ -268,15 +281,11 @@ public class RunActivity extends ActionBarActivity {
         mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         handler.post(timedTask);
-
+        BPMList = new ArrayList<Integer>();
     }
 
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-
-        // Release the WakeLock
-        mWakeLock.release();
+    protected void onStop() {
+        super.onStop();
 
         // Unbind and stop LocationService
         unbindService(mConnection);
@@ -294,13 +303,9 @@ public class RunActivity extends ActionBarActivity {
         }
         //mSensorManager.unregisterListener(this, mStepCounterSensor);
         mSensorManager.unregisterListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor);
-    }
 
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d("RunActivity", "onStop");
         handler.removeCallbacks(timedTask);
+        BPMList=null;
     }
 
     // Timertask executes every second
@@ -341,6 +346,8 @@ public class RunActivity extends ActionBarActivity {
             if(steps != 0){
                 currentBPM = steps*(60000/intervalDuration);
 
+                BPMList.add(currentBPM);
+
                 txtStepCountPerMinute.setText(""+currentBPM);
                 txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mStepDetectorAccelerometer.mCount));
                 if(mStepCounterSensor != null){
@@ -361,10 +368,15 @@ public class RunActivity extends ActionBarActivity {
 
                     if(timesUnder == timesMax){
                         //adjust music
+                        float rate = 1+(runningBPM*currentBPM/100)/100;
+                        audioPlayer.adjustRate(rate);
+
                         changeSpeed = true;
                     }else if (timesOver == timesMax*2 ){
                         //select new music title to new BPM
+                        timesOver = 0;
                         runningBPM = currentBPM;
+                        audioPlayer.adjustPlaylist(runningBPM);
                     }
                 }else{
                     if(currentBPM < runningBPM - threshold){//under BPM
@@ -373,16 +385,35 @@ public class RunActivity extends ActionBarActivity {
                         timesUnder--;
                     }
 
+                    float rate = 1+(runningBPM*currentBPM/100)/100;
+
                     if(timesUnder == 0){
                         //adjust music to normal
+                        rate = 1.0f;
                         changeSpeed = false;
                     }else if(timesUnder == timesMax*2){
                         //select new music title to new BPM
+                        rate = 1.0f;
+                        changeSpeed = false;
+                        timesUnder = 0;
                         runningBPM = currentBPM;
+                        audioPlayer.adjustPlaylist(runningBPM);
                     }
+
+                    audioPlayer.adjustRate(rate);
                 }
             }
             handler.postDelayed(timedTask, intervalDuration);
         }
     };
+
+    @Override
+    public void onSongListInteraction(YaraSong s) {
+
+    }
+
+    @Override
+    public void onImportMusicInteraction() {
+
+    }
 }
