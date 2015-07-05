@@ -28,6 +28,8 @@ import pem.yara.entity.YaraRun;
 import pem.yara.entity.YaraSong;
 import pem.yara.fragments.SongListFragment;
 import pem.yara.music.AudioPlayer;
+import pem.yara.step.StepAccelerometer;
+import pem.yara.step.StepCounter;
 
 
 public class RunActivity extends ActionBarActivity implements SongListFragment.OnSongListInteractionListener {
@@ -54,6 +56,9 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
     private TextView    txtTime;
     private TextView    txtDistance;
 
+    private RunDbHelper mRunDbHelper;
+    private TrackDbHelper mTrackDbHelper;
+
 
     private SensorManager mSensorManager;
     private Sensor mStepCounterSensor;
@@ -65,6 +70,8 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
     private Handler handler;
     //in ms
     private int intervalDuration;
+    private int intervalFactor;
+    private boolean minute;
 
     private int runningBPM;
     private int currentBPM;
@@ -76,6 +83,8 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
     private boolean changeSpeed;
 
     private ArrayList<Integer> BPMList;
+    private int intervalSteps[];
+    private int index;
 
     private ServiceConnection mConnection = new ServiceConnection() {
 
@@ -121,11 +130,19 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         try {
             mTrackID = getIntent().getExtras().getInt("TrackID");
 
+            YaraRun mYaraRun = mRunDbHelper.getLastRunToTrack(mTrackID);
+            double lastBPM = mYaraRun.getAvgBpm();
+            audioPlayer.adjustPlaylist(lastBPM);
+
             Log.d("Statistics onCreate", "TrackID: " + mTrackID);
         } catch (Exception e){
             Log.d("Statistics onCreate", "No TrackID passed, new track!");
             return;
         }
+
+
+
+
 
         // Bind service to later be able to address the mService-Object to get a recorded Track
         c.startService(locationIntent);
@@ -155,6 +172,10 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         txtTime = (TextView)findViewById(R.id.txtTime);
         txtDistance =(TextView)findViewById(R.id.txtTime);
 
+
+        mRunDbHelper = new RunDbHelper(getBaseContext());
+        mTrackDbHelper = new TrackDbHelper(getBaseContext());
+
         //Init StepDetector
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         mStepCounterSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
@@ -178,19 +199,12 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         // timer
         timerHandler.postDelayed(timerTask, 1000);
 
-        runningBPM = 0;
-        currentBPM = 0;
-        threshold = 5;
-        changeSpeed = false;
-
-        handler = new Handler();
-        intervalDuration = 10000;
-
-        BPMList = new ArrayList<>();
-
+        initStepVariables();
 
         //handler.postDelayed(timedTask, intervalDuration);
     }
+
+
     public void finishRun(){
         ArrayList<Location> aTrack = mService.receiveTrack();
 
@@ -218,8 +232,6 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
                 "m/s, maxSpeed: " + mYaraRun.getRunMaxSpeed() +
                 "m/s, avgAccuracy: " + mYaraRun.getAvgAccuracy() + "m");
 
-        RunDbHelper mRunDbHelper = new RunDbHelper(getBaseContext());
-        TrackDbHelper mTrackDbHelper = new TrackDbHelper(getBaseContext());
 
         // Assigning the Track ID to mYaraRun
         mYaraRun = mRunDbHelper.insertRun(mYaraRun, getBaseContext());
@@ -281,7 +293,8 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         handler.post(timedTask);
-        BPMList = new ArrayList<Integer>();
+
+        initStepVariables();
     }
 
     protected void onStop() {
@@ -306,6 +319,8 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
         handler.removeCallbacks(timedTask);
         BPMList=null;
+        intervalSteps = null;
+        minute = false;
     }
 
     // Timertask executes every second
@@ -328,9 +343,9 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
             txtTime.setText((hours <10 ? "0":"")+hours+":"+(mins <10 ? "0":"")+mins+":"+(secs <10 ? "0":"")+secs);
 
             //Update von den Schrittfeldern
-            txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mStepDetectorAccelerometer.mCount));
+            txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mStepDetectorAccelerometer.getmCount()));
             if(mStepCounterSensor != null){
-                txtStepCount.setText("Step Counter StepDetector : " + (mStepDetectorCounter.mCount));
+                txtStepCount.setText("Step Counter StepDetector : " + (mStepDetectorCounter.getmCount()));
             }
 
             timerHandler.postDelayed(this, 1000);
@@ -343,65 +358,81 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         public void run() {
             Log.d("MY VERY OWN TIMED TASK", "BPM: "+currentBPM);
             int steps = mStepDetectorAccelerometer.getSteps();
+
             if(steps != 0){
-                currentBPM = steps*(60000/intervalDuration);
+
+                intervalSteps[index % intervalFactor] = steps;
+                index++;
+
+                if(minute){
+
+                    currentBPM = calculateBPM();
+
+                    if(!changeSpeed){
+                        if(currentBPM < runningBPM - threshold){//under BPM
+                            timesUnder++;
+                            timesOver = 0;
+                        }else if(currentBPM > runningBPM + threshold){//over BPM
+                            timesOver++;
+                            timesUnder = 0;
+                        }else{//within Threshold
+                            timesOver = 0;
+                            timesUnder = 0;
+                        }
+
+                        if(timesUnder == timesMax){
+                            //adjust music
+                            float rate = 1 + (runningBPM * currentBPM/100)/100;
+                            audioPlayer.adjustRate(rate);
+
+                            changeSpeed = true;
+                        }else if (timesOver == timesMax*2 ){
+                            //select new music title to new BPM
+                            timesOver = 0;
+                            runningBPM = currentBPM;
+                            audioPlayer.adjustPlaylist(runningBPM);
+                        }
+                    }else{
+                        if(currentBPM < runningBPM - threshold){//under BPM
+                            timesUnder++;
+                        }else{//within Threshold
+                            timesUnder--;
+                        }
+
+                        float rate = 1+(runningBPM*currentBPM/100)/100;
+
+                        if(timesUnder == 0){
+                            //adjust music to normal
+                            rate = 1.0f;
+                            changeSpeed = false;
+                        }else if(timesUnder == timesMax*2){
+                            //select new music title to new BPM
+                            rate = 1.0f;
+                            changeSpeed = false;
+                            timesUnder = 0;
+                            runningBPM = currentBPM;
+                            audioPlayer.adjustPlaylist(runningBPM);
+                        }
+
+                        audioPlayer.adjustRate(rate);
+                    }
+                }else{
+                    if(index >= intervalFactor){
+                        minute = true;
+                    }
+                    currentBPM = calculateBPM();
+                }
 
                 BPMList.add(currentBPM);
 
+
+
                 txtStepCountPerMinute.setText(""+currentBPM);
-                txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mStepDetectorAccelerometer.mCount));
+                txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mStepDetectorAccelerometer.getmCount()));
                 if(mStepCounterSensor != null){
-                    txtStepCount.setText("Step Counter StepDetector : " + (mStepDetectorCounter.mCount));
+                    txtStepCount.setText("Step Counter StepDetector : " + (mStepDetectorCounter.getmCount()));
                 }
 
-                if(!changeSpeed){
-                    if(currentBPM < runningBPM - threshold){//under BPM
-                        timesUnder++;
-                        timesOver = 0;
-                    }else if(currentBPM > runningBPM + threshold){//over BPM
-                        timesOver++;
-                        timesUnder = 0;
-                    }else{//within Threshold
-                        timesOver = 0;
-                        timesUnder = 0;
-                    }
-
-                    if(timesUnder == timesMax){
-                        //adjust music
-                        float rate = 1+(runningBPM*currentBPM/100)/100;
-                        audioPlayer.adjustRate(rate);
-
-                        changeSpeed = true;
-                    }else if (timesOver == timesMax*2 ){
-                        //select new music title to new BPM
-                        timesOver = 0;
-                        runningBPM = currentBPM;
-                        audioPlayer.adjustPlaylist(runningBPM);
-                    }
-                }else{
-                    if(currentBPM < runningBPM - threshold){//under BPM
-                        timesUnder++;
-                    }else{//within Threshold
-                        timesUnder--;
-                    }
-
-                    float rate = 1+(runningBPM*currentBPM/100)/100;
-
-                    if(timesUnder == 0){
-                        //adjust music to normal
-                        rate = 1.0f;
-                        changeSpeed = false;
-                    }else if(timesUnder == timesMax*2){
-                        //select new music title to new BPM
-                        rate = 1.0f;
-                        changeSpeed = false;
-                        timesUnder = 0;
-                        runningBPM = currentBPM;
-                        audioPlayer.adjustPlaylist(runningBPM);
-                    }
-
-                    audioPlayer.adjustRate(rate);
-                }
             }
             handler.postDelayed(timedTask, intervalDuration);
         }
@@ -415,5 +446,33 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
     @Override
     public void onImportMusicInteraction() {
 
+    }
+
+    private void initStepVariables() {
+        runningBPM = 0;
+        currentBPM = 0;
+        threshold = 5;
+        changeSpeed = false;
+
+        handler = new Handler();
+        intervalDuration = 10000;
+        intervalFactor = 60000/intervalDuration;
+        minute = false;
+
+        timesOver = 0;
+        timesUnder = 0;
+        timesMax = intervalFactor/2;
+
+        BPMList = new ArrayList<>();
+        intervalSteps = new int[intervalFactor];
+        index = 0;
+    }
+
+    public int calculateBPM() {
+        int bpm = 0;
+        for(int i = 0; i < intervalSteps.length; i++){
+            bpm += intervalSteps[i];
+        }
+        return bpm;
     }
 }

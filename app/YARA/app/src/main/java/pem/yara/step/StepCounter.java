@@ -1,19 +1,17 @@
-package pem.yara;
+package pem.yara.step;
 
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
-import android.util.Log;
 
 public class StepCounter implements SensorEventListener {
 
     private boolean startedStepCounter;
     private int stepCountInit;
-    private long[] lastSteps;
 
-    public int mCount;
-    public int mCountLast;
+    private int mCount;
+    private int mCountLast;
 
     public StepCounter(){
         mCount = 0;
@@ -48,5 +46,10 @@ public class StepCounter implements SensorEventListener {
         int difference = mCount-mCountLast;
         mCountLast = mCount;
         return difference;
+    }
+
+
+    public int getmCount() {
+        return mCount;
     }
 }

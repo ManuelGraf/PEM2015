@@ -1,18 +1,14 @@
-package pem.yara;
+package pem.yara.step;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.os.Handler;
 import android.util.Log;
-import android.widget.SeekBar;
-import android.widget.TextView;
 
 public class StepAccelerometer implements SensorEventListener {
 
-    private final static String TAG = "StepDetector";
-    private float   mLimit = 22.50f; // 1.97  2.96  4.44  6.66  10.00  15.00  22.50  33.75  50.62
+    private float   mLimit = 22.50f;
     private float   mLastValues[] = new float[3*2];
     private float   mScale[] = new float[2];
     private float   mYOffset;
@@ -22,11 +18,8 @@ public class StepAccelerometer implements SensorEventListener {
     private float   mLastDiff[] = new float[3*2];
     private int     mLastMatch = -1;
 
-    private SeekBar seekBar;
-    private TextView textSensitive;
-
-    public int mCount;
-    public int mCountLast;
+    private int mCount;
+    private int mCountLast;
 
 
     public StepAccelerometer(){
@@ -70,12 +63,8 @@ public class StepAccelerometer implements SensorEventListener {
                             boolean isNotContra = (mLastMatch != 1 - extType);
 
                             if (isAlmostAsLargeAsPrevious && isPreviousLargeEnough && isNotContra) {
-                                Log.i(TAG, "step");
                                 mCount ++;
                                 Log.d("", "Count " + mCount);
-
-                                //updateViewMethod(mCount);
-
                                 mLastMatch = extType;
                             }
                             else {
@@ -97,12 +86,16 @@ public class StepAccelerometer implements SensorEventListener {
     }
 
     public void setSensitivity(float sensitivity) {
-        mLimit = sensitivity; // 1.97  2.96  4.44  6.66  10.00  15.00  22.50  33.75  50.62
+        mLimit = sensitivity;
     }
 
     public int getSteps(){
         int difference = mCount-mCountLast;
          mCountLast = mCount;
         return difference;
+    }
+
+    public int getmCount() {
+        return mCount;
     }
 }

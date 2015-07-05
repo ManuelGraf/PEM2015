@@ -56,7 +56,7 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         //Should call Soundpool: public final void setRate (int streamID, float rate)
     }
 
-    public void adjustPlaylist(int runningBPM) {
+    public void adjustPlaylist(double runningBPM) {
         Log.i("AudioPlayer", "Creating new playlist with " + runningBPM + " BPM");
 
         // reset playlist
