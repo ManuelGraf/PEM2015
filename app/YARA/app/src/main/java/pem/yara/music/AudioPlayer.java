@@ -139,11 +139,14 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         }
 
         YaraSong yaraSong = playlist.get(currentSong);
+        if (yaraSong == null) {
+            Log.d("AudioPlayer", "currentSong index is out of bounds!");
+        }
 
         if (mediaPlayer != null && paused) {
             mediaPlayer.start();
             paused = false;
-        } else if( mediaPlayer != null ) {
+        } else if(mediaPlayer != null ) {
             release();
         }
 
@@ -157,36 +160,11 @@ public class AudioPlayer extends Service implements OnCompletionListener {
             Log.e("AudioPlayer", "error playing" + yaraSong);
         }
     }
+
     // play a specific song from current playlist
     public void play(int pos) {
-        if (playlist.size() == 0) {
-            Log.d("AudioPlayer", "Trying to play empty playlist... returning!");
-            return;
-        }
-        YaraSong yaraSong;
-        try{
-            yaraSong = playlist.get(pos);
-        }catch(ArrayIndexOutOfBoundsException e ){
-            e.printStackTrace();
-            return;
-        }
-
-        if (mediaPlayer != null && paused) {
-            mediaPlayer.start();
-            paused = false;
-        } else if( mediaPlayer != null ) {
-            release();
-        }
-
-        try {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(context, Uri.parse(yaraSong.getUri()));
-            mediaPlayer.prepare();
-            mediaPlayer.start();
-            mediaPlayer.setOnCompletionListener(this);
-        } catch (IOException ioe) {
-            Log.e("AudioPlayer", "error playing" + yaraSong);
-        }
+        currentSong = pos;
+        play();
     }
 
     public List<YaraSong> getPlayList(){
@@ -206,14 +184,6 @@ public class AudioPlayer extends Service implements OnCompletionListener {
 
     public void setSongChangedListener(SongChangedListener songChangedListener) {
         this.songChangedListener = songChangedListener;
-    }
-
-    // TODO do something with it on GUI
-    public int elapsed() {
-        if (mediaPlayer == null) {
-            return 0;
-        }
-        return mediaPlayer.getCurrentPosition();
     }
 
     public class AudioPlayerBinder extends Binder {
