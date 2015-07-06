@@ -19,6 +19,7 @@ import pem.yara.SongChangedListener;
 import pem.yara.db.SongDbHelper;
 import pem.yara.entity.YaraSong;
 
+import static android.media.AudioManager.FLAG_PLAY_SOUND;
 import static android.media.AudioManager.STREAM_MUSIC;
 import static android.media.MediaPlayer.OnCompletionListener;
 
@@ -40,6 +41,8 @@ public class AudioPlayer extends Service implements OnCompletionListener {
 
     private int maxVolume;
 
+    private int baseVolume;
+
     private SongChangedListener songChangedListener;
 
     @Override
@@ -50,6 +53,7 @@ public class AudioPlayer extends Service implements OnCompletionListener {
 
         audioManager = (AudioManager)getSystemService(context.AUDIO_SERVICE);
         maxVolume = audioManager.getStreamMaxVolume(STREAM_MUSIC);
+        baseVolume = audioManager.getStreamVolume(STREAM_MUSIC);
     }
 
     @Override
@@ -58,13 +62,17 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         release();
     }
 
-    public void adjustRate(float rate){
-        audioManager.setStreamVolume(STREAM_MUSIC, getNewVolume(rate), AudioManager.FLAG_PLAY_SOUND);
+    public void adjustVolume(float factor) {
+        if (factor == 1.0f) {
+            audioManager.setStreamVolume(STREAM_MUSIC, baseVolume, FLAG_PLAY_SOUND);
+        }
+        audioManager.setStreamVolume(STREAM_MUSIC, getNewVolume(factor), FLAG_PLAY_SOUND);
     }
 
     private int getNewVolume(float factor) {
-        int volume = audioManager.getStreamVolume(STREAM_MUSIC);
-        return Math.min(maxVolume, (int)(volume * factor));
+        int currentVolume = audioManager.getStreamVolume(STREAM_MUSIC);
+        int newVolume = (int)(currentVolume * factor);
+        return newVolume > maxVolume ? maxVolume : newVolume;
     }
 
     public YaraSong getCurrentSong(){

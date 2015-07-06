@@ -480,7 +480,7 @@ public class RunActivity extends ActionBarActivity implements SongChangedListene
                         if(timesUnder == timesMax){
                             //adjust music
                             float rate = 1 + (runningBPM * currentBPM/100)/100;
-                            audioPlayer.adjustRate(rate);
+                            audioPlayer.adjustVolume(rate);
 
                             changeSpeed = true;
                         }else if (timesOver == timesMax*2 ){
@@ -515,7 +515,7 @@ public class RunActivity extends ActionBarActivity implements SongChangedListene
                             newPlaylist(runningBPM);
                         }
 
-                        audioPlayer.adjustRate(rate);
+                        audioPlayer.adjustVolume(rate);
                     }
                 }else{
                     currentBPM = calculateBPM();
