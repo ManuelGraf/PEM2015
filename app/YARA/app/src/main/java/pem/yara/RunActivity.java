@@ -109,8 +109,8 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
     private final class AudioPlayerServiceConnection implements ServiceConnection {
         public void onServiceConnected(ComponentName className, IBinder baBinder) {
-            Log.v("StartActivity", "AudioPlayerServiceConnection: Service connected");
             audioPlayer = ((AudioPlayer.AudioPlayerBinder) baBinder).getService();
+            Log.v("StartActivity", "AudioPlayerServiceConnection: Service connected");
             newPlaylist(currentBPM);
             startService(audioPlayerIntent);
         }
@@ -142,7 +142,6 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
             mTrackID = getIntent().getExtras().getInt("TrackID");
 
             // Get average BPM to that Track OR start with fixed Value
-
             YaraRun mYaraRun = mRunDbHelper.getLastRunToTrack(mTrackID);
             if(mYaraRun==null){
                 lastBPM = 104;   // Startwert
@@ -157,14 +156,6 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
             mTrackID = -1;
         }
 
-        try{
-            //audioPlayer.adjustPlaylist(lastBPM);
-            newPlaylist(lastBPM);
-        }catch (Exception e){
-            e.printStackTrace();
-            Log.d("Run onCreate", "new Playlist null pointer!");
-        }
-
         // Bind services to have callable objects
         c.startService(locationIntent);
         c.bindService(locationIntent, mConnection, Context.BIND_AUTO_CREATE);
@@ -174,6 +165,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         startService(audioPlayerIntent);
         bindService(audioPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
         Log.d("RunActivity onStart", "AudioService bound");
+
     }
 
     /**
@@ -228,6 +220,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         mSongList = (ListView)findViewById(R.id.songListView);
         mSongListAdapter=new SongListItemAdapter(getBaseContext(),new SongDbHelper(getBaseContext()).getAllSongs());
         mSongList.setAdapter(mSongListAdapter);
+        
         //mFragmentSongList = SongListFragment.newInstance(80,-1);
         //mFragmentManager.beginTransaction().add(R.id.songListFragmentContainer,mFragmentSongList).commit();
 
@@ -338,7 +331,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
             audioPlayer.skip();
 
         }else if(id == R.id.actionRefreshPlaylist){
-            // @TODO get a more suitable playlist for current bpm
+            // Get a more suitable playlist for current bpm
             newPlaylist(currentBPM);
         }
 

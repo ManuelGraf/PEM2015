@@ -40,6 +40,8 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     /*
     Public methods for Clients to call
      */
+
+
     public ArrayList<Location> receiveTrack(){
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, mLocationListener);
         return aTrack;
