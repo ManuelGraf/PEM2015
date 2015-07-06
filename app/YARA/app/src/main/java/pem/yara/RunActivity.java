@@ -180,7 +180,9 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
     private void onSongChanged(){
         mSongListAdapter = new SongListItemAdapter(getBaseContext(),audioPlayer.getPlayList());
-        mSongListAdapter.setCurrentSong(audioPlayer.getCurrentSong().getId());
+        if(audioPlayer.getPlayList().size() > 0){
+            mSongListAdapter.setCurrentSong(audioPlayer.getCurrentSong().getId());
+        }
         mSongList.setAdapter(mSongListAdapter);
 
         ((BaseAdapter)mSongList.getAdapter()).notifyDataSetChanged();
@@ -192,7 +194,9 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 //        mFragmentManager.beginTransaction().replace(R.id.songListFragment,mFragmentSongList).commit();
         audioPlayer.adjustPlaylist(bpm);
         mSongListAdapter = new SongListItemAdapter(getBaseContext(),audioPlayer.getPlayList());
-        mSongListAdapter.setCurrentSong(audioPlayer.getCurrentSong().getId());
+        if(audioPlayer.getPlayList().size() > 0){
+            mSongListAdapter.setCurrentSong(audioPlayer.getCurrentSong().getId());
+        }
         mSongList.setAdapter(mSongListAdapter);
 
         ((BaseAdapter)mSongList.getAdapter()).notifyDataSetChanged();
