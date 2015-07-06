@@ -3,8 +3,9 @@ package pem.yara.step;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-
+/**
+ * StepCounter via Android Sensor.TYPE_STEP_COUNTER
+ */
 public class StepCounter implements StepDetection {
 
     private boolean startedStepCounter;
@@ -19,10 +20,7 @@ public class StepCounter implements StepDetection {
     }
 
     /**
-     * Finds a view that was identified by the id attribute from the XML that
-     * was processed in.
-     *
-     * @return The view if found or null otherwise.
+     * EventListener for Step_Counter Events
      */
     public void onSensorChanged(SensorEvent event){
         Sensor sensor = event.sensor;
@@ -47,14 +45,20 @@ public class StepCounter implements StepDetection {
 
     }
 
-
+    /**
+     * Returns step count since the last call
+     * @return step count
+     */
     public int getSteps(){
         int difference = mCount-mCountLast;
         mCountLast = mCount;
         return difference;
     }
 
-
+    /**
+     * Getter for mCount variable. Used for Display
+     * @return mCount
+     */
     public int getmCount() {
         return mCount;
     }

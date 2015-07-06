@@ -225,9 +225,16 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         mRunDbHelper = new RunDbHelper(getBaseContext());
         mTrackDbHelper = new TrackDbHelper(getBaseContext());
 
-        //Init StepDetector
+        /**
+         * Init StepDetector
+         * Checks if TYPE_STEP_COUNTER is available otherwise fallback via Accelerometer is used to count steps.
+         */
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        mStepDetectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        try {
+            mStepDetectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        }catch (Exception e){
+            Log.d("Step Counter Type", "Sensor.TYPE_STEP_COUNTER nicht verfügbar");
+        }
         if(mStepDetectorSensor != null){
             Log.d("Step Counter Type", "TYPE_STEP_COUNTER verfuegbar");
             mStepDetector = new StepCounter();
@@ -393,7 +400,10 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         }
     };
 
-
+    /**
+     * Timed Task for tracking steps during time intervals
+     *
+     */
     private Runnable timedTask  = new Runnable(){
         @Override
         public void run() {
@@ -402,14 +412,22 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
             if(steps != 0){
 
+                //Last intervalFactor times steps are stored in this array to calculate the currentBPM
                 intervalSteps[index % intervalFactor] = steps;
                 index++;
 
+                //after the first minute the first real BPM can be calculated
                 if(minute){
 
                     currentBPM = calculateBPM();
                     BPMList.add(currentBPM);
 
+                    /**
+                     * normal case
+                     * checks for consecutive BPM under or over your runningBPM
+                     * underperforming x times results in adjustment in the music playback
+                     * overperforming results in adjusting the playlist
+                     */
                     if(!changeSpeed){
                         if(currentBPM < runningBPM - threshold){//under BPM
                             timesUnder++;
@@ -435,6 +453,10 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
                             newPlaylist(runningBPM);
                         }
                     }else{
+                        /**
+                         * adjust the music playback or playlist according the the logic
+                         * and calculate the playback rate from currentBPM
+                         */
                         if(currentBPM < runningBPM - threshold){//under BPM
                             timesUnder++;
                         }else{//within Threshold
@@ -484,6 +506,9 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
     }
 
+    /**
+     * Initialization of variables related to step detection.
+     */
     private void initStepVariables() {
         runningBPM = 0;
         currentBPM = 0;
@@ -504,6 +529,10 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         index = 0;
     }
 
+    /**
+     * Calculation of step BPM
+     * @return currentBPM
+     */
     public int calculateBPM() {
         int bpm = 0;
         for(int i = 0; i < intervalSteps.length; i++){

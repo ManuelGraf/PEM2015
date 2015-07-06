@@ -2,10 +2,12 @@ package pem.yara.step;
 
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
+/**
+ * StepCounter via Accelerometer
+ */
 public class StepAccelerometer implements StepDetection {
 
     private float   mLimit = 22.50f;
@@ -33,6 +35,10 @@ public class StepAccelerometer implements StepDetection {
 
     }
 
+    /**
+     * EventListener for Accelerometer Events
+     * Registers up and down movements. If distance is over a threshold it counts as a step.
+     */
     public void onSensorChanged(SensorEvent event){
         Sensor sensor = event.sensor;
         synchronized (this) {
@@ -85,16 +91,20 @@ public class StepAccelerometer implements StepDetection {
 
     }
 
-    public void setSensitivity(float sensitivity) {
-        mLimit = sensitivity;
-    }
-
+    /**
+     * Returns step count since the last call
+     * @return step count
+     */
     public int getSteps(){
         int difference = mCount-mCountLast;
          mCountLast = mCount;
         return difference;
     }
 
+    /**
+     * Getter for mCount variable. Used for Display
+     * @return mCount
+     */
     public int getmCount() {
         return mCount;
     }
