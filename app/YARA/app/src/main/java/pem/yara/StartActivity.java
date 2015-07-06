@@ -11,6 +11,8 @@ import android.widget.TextView;
 import com.astuetz.PagerSlidingTabStrip;
 
 import pem.yara.adapters.HomeScreenPageAdapter;
+import pem.yara.db.RunDbHelper;
+import pem.yara.db.TrackDbHelper;
 import pem.yara.entity.YaraSong;
 import pem.yara.fragments.SongListFragment;
 import pem.yara.music.ScanMusicTask;

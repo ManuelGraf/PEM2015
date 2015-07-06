@@ -118,8 +118,8 @@ public class RunActivity extends ActionBarActivity implements SongChangedListene
         public void onServiceConnected(ComponentName className, IBinder baBinder) {
             audioPlayer = ((AudioPlayer.AudioPlayerBinder) baBinder).getService();
             Log.v("StartActivity", "AudioPlayerServiceConnection: Service connected");
-
             newPlaylist(mLastBPM);
+
             startService(audioPlayerIntent);
             audioPlayer.setSongChangedListener(RunActivity.this);
         }
@@ -327,16 +327,15 @@ public class RunActivity extends ActionBarActivity implements SongChangedListene
 
         YaraRun mYaraRun = new YaraRun(mTrackID, avgBPM, aTrack, new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime()));
 
+        // Assigning the Track ID to mYaraRun
+        mYaraRun = mRunDbHelper.insertRun(mYaraRun, getBaseContext());
         Log.d("Run Finished Listener", "ID: " + mTrackID +"Distance: " + mYaraRun.getRunDistance() +
                 ", Duration: " + mYaraRun.getCompletionTime() +
                 "s, avgSpeed: " + mYaraRun.getAvgSpeed() +
+                "s, avgBPM: " + mYaraRun.getAvgBpm() +
                 "m/s, minSpeed: " + mYaraRun.getRunMinSpeed() +
                 "m/s, maxSpeed: " + mYaraRun.getRunMaxSpeed() +
                 "m/s, avgAccuracy: " + mYaraRun.getAvgAccuracy() + "m");
-
-
-        // Assigning the Track ID to mYaraRun
-        mYaraRun = mRunDbHelper.insertRun(mYaraRun, getBaseContext());
 
         mRunDbHelper.listEntries();
         mTrackDbHelper.listEntries();
