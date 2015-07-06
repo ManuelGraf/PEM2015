@@ -19,7 +19,7 @@ import static android.os.AsyncTask.Status.PENDING;
 
 public class StartActivity extends ActionBarActivity implements SongListFragment.OnSongListInteractionListener {
 
-    private ScanMusicTask scanMusicTask = new ScanMusicTask();
+    private ScanMusicTask scanMusicTask = new ScanMusicTask(this);
     private HomeScreenPageAdapter mPagerAdapter;
     private ViewPager mViewPager;
     private int mActiveTab = 0;

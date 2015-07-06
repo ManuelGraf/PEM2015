@@ -9,9 +9,16 @@ import android.util.Log;
 import java.util.ArrayList;
 import java.util.List;
 
+import pem.yara.StartActivity;
 import pem.yara.entity.YaraSong;
 
 public class ScanMusicTask extends AsyncTask<Application, Void, ArrayList<YaraSong>> {
+
+    private final StartActivity startActivity;
+
+    public ScanMusicTask(final StartActivity startActivity) {
+        this.startActivity = startActivity;
+    }
 
     @Override
     protected ArrayList<YaraSong> doInBackground(Application... params) {
@@ -64,5 +71,10 @@ public class ScanMusicTask extends AsyncTask<Application, Void, ArrayList<YaraSo
         Log.i("Music scan", "Done!");
 
         return songs;
+    }
+
+    @Override
+    protected void onPostExecute(ArrayList<YaraSong> yaraSongs) {
+        startActivity.hideLoadingIndicator();
     }
 }
