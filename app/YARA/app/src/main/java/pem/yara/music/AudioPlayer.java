@@ -56,7 +56,11 @@ public class AudioPlayer extends Service implements OnCompletionListener {
     }
 
     public YaraSong getCurrentSong(){
-        return playlist.get(currentSong);
+        YaraSong song = null;
+        if(playlist.size() > 0){
+            song = playlist.get(currentSong);
+        }
+        return song;
     }
 
     public void adjustPlaylist(double runningBPM) {
@@ -67,7 +71,7 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         currentSong = 0;
 
         // add new songs and shuffle
-        List<YaraSong> songsWithinRange = findSongsWithinRange(runningBPM - 5, runningBPM + 5);
+        List<YaraSong> songsWithinRange = dbHelper.findSongsWithinRange(runningBPM,5);
         playlist.addAll(songsWithinRange);
         Collections.shuffle(playlist);
 
@@ -75,29 +79,29 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         play();
     }
 
-    private List<YaraSong> findSongsWithinRange(double lowerBound, double upperBound) {
-        /*String[] projection = {SongDbHelper.SongDbItem._ID,"title", "artist", "uri", "bpm", "count", "score", "blocked"};
-
-        Cursor cursor = db.query(
-                SongDbHelper.SongDbItem.TABLE_NAME,
-                projection,                         // The columns to return
-                "bpm > " + lowerBound + " AND bpm < " + upperBound,
-                null,                               // The values for the WHERE clause
-                null,                               // don't group the rows
-                null,                               // don't filter by row groups
-                null                                // The sort order
-        );
-
-        cursor.moveToFirst();
-        List<YaraSong> songs = new ArrayList<>();
-        while(!cursor.isAfterLast()) {
-            YaraSong song = new YaraSong(cursor.getInt(0),cursor.getString(1), cursor.getString(2), cursor.getString(3), Double.parseDouble(cursor.getString(4)),cursor.getDouble(5),cursor.getInt(6),cursor.getInt(7));
-            songs.add(song);
-            cursor.moveToNext();
-        }
-        cursor.close();*/
-        return dbHelper.findSongsWithinRange(lowerBound,upperBound);
-    }
+//    private List<YaraSong> findSongsWithinRange(double bpm, double upperBound) {
+//        String[] projection = {SongDbHelper.SongDbItem._ID,"title", "artist", "uri", "bpm", "count", "score", "blocked"};
+//
+//        Cursor cursor = db.query(
+//                SongDbHelper.SongDbItem.TABLE_NAME,
+//                projection,                         // The columns to return
+//                "bpm > " + lowerBound + " AND bpm < " + upperBound,
+//                null,                               // The values for the WHERE clause
+//                null,                               // don't group the rows
+//                null,                               // don't filter by row groups
+//                null                                // The sort order
+//        );
+//
+//        cursor.moveToFirst();
+//        List<YaraSong> songs = new ArrayList<>();
+//        while(!cursor.isAfterLast()) {
+//            YaraSong song = new YaraSong(cursor.getInt(0),cursor.getString(1), cursor.getString(2), cursor.getString(3), Double.parseDouble(cursor.getString(4)),cursor.getDouble(5),cursor.getInt(6),cursor.getInt(7));
+//            songs.add(song);
+//            cursor.moveToNext();
+//        }
+//        cursor.close();
+//        return songs;
+//    }
 
     @Override
     public void onCompletion(MediaPlayer mp) {

@@ -50,13 +50,15 @@ public class SongDbHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
-    public List<YaraSong> findSongsWithinRange(double lowerBound, double upperBound) {
+    public List<YaraSong> findSongsWithinRange(double bpm, double treshold) {
+        double lowerBound =bpm-treshold;
+        double upperBound=bpm+treshold;
         String[] projection = {SongDbItem._ID,SongDbItem.COLUMN_NAME_TITLE, SongDbItem.COLUMN_NAME_ARTIST,SongDbItem.COLUMN_NAME_URI , SongDbItem.COLUMN_NAME_BPM,SongDbItem.COLUMN_NAME_PLAYCOUNT,SongDbItem.COLUMN_NAME_SCORE,SongDbItem.COLUMN_NAME_BLOCKED};
 
         Cursor cursor = getReadableDatabase().query(
                 SongDbHelper.SongDbItem.TABLE_NAME,
                 projection,                         // The columns to return
-                "bpm > " + lowerBound + " AND bpm < " + upperBound,
+                "(bpm > " + lowerBound + " AND bpm < " + upperBound+") OR (bpm > " + (bpm*2-treshold) + " AND bpm < " + (bpm*2+treshold)+")",
                 null,                               // The values for the WHERE clause
                 null,                               // don't group the rows
                 null,                               // don't filter by row groups
@@ -73,6 +75,7 @@ public class SongDbHelper extends SQLiteOpenHelper {
         }
         cursor.close();
         Log.d("SongDbHelper",songs.size()+" songs fit to the range ["+lowerBound+","+upperBound+"]" );
+
         return songs;
     }
 
@@ -97,6 +100,7 @@ public class SongDbHelper extends SQLiteOpenHelper {
                 cursor.moveToNext();
             }
             cursor.close();
+
             return songs;
 
     }

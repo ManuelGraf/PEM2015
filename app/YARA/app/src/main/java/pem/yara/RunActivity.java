@@ -11,14 +11,19 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.BaseAdapter;
+import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.math.RoundingMode;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -28,15 +33,13 @@ import pem.yara.db.RunDbHelper;
 import pem.yara.db.SongDbHelper;
 import pem.yara.db.TrackDbHelper;
 import pem.yara.entity.YaraRun;
-import pem.yara.entity.YaraSong;
-import pem.yara.fragments.SongListFragment;
 import pem.yara.music.AudioPlayer;
 import pem.yara.step.StepAccelerometer;
 import pem.yara.step.StepCounter;
 import pem.yara.step.StepDetection;
 
 
-public class RunActivity extends ActionBarActivity implements SongListFragment.OnSongListInteractionListener {
+public class RunActivity extends ActionBarActivity {
 
     private int mTrackID;
     private PowerManager.WakeLock mWakeLock;
@@ -51,6 +54,12 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
     // Songlist Fragment
     private SongListItemAdapter mSongListAdapter;
     private ListView mSongList;
+    private SwipeRefreshLayout refreshLayout;
+
+    private ImageButton btnSongControlSkip;
+    private ImageButton btnSongControlPause;
+    private ImageButton btnSongControlPlay;
+    private ImageButton btnSongControlRefresh;
 
     private TextView    txtStepCount;
     private TextView    txtStepCountAccelerometer;
@@ -78,6 +87,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
     private int runningBPM;
     private int currentBPM;
+    private double mLastBPM;
     private int threshold;
 
     private int timesOver;
@@ -111,7 +121,8 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         public void onServiceConnected(ComponentName className, IBinder baBinder) {
             audioPlayer = ((AudioPlayer.AudioPlayerBinder) baBinder).getService();
             Log.v("StartActivity", "AudioPlayerServiceConnection: Service connected");
-            newPlaylist(currentBPM);
+
+            newPlaylist(mLastBPM);
             startService(audioPlayerIntent);
         }
 
@@ -144,9 +155,9 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
             // Get average BPM to that Track OR start with fixed Value
             YaraRun mYaraRun = mRunDbHelper.getLastRunToTrack(mTrackID);
             if(mYaraRun==null){
-                lastBPM = 104;   // Startwert
+                mLastBPM = 104;   // Startwert
             } else {
-                lastBPM = mYaraRun.getAvgBpm();
+                mLastBPM = mYaraRun.getAvgBpm();
             }
 
             Log.d("Run onCreate", "TrackID: " + mTrackID);
@@ -177,12 +188,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
     private void onSongChanged(){
         mSongListAdapter = new SongListItemAdapter(getBaseContext(),audioPlayer.getPlayList());
-        if(audioPlayer.getPlayList().size() > 0){
-            mSongListAdapter.setCurrentSong(audioPlayer.getCurrentSong().getId());
-        }
-        mSongList.setAdapter(mSongListAdapter);
-
-        ((BaseAdapter)mSongList.getAdapter()).notifyDataSetChanged();
+       refreshSongList();
     }
 
     private void newPlaylist(double bpm){
@@ -191,6 +197,10 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 //        mFragmentManager.beginTransaction().replace(R.id.songListFragment,mFragmentSongList).commit();
         //TODO: nullpointer bei Aufruf
         audioPlayer.adjustPlaylist(bpm);
+       refreshSongList();
+    }
+
+    private void refreshSongList(){
         mSongListAdapter = new SongListItemAdapter(getBaseContext(),audioPlayer.getPlayList());
         if(audioPlayer.getPlayList().size() > 0){
             mSongListAdapter.setCurrentSong(audioPlayer.getCurrentSong().getId());
@@ -208,19 +218,31 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         txtStepCountAccelerometer  = (TextView)findViewById(R.id.txtStepCountAccelerometer);
         txtStepCountPerMinute = (TextView)findViewById(R.id.txtStepCountPerMinute);
         txtTime = (TextView)findViewById(R.id.txtTime);
-        txtDistance =(TextView)findViewById(R.id.txtTime);
+        txtDistance =(TextView)findViewById(R.id.txtDistance);
 
         // Acquire a partial WakeLock, to keep the background services running even if the phone locks the screen
         PowerManager mPowerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakeLock");
         mWakeLock.acquire();
 
-        //mFragmentManager = getSupportFragmentManager();
-        //containerSonglistFragment = (FrameLayout)findViewById(R.id.songListFragmentContainer);
+        //Songlist itneraction kram
+
         mSongList = (ListView)findViewById(R.id.songListView);
         mSongListAdapter=new SongListItemAdapter(getBaseContext(),new SongDbHelper(getBaseContext()).getAllSongs());
         mSongList.setAdapter(mSongListAdapter);
-        
+        mSongList.setEmptyView(findViewById(R.id.txtSonglistBpmEmpty));
+
+        btnSongControlSkip = (ImageButton)findViewById(R.id.btnSongListControlSkip);
+        btnSongControlSkip.setOnClickListener(skipSongListener);
+        btnSongControlPause = (ImageButton)findViewById(R.id.btnSongListControlStop);
+        btnSongControlPause.setOnClickListener(pauseSongListener);
+        btnSongControlPlay = (ImageButton)findViewById(R.id.btnSongListControlPlay);
+        btnSongControlPlay.setOnClickListener(playSongListener);
+        btnSongControlRefresh = (ImageButton)findViewById(R.id.btnSongListControlRefresh);
+        btnSongControlRefresh.setOnClickListener(refreshSongListener);
+
+        refreshLayout = (SwipeRefreshLayout)findViewById(R.id.swipe_container);
+        refreshLayout.setOnRefreshListener(swipeRefresh);
         //mFragmentSongList = SongListFragment.newInstance(80,-1);
         //mFragmentManager.beginTransaction().add(R.id.songListFragmentContainer,mFragmentSongList).commit();
 
@@ -236,7 +258,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         try {
             mStepDetectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
         }catch (Exception e){
-            Log.d("Step Counter Type", "Sensor.TYPE_STEP_COUNTER nicht verfügbar");
+            Log.d("Step Counter Type", "Sensor.TYPE_STEP_COUNTER nicht verfï¿½gbar");
         }
         if(mStepDetectorSensor != null){
             Log.d("Step Counter Type", "TYPE_STEP_COUNTER verfuegbar");
@@ -255,6 +277,27 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
         //handler.postDelayed(timedTask, intervalDuration);
     }
+
+    View.OnClickListener skipSongListener = new View.OnClickListener(){
+        public void onClick(View v){
+            audioPlayer.skip();
+        }
+    };
+    View.OnClickListener refreshSongListener = new View.OnClickListener(){
+        public void onClick(View v){
+            newPlaylist(currentBPM);
+        }
+    };
+    View.OnClickListener pauseSongListener = new View.OnClickListener(){
+        public void onClick(View v){
+            audioPlayer.pause();
+        }
+    };
+    View.OnClickListener playSongListener = new View.OnClickListener(){
+        public void onClick(View v){
+            audioPlayer.play();
+        }
+    };
 
     /**
      * Called by pressing the finishRun-Button. Finishes recording the track and writes it to the DB.
@@ -327,12 +370,6 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         if (id == R.id.actionFinishRun) {
             finishRun();
             return true;
-        }else if(id == R.id.actionSkipSong){
-            audioPlayer.skip();
-
-        }else if(id == R.id.actionRefreshPlaylist){
-            // Get a more suitable playlist for current bpm
-            newPlaylist(currentBPM);
         }
 
         return super.onOptionsItemSelected(item);
@@ -385,6 +422,11 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
         @Override
         public void run() {
+            DecimalFormat df = new DecimalFormat("#.###");
+            df.setRoundingMode(RoundingMode.CEILING);
+            String distance = df.format(mService.getDistanceUntilNow() / 1000);
+            txtDistance.setText(distance+ " km");
+
             if(secs>59){
                 secs =0;
                 mins++;
@@ -499,15 +541,15 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         }
     };
 
-    @Override
-    public void onSongListInteraction(YaraSong s) {
 
-    }
 
-    @Override
-    public void onImportMusicInteraction() {
-
-    }
+    private SwipeRefreshLayout.OnRefreshListener swipeRefresh = new SwipeRefreshLayout.OnRefreshListener(){
+        @Override
+        public void onRefresh() {
+            newPlaylist(currentBPM);
+            refreshLayout.setRefreshing(false);
+        }
+    };
 
     /**
      * Initialization of variables related to step detection.

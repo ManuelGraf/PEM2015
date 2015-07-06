@@ -23,6 +23,7 @@
 
     <string name="error_no_tracks">You have not recorded a route yet.</string>
     <string name="error_no_songs">You did not scan your Music Library yet.</string>
+    <string name="error_no_songs_for_bpm">YARA will try to play music as soon as there is matching music for your pace.</string>
 
     <string name="info_loading_songs">Please wait while your music Library is being scanned.</string>
     <string name="info_loading_songs_finished">Your music Library has been scanned. For a complete List of Songs that this App can use, refer to the tab \"All Songs\"</string>

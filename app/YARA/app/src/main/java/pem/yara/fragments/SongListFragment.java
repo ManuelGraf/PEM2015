@@ -78,7 +78,7 @@ public class SongListFragment extends Fragment {
             mBPM = getArguments().getDouble(ARG_BPM);
             mCurrentSong = getArguments().getInt(ARG_CURRENTSONG);
         }
-
+        // TODO nicht mehr benötigt. SonglistFragment ist nur noch Fragment für den viewpager der Startactivity.
         int treshold = 5;
         double upperBound = mBPM + treshold;
         double lowerBound = mBPM - treshold;

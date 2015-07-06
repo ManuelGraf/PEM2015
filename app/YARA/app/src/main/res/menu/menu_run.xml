@@ -5,15 +5,7 @@
 
 
 
-    <item android:id="@+id/actionSkipSong"
-        android:icon="@drawable/ic_menu_skip_holo_dark"
-        android:title="@string/action_skip_song"
-        yara:showAsAction="ifRoom" />
 
-    <item android:id="@+id/actionRefreshPlaylist"
-        android:icon="@drawable/ic_menu_refresh_holo_dark"
-        android:title="@string/action_reevaluate_bpm"
-        yara:showAsAction="ifRoom" />
 
     <item android:id="@+id/actionFinishRun"
         android:icon="@drawable/ic_menu_finish_run_holo_dark"
