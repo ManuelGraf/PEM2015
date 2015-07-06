@@ -120,18 +120,16 @@ public class SongDbHelper extends SQLiteOpenHelper {
         cursor.moveToFirst();
         List<YaraSong> songs = new ArrayList<>();
         while(!cursor.isAfterLast()) {
-            Log.d("List all Songs",""+cursor.getInt(0)+" "+cursor.getString(1)+" "+ cursor.getString(2)+" "+ cursor.getString(3)+" "+ Double.parseDouble(cursor.getString(4))+" "+cursor.getDouble(5)+" "+cursor.getInt(6)+" "+cursor.getInt(7));
+            Log.d("List all Songs",""+cursor.getInt(0)+" "+cursor.getString(1)+" "+ cursor.getString(2)+" "+ cursor.getString(3)+" "+ Double.parseDouble(cursor.getString(4))+" "+cursor.getInt(5)+" "+cursor.getInt(6)+" "+cursor.getInt(7));
             cursor.moveToNext();
         }
         cursor.close();
     }
 
     public void incrementPlayCount(int id){
-        String query = "UPDATE "+SongDbItem.TABLE_NAME+" SET "+SongDbItem.COLUMN_NAME_PLAYCOUNT+"="+SongDbItem.COLUMN_NAME_PLAYCOUNT+"+1 WHERE "+SongDbItem._ID +"="+id+";";
-        Log.d("increment Playcount",query);
-        SQLiteDatabase db = getWritableDatabase();
-        db.execSQL(query);
-        db.close();
+       String query = "UPDATE songs SET count=count+1 WHERE _id=="+id+";";
+        getWritableDatabase().execSQL(query);
+        getWritableDatabase().close();
     }
 
     @Override
