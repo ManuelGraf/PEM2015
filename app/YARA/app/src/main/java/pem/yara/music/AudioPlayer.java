@@ -101,6 +101,7 @@ public class AudioPlayer extends Service implements OnCompletionListener {
 
     @Override
     public void onCompletion(MediaPlayer mp) {
+        dbHelper.incrementPlayCount(playlist.get(currentSong).getId());
         release();
         nextTrack();
     }

@@ -118,10 +118,16 @@ public class RunActivity extends ActionBarActivity implements SongChangedListene
         public void onServiceConnected(ComponentName className, IBinder baBinder) {
             audioPlayer = ((AudioPlayer.AudioPlayerBinder) baBinder).getService();
             Log.v("StartActivity", "AudioPlayerServiceConnection: Service connected");
-            newPlaylist(mLastBPM);
+                Log.d("lastbpm",mLastBPM+"");
+            if(mLastBPM > 0){
+                newPlaylist(mLastBPM);
+            }else{
+                refreshSongList();
+            }
 
             startService(audioPlayerIntent);
             audioPlayer.setSongChangedListener(RunActivity.this);
+
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -153,7 +159,7 @@ public class RunActivity extends ActionBarActivity implements SongChangedListene
             // Get average BPM to that Track OR start with fixed Value
             YaraRun mYaraRun = mRunDbHelper.getLastRunToTrack(mTrackID);
             if(mYaraRun==null){
-                mLastBPM = 104;   // Startwert
+                mLastBPM = -1;   // Startwert
             } else {
                 mLastBPM = mYaraRun.getAvgBpm();
             }
