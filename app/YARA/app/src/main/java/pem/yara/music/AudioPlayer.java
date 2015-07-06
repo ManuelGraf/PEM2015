@@ -138,16 +138,18 @@ public class AudioPlayer extends Service implements OnCompletionListener {
             return;
         }
 
-        YaraSong yaraSong = playlist.get(currentSong);
-        if (yaraSong == null) {
-            Log.d("AudioPlayer", "currentSong index is out of bounds!");
-        }
 
         if (mediaPlayer != null && paused) {
             mediaPlayer.start();
             paused = false;
+            return;
         } else if(mediaPlayer != null ) {
             release();
+        }
+
+        YaraSong yaraSong = playlist.get(currentSong);
+        if (yaraSong == null) {
+            Log.d("AudioPlayer", "currentSong index is out of bounds!");
         }
 
         try {
