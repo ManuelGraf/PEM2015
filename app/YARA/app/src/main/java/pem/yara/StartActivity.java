@@ -72,16 +72,13 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
 
     public boolean onPrepareOptionsMenu(final Menu menu) {
 
-        MenuItem btnScanForMusic = menu.findItem(R.id.actionScanMusicLibrary);
         MenuItem btnAddTrack = menu.findItem(R.id.actionAddTrack);
         switch(mActiveTab){
             case 0:
                 btnAddTrack.setVisible(true).setEnabled(true);
-                btnScanForMusic.setVisible(false).setEnabled(false);
                 break;
             case 1:
                 btnAddTrack.setVisible(false).setEnabled(false);
-                btnScanForMusic.setVisible(true).setEnabled(true);
                 break;
             default:
                 break;
@@ -103,9 +100,6 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         switch (item.getItemId()) {
             case R.id.actionAddTrack:
                 newTrack();
-                return true;
-            case R.id.actionScanMusicLibrary:
-                importMusic();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

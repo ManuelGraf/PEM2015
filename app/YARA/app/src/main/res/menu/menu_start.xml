@@ -9,9 +9,6 @@
         android:title="@string/action_add_track"
         yara:showAsAction="ifRoom" />
 
-    <item android:id="@+id/actionScanMusicLibrary"
-        android:icon="@drawable/ic_menu_search_holo_dark"
-        android:title="@string/action_search_music"
-        yara:showAsAction="ifRoom" />
+
 
 </menu>
