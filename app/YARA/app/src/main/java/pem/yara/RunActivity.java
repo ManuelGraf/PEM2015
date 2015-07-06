@@ -38,8 +38,7 @@ import pem.yara.step.StepAccelerometer;
 import pem.yara.step.StepCounter;
 import pem.yara.step.StepDetection;
 
-
-public class RunActivity extends ActionBarActivity {
+public class RunActivity extends ActionBarActivity implements SongChangedListener {
 
     private int mTrackID;
     private PowerManager.WakeLock mWakeLock;
@@ -121,6 +120,7 @@ public class RunActivity extends ActionBarActivity {
 
             newPlaylist(mLastBPM);
             startService(audioPlayerIntent);
+            audioPlayer.setSongChangedListener(RunActivity.this);
         }
 
         public void onServiceDisconnected(ComponentName className) {
@@ -183,7 +183,8 @@ public class RunActivity extends ActionBarActivity {
         this.finish();
     }
 
-    private void onSongChanged(){
+    @Override
+    public void onSongChanged(){
         mSongListAdapter = new SongListItemAdapter(getBaseContext(),audioPlayer.getPlayList());
        refreshSongList();
     }

@@ -3,7 +3,7 @@ package pem.yara.music;
 import android.app.Application;
 import android.app.Service;
 import android.content.Intent;
-import android.database.sqlite.SQLiteDatabase;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Binder;
@@ -15,16 +15,17 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import pem.yara.SongChangedListener;
 import pem.yara.db.SongDbHelper;
 import pem.yara.entity.YaraSong;
 
+import static android.media.AudioManager.STREAM_MUSIC;
 import static android.media.MediaPlayer.OnCompletionListener;
 
 public class AudioPlayer extends Service implements OnCompletionListener {
 
     private Application context;
 
-    private SQLiteDatabase db;
     private SongDbHelper dbHelper;
 
     private MediaPlayer mediaPlayer = new MediaPlayer();
@@ -35,14 +36,20 @@ public class AudioPlayer extends Service implements OnCompletionListener {
 
     private int currentSong = 0;
 
+    private AudioManager audioManager;
+
+    private int maxVolume;
+
+    private SongChangedListener songChangedListener;
+
     @Override
     public void onCreate() {
         Log.i("AudioPlayer", "onCreate() called");
         context = getApplication();
         dbHelper = new SongDbHelper(context);
-        db = dbHelper.getWritableDatabase();
 
-        adjustPlaylist(105);
+        audioManager = (AudioManager)getSystemService(context.AUDIO_SERVICE);
+        maxVolume = audioManager.getStreamMaxVolume(STREAM_MUSIC);
     }
 
     @Override
@@ -52,7 +59,12 @@ public class AudioPlayer extends Service implements OnCompletionListener {
     }
 
     public void adjustRate(float rate){
-        //Should call Soundpool: public final void setRate (int streamID, float rate)
+        audioManager.setStreamVolume(STREAM_MUSIC, getNewVolume(rate), AudioManager.FLAG_PLAY_SOUND);
+    }
+
+    private int getNewVolume(float factor) {
+        int volume = audioManager.getStreamVolume(STREAM_MUSIC);
+        return Math.min(maxVolume, (int)(volume * factor));
     }
 
     public YaraSong getCurrentSong(){
@@ -79,30 +91,6 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         play();
     }
 
-//    private List<YaraSong> findSongsWithinRange(double bpm, double upperBound) {
-//        String[] projection = {SongDbHelper.SongDbItem._ID,"title", "artist", "uri", "bpm", "count", "score", "blocked"};
-//
-//        Cursor cursor = db.query(
-//                SongDbHelper.SongDbItem.TABLE_NAME,
-//                projection,                         // The columns to return
-//                "bpm > " + lowerBound + " AND bpm < " + upperBound,
-//                null,                               // The values for the WHERE clause
-//                null,                               // don't group the rows
-//                null,                               // don't filter by row groups
-//                null                                // The sort order
-//        );
-//
-//        cursor.moveToFirst();
-//        List<YaraSong> songs = new ArrayList<>();
-//        while(!cursor.isAfterLast()) {
-//            YaraSong song = new YaraSong(cursor.getInt(0),cursor.getString(1), cursor.getString(2), cursor.getString(3), Double.parseDouble(cursor.getString(4)),cursor.getDouble(5),cursor.getInt(6),cursor.getInt(7));
-//            songs.add(song);
-//            cursor.moveToNext();
-//        }
-//        cursor.close();
-//        return songs;
-//    }
-
     @Override
     public void onCompletion(MediaPlayer mp) {
         release();
@@ -128,6 +116,7 @@ public class AudioPlayer extends Service implements OnCompletionListener {
             Collections.shuffle(playlist);
         }
         play();
+        songChangedListener.onSongChanged();
     }
 
     public void skip() {
@@ -201,10 +190,14 @@ public class AudioPlayer extends Service implements OnCompletionListener {
     }
 
     public void pause() {
-        if( mediaPlayer != null) {
+        if (mediaPlayer != null) {
             mediaPlayer.pause();
             paused = true;
         }
+    }
+
+    public void setSongChangedListener(SongChangedListener songChangedListener) {
+        this.songChangedListener = songChangedListener;
     }
 
     // TODO do something with it on GUI
