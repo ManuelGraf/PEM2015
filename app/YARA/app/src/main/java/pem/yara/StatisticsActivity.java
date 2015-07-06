@@ -285,6 +285,7 @@ public class StatisticsActivity extends ActionBarActivity {
     }
     public void startRun(){
         Intent intent = new Intent(getBaseContext(), RunActivity.class);
+        Log.d("Statistics StartRun", "TrackID: "+mTrackID);
         intent.putExtra("TrackID", mTrackID);
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         getBaseContext().startActivity(intent);

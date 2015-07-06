@@ -2,6 +2,7 @@ package pem.yara.adapters;
 
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -58,6 +59,7 @@ public class TrackHistoryItemAdapter extends ArrayAdapter<YaraTrack> {
         public void onItemClick(AdapterView<?> adapterView, View view, int pos, long id) {
             Intent intent = new Intent(getContext(), StatisticsActivity.class);
             intent.putExtra("TrackID", values.get(pos).getId());
+            Log.i("History Item", "ID: " + values.get(pos).getId() + " !");
             getContext().startActivity(intent);
         }
     };

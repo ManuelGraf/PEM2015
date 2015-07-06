@@ -135,29 +135,34 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         Context c;
         c=this.getBaseContext();
 
+
         // Get TrackID from Intent
+        double lastBPM = 0;
         try {
             mTrackID = getIntent().getExtras().getInt("TrackID");
 
             // Get average BPM to that Track OR start with fixed Value
-            double lastBPM;
-            YaraRun mYaraRun = mRunDbHelper.getLastRunToTrack(mTrackID);
 
+            YaraRun mYaraRun = mRunDbHelper.getLastRunToTrack(mTrackID);
             if(mYaraRun==null){
                 lastBPM = 104;   // Startwert
             } else {
                 lastBPM = mYaraRun.getAvgBpm();
             }
 
-
-//            audioPlayer.adjustPlaylist(lastBPM);
-            newPlaylist(lastBPM);
-
-            Log.d("Statistics onCreate", "TrackID: " + mTrackID);
+            Log.d("Run onCreate", "TrackID: " + mTrackID);
         } catch (Exception e){
             e.printStackTrace();
-            Log.d("Statistics onCreate", "No TrackID passed, new track!");
+            Log.d("Run onCreate", "No TrackID passed, new track!");
             mTrackID = -1;
+        }
+
+        try{
+            //audioPlayer.adjustPlaylist(lastBPM);
+            newPlaylist(lastBPM);
+        }catch (Exception e){
+            e.printStackTrace();
+            Log.d("Run onCreate", "new Playlist null pointer!");
         }
 
         // Bind services to have callable objects
@@ -192,6 +197,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
 //        mFragmentSongList = SongListFragment.newInstance(bpm,-1);
 //        mFragmentManager.beginTransaction().replace(R.id.songListFragment,mFragmentSongList).commit();
+        //TODO: nullpointer bei Aufruf
         audioPlayer.adjustPlaylist(bpm);
         mSongListAdapter = new SongListItemAdapter(getBaseContext(),audioPlayer.getPlayList());
         if(audioPlayer.getPlayList().size() > 0){
