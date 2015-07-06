@@ -189,7 +189,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
 //        mFragmentSongList = SongListFragment.newInstance(bpm,-1);
 //        mFragmentManager.beginTransaction().replace(R.id.songListFragment,mFragmentSongList).commit();
-        audioPlayer.adjustPlaylist(80);
+        audioPlayer.adjustPlaylist(bpm);
         mSongListAdapter = new SongListItemAdapter(getBaseContext(),audioPlayer.getPlayList());
         mSongListAdapter.setCurrentSong(audioPlayer.getCurrentSong().getId());
         mSongList.setAdapter(mSongListAdapter);
