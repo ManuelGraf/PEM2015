@@ -553,7 +553,7 @@ public class RunActivity extends ActionBarActivity implements SongChangedListene
         changeSpeed = false;
 
         handler = new Handler();
-        intervalDuration = 10000;
+        intervalDuration = 5000;
         intervalFactor = 60000/intervalDuration;
         minute = false;
 
