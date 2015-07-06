@@ -61,9 +61,6 @@ public class RunActivity extends ActionBarActivity {
     private ImageButton btnSongControlPlay;
     private ImageButton btnSongControlRefresh;
 
-    private TextView    txtStepCount;
-    private TextView    txtStepCountAccelerometer;
-
     // run overview part obendrueber
     private Handler timerHandler = new Handler();
 
@@ -214,8 +211,6 @@ public class RunActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_run);
-        txtStepCount = (TextView)findViewById(R.id.txtStepCount);
-        txtStepCountAccelerometer  = (TextView)findViewById(R.id.txtStepCountAccelerometer);
         txtStepCountPerMinute = (TextView)findViewById(R.id.txtStepCountPerMinute);
         txtTime = (TextView)findViewById(R.id.txtTime);
         txtDistance =(TextView)findViewById(R.id.txtDistance);
@@ -438,9 +433,6 @@ public class RunActivity extends ActionBarActivity {
             secs++;
             txtTime.setText((hours <10 ? "0":"")+hours+":"+(mins <10 ? "0":"")+mins+":"+(secs <10 ? "0":"")+secs);
 
-            //Update von den Schrittfeldern
-            txtStepCount.setText("Step Counter Accelerometer : " + (mStepDetector.getmCount()));
-
             timerHandler.postDelayed(this, 1000);
         }
     };
@@ -452,7 +444,6 @@ public class RunActivity extends ActionBarActivity {
     private Runnable timedTask  = new Runnable(){
         @Override
         public void run() {
-            Log.d("MY VERY OWN TIMED TASK", "BPM: " + currentBPM);
             int steps = mStepDetector.getSteps();
 
             if(steps != 0){
@@ -534,7 +525,7 @@ public class RunActivity extends ActionBarActivity {
                 }
 
                 txtStepCountPerMinute.setText("" + currentBPM);
-                txtStepCount.setText("Step Counter: " + (mStepDetector.getmCount()));
+                Log.d("MY VERY OWN TIMED TASK", "BPM: " + currentBPM);
 
             }
             handler.postDelayed(timedTask, intervalDuration);
