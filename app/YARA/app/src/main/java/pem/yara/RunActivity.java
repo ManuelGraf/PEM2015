@@ -483,7 +483,7 @@ public class RunActivity extends ActionBarActivity implements SongChangedListene
                             audioPlayer.adjustVolume(rate);
 
                             changeSpeed = true;
-                        }else if (timesOver == timesMax*2 ){
+                        }else if (timesOver == timesMax ){
                             //select new music title to new BPM
                             timesOver = 0;
                             runningBPM = currentBPM;
@@ -519,7 +519,7 @@ public class RunActivity extends ActionBarActivity implements SongChangedListene
                     }
                 }else{
                     currentBPM = calculateBPM();
-                    if(index >= intervalFactor){
+                    if(index >= intervalFactor/3){
                         minute = true;
                         BPMList.add(currentBPM);
                     }
@@ -559,7 +559,7 @@ public class RunActivity extends ActionBarActivity implements SongChangedListene
 
         timesOver = 0;
         timesUnder = 0;
-        timesMax = intervalFactor/2;
+        timesMax = intervalFactor/3;
 
         BPMList = new ArrayList<>();
         intervalSteps = new int[intervalFactor];
