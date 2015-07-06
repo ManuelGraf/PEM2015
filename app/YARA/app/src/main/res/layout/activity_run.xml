@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="steps per minute"
+            android:text="STEPS PER MINUTE"
             android:id="@+id/textView3"
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true" />
@@ -45,7 +45,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceSmall"
-            android:text="distance"
+            android:text="DISTANCE"
             android:id="@+id/textView5"
             android:layout_alignParentBottom="true"
             android:layout_alignParentEnd="true" />
@@ -92,13 +92,29 @@
         android:layout_below="@+id/txtStepCountAccelerometer"
         android:layout_alignParentLeft="true"
         />
-    <fragment
+
+
+
+
+     <FrameLayout
+         android:layout_width="fill_parent"
+         android:layout_height="200dp"
+         android:layout_weight="1"
+         android:id="@+id/songListFragmentContainer"
+         >
+         <ListView
+             android:layout_width="match_parent"
+             android:layout_height="match_parent"
+             android:id="@+id/songListView"
+             android:layout_gravity="center_horizontal" />
+     </FrameLayout>
+   <!-- <fragment
         android:layout_width="fill_parent"
         android:layout_height="0px"
         android:layout_weight="1"
         android:layout_below="@+id/txtStepCount"
         android:name="pem.yara.fragments.SongListFragment"
-        android:id="@+id/headlines_fragment"/>
+        android:id="@+id/headlines_fragment"/>-->
 
 
 

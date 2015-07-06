@@ -6,12 +6,11 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
 import com.astuetz.PagerSlidingTabStrip;
 
 import pem.yara.adapters.HomeScreenPageAdapter;
-import pem.yara.db.RunDbHelper;
-import pem.yara.db.TrackDbHelper;
 import pem.yara.entity.YaraSong;
 import pem.yara.fragments.SongListFragment;
 import pem.yara.music.ScanMusicTask;
@@ -24,6 +23,7 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
     private HomeScreenPageAdapter mPagerAdapter;
     private ViewPager mViewPager;
     private int mActiveTab = 0;
+    private TextView txtLoadingIndicator;
 
 
     @Override
@@ -31,9 +31,10 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
+        txtLoadingIndicator = (TextView)findViewById(R.id.infoBox);
         // TODO: Remove reset-Statements when going live
-        new RunDbHelper(getBaseContext()).resetDB();
-        new TrackDbHelper(getBaseContext()).resetDB();
+//        new RunDbHelper(getBaseContext()).resetDB();
+//        new TrackDbHelper(getBaseContext()).resetDB();
 
         mPagerAdapter = new HomeScreenPageAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.pager);
@@ -117,11 +118,18 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
 
     }
 
+
     @Override
     public void onImportMusicInteraction() {
       importMusic();
     }
 
+    public void setInfo(String msg){
+        txtLoadingIndicator.setText(msg);
+    }
+    public void hideLoadingIndicator(){
+        setInfo("");
+    }
     public void importMusic(){
         if (scanMusicTask.getStatus() == PENDING) {
             scanMusicTask.execute(getApplication());

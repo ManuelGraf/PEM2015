@@ -1,9 +1,16 @@
 package pem.yara.db;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.provider.BaseColumns;
+import android.util.Log;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import pem.yara.entity.YaraSong;
 
 /**
  * Created by yummie on 17.06.2015.
@@ -43,6 +50,56 @@ public class SongDbHelper extends SQLiteOpenHelper {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
     }
 
+    public List<YaraSong> findSongsWithinRange(double lowerBound, double upperBound) {
+        String[] projection = {SongDbItem._ID,SongDbItem.COLUMN_NAME_TITLE, SongDbItem.COLUMN_NAME_ARTIST,SongDbItem.COLUMN_NAME_URI , SongDbItem.COLUMN_NAME_BPM,SongDbItem.COLUMN_NAME_PLAYCOUNT,SongDbItem.COLUMN_NAME_SCORE,SongDbItem.COLUMN_NAME_BLOCKED};
+
+        Cursor cursor = getReadableDatabase().query(
+                SongDbHelper.SongDbItem.TABLE_NAME,
+                projection,                         // The columns to return
+                "bpm > " + lowerBound + " AND bpm < " + upperBound,
+                null,                               // The values for the WHERE clause
+                null,                               // don't group the rows
+                null,                               // don't filter by row groups
+                null                                // The sort order
+        );
+
+        cursor.moveToFirst();
+        List<YaraSong> songs = new ArrayList<>();
+        while(!cursor.isAfterLast()) {
+            YaraSong song = new YaraSong(cursor.getInt(0),cursor.getString(1), cursor.getString(2), cursor.getString(3), Double.parseDouble(cursor.getString(4)),cursor.getDouble(5),cursor.getInt(6),cursor.getInt(7));
+            songs.add(song);
+            Log.d("SongDbHelper","song "+song.getId()+" fits to the range ["+lowerBound+","+upperBound+"]" );
+            cursor.moveToNext();
+        }
+        cursor.close();
+        Log.d("SongDbHelper",songs.size()+" songs fit to the range ["+lowerBound+","+upperBound+"]" );
+        return songs;
+    }
+
+    public List<YaraSong> getAllSongs(){
+        String[] projection = {SongDbItem._ID,SongDbItem.COLUMN_NAME_TITLE, SongDbItem.COLUMN_NAME_ARTIST,SongDbItem.COLUMN_NAME_URI , SongDbItem.COLUMN_NAME_BPM,SongDbItem.COLUMN_NAME_PLAYCOUNT,SongDbItem.COLUMN_NAME_SCORE,SongDbItem.COLUMN_NAME_BLOCKED};
+
+            Cursor cursor = getReadableDatabase().query(
+                    SongDbHelper.SongDbItem.TABLE_NAME,
+                    projection,                         // The columns to return
+                    null,
+                    null,                               // The values for the WHERE clause
+                    null,                               // don't group the rows
+                    null,                               // don't filter by row groups
+                    null                                // The sort order
+            );
+
+            cursor.moveToFirst();
+            List<YaraSong> songs = new ArrayList<>();
+            while(!cursor.isAfterLast()) {
+                YaraSong song = new YaraSong(cursor.getInt(0),cursor.getString(1), cursor.getString(2), cursor.getString(3), Double.parseDouble(cursor.getString(4)),cursor.getDouble(5),cursor.getInt(6),cursor.getInt(7));
+                songs.add(song);
+                cursor.moveToNext();
+            }
+            cursor.close();
+            return songs;
+
+    }
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_ENTRIES);

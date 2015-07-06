@@ -1,0 +1,64 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical" android:layout_width="fill_parent"
+    android:nestedScrollingEnabled="false"
+    android:paddingTop="15dp"
+    android:paddingBottom="15dp"
+    android:paddingLeft="15dp"
+    android:paddingRight="15dp"
+    android:layout_height="match_parent"
+    style="@style/highlightedSong">
+
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/textAppearanceMediumBlack"
+        android:text="Song Title"
+        android:layout_marginBottom="5dp"
+        android:id="@+id/songItemName" />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="horizontal" android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginTop="3dp"
+            android:src="@drawable/ic_tempo_holo_light"
+            android:layout_weight="0.1"
+            />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/textAppearanceSmallBlack"
+            android:text="xx BPM"
+            android:layout_weight="0.7"
+            android:id="@+id/songItemBpm" />
+        <ImageView
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginTop="3dp"
+            android:src="@drawable/ic_play_holo_light"
+            android:layout_weight="0.1"
+        />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/textAppearanceSmallBlack"
+            android:text="played XX times"
+            android:layout_weight="0.3"
+            android:id="@+id/songItemPlaycount" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            style="@style/textAppearanceSmallBlack"
+            android:visibility="invisible"
+            android:layout_weight="0.01"
+            android:id="@+id/songItemId" />
+    </LinearLayout>
+
+
+
+</LinearLayout>

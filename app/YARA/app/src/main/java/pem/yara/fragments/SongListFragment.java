@@ -31,8 +31,8 @@ import pem.yara.entity.YaraSong;
 public class SongListFragment extends Fragment {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_BPM = "BPM";
+    private static final String ARG_CURRENTSONG = "currentSong";
 
     private TextView txtSongsEmpty;
     private ListView listSongs;
@@ -43,8 +43,8 @@ public class SongListFragment extends Fragment {
 
 
     // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
+    private double mBPM;
+    private int mCurrentSong;
 
     private OnSongListInteractionListener mListener;
 
@@ -57,11 +57,11 @@ public class SongListFragment extends Fragment {
      * @return A new instance of fragment SongListFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static SongListFragment newInstance(String param1, String param2) {
+    public static SongListFragment newInstance(double param1, int param2) {
         SongListFragment fragment = new SongListFragment();
         Bundle args = new Bundle();
-        args.putString(ARG_PARAM1, param1);
-        args.putString(ARG_PARAM2, param2);
+        args.putDouble(ARG_BPM, param1);
+        args.putInt(ARG_CURRENTSONG, param2);
         fragment.setArguments(args);
         return fragment;
     }
@@ -73,14 +73,21 @@ public class SongListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            mBPM = getArguments().getDouble(ARG_BPM);
+            mCurrentSong = getArguments().getInt(ARG_CURRENTSONG);
         }
+
+        int treshold = 5;
+        double upperBound = mBPM + treshold;
+        double lowerBound = mBPM - treshold;
 
 
         dbHelper = new SongDbHelper(getActivity().getApplicationContext());
         db = dbHelper.getReadableDatabase();
+
+
         String[] projection = {
                 SongDbHelper.SongDbItem._ID,
                 SongDbHelper.SongDbItem.COLUMN_NAME_ARTIST,
@@ -93,11 +100,16 @@ public class SongListFragment extends Fragment {
         };
 
         String sortOrder = SongDbHelper.SongDbItem.COLUMN_NAME_ARTIST + " DESC";
+        String where = "";
 
+        if(mBPM != -1){
+            where = "bpm > " + lowerBound + " AND bpm < " + upperBound;
+        }
+        Log.d("SongListFragment","showing Songs from "+lowerBound+" to "+upperBound+" BPM");
         Cursor c = db.query(
                 SongDbHelper.SongDbItem.TABLE_NAME,
                 projection,
-                null,
+                where,
                 null,
                 null,
                 null,
@@ -137,7 +149,7 @@ public class SongListFragment extends Fragment {
                              Bundle savedInstanceState) {
 
         View rootView = inflater.inflate(R.layout.fragment_song_list, container, false);
-
+        Log.d("SongListFragment","adding songlist to "+container.getId());
 
         txtSongsEmpty = (TextView)rootView.findViewById(R.id.txtSonglistEmpty);
         listSongs = (ListView)rootView.findViewById(R.id.songItems);

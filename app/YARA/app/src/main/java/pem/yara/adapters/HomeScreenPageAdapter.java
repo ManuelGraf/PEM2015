@@ -24,7 +24,7 @@ public class HomeScreenPageAdapter extends FragmentStatePagerAdapter {
             case 0:
                 return new HomeScreenFragment();
             case 1:
-                return SongListFragment.newInstance("bla","blub");
+                return SongListFragment.newInstance(-1,-1);
             default:
                 return new HomeScreenFragment();
         }
@@ -39,6 +39,6 @@ public class HomeScreenPageAdapter extends FragmentStatePagerAdapter {
     @Override
     public CharSequence getPageTitle(int position) {
 
-        return (position == 0) ? "TRACKS" : "ALL SONGS";
+        return (position == 0) ? "ROUTES" : "ALL SONGS";
     }
 }

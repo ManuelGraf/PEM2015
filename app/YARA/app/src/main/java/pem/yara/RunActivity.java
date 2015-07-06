@@ -1,6 +1,5 @@
 package pem.yara;
 
-import android.app.Fragment;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -16,13 +15,17 @@ import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 
+import pem.yara.adapters.SongListItemAdapter;
 import pem.yara.db.RunDbHelper;
+import pem.yara.db.SongDbHelper;
 import pem.yara.db.TrackDbHelper;
 import pem.yara.entity.YaraRun;
 import pem.yara.entity.YaraSong;
@@ -45,7 +48,9 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
     private AudioPlayer audioPlayer;
     private Intent audioPlayerIntent;
 
-    private Fragment songlistFragment;
+    // Songlist Fragment
+    private SongListItemAdapter mSongListAdapter;
+    private ListView mSongList;
 
     private TextView    txtStepCount;
     private TextView    txtStepCountAccelerometer;
@@ -106,6 +111,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         public void onServiceConnected(ComponentName className, IBinder baBinder) {
             Log.v("StartActivity", "AudioPlayerServiceConnection: Service connected");
             audioPlayer = ((AudioPlayer.AudioPlayerBinder) baBinder).getService();
+            newPlaylist(currentBPM);
             startService(audioPlayerIntent);
         }
 
@@ -125,6 +131,11 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         Context c;
         c=this.getBaseContext();
 
+        // Bind service to later be able to address the mService-Object to get a recorded Track
+        c.startService(locationIntent);
+        c.bindService(locationIntent, mConnection, Context.BIND_AUTO_CREATE);
+        Log.d("RunActivity onStart", "LocationService bound");
+
         try {
             mTrackID = getIntent().getExtras().getInt("TrackID");
 
@@ -138,7 +149,8 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
             }
 
 
-            audioPlayer.adjustPlaylist(lastBPM);
+//            audioPlayer.adjustPlaylist(lastBPM);
+            newPlaylist(lastBPM);
 
             Log.d("Statistics onCreate", "TrackID: " + mTrackID);
         } catch (Exception e){
@@ -152,6 +164,10 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         c.bindService(locationIntent, mConnection, Context.BIND_AUTO_CREATE);
         Log.d("RunActivity onStart", "LocationService bound");
 
+
+
+
+
         audioPlayerIntent = new Intent(this, AudioPlayer.class);
         startService(audioPlayerIntent);
         bindService(audioPlayerIntent, serviceConnection, Context.BIND_AUTO_CREATE);
@@ -162,6 +178,24 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         this.finish();
     }
 
+    private void onSongChanged(){
+        mSongListAdapter = new SongListItemAdapter(getBaseContext(),audioPlayer.getPlayList());
+        mSongListAdapter.setCurrentSong(audioPlayer.getCurrentSong().getId());
+        mSongList.setAdapter(mSongListAdapter);
+
+        ((BaseAdapter)mSongList.getAdapter()).notifyDataSetChanged();
+    }
+    private void newPlaylist(double bpm){
+
+//        mFragmentSongList = SongListFragment.newInstance(bpm,-1);
+//        mFragmentManager.beginTransaction().replace(R.id.songListFragment,mFragmentSongList).commit();
+        audioPlayer.adjustPlaylist(80);
+        mSongListAdapter = new SongListItemAdapter(getBaseContext(),audioPlayer.getPlayList());
+        mSongListAdapter.setCurrentSong(audioPlayer.getCurrentSong().getId());
+        mSongList.setAdapter(mSongListAdapter);
+
+        ((BaseAdapter)mSongList.getAdapter()).notifyDataSetChanged();
+    }
 
 
     @Override
@@ -170,7 +204,6 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         setContentView(R.layout.activity_run);
         txtStepCount = (TextView)findViewById(R.id.txtStepCount);
         txtStepCountAccelerometer  = (TextView)findViewById(R.id.txtStepCountAccelerometer);
-
         txtStepCountPerMinute = (TextView)findViewById(R.id.txtStepCountPerMinute);
         txtTime = (TextView)findViewById(R.id.txtTime);
         txtDistance =(TextView)findViewById(R.id.txtTime);
@@ -179,6 +212,13 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         PowerManager mPowerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakeLock");
         mWakeLock.acquire();
+        //mFragmentManager = getSupportFragmentManager();
+        //containerSonglistFragment = (FrameLayout)findViewById(R.id.songListFragmentContainer);
+        mSongList = (ListView)findViewById(R.id.songListView);
+        mSongListAdapter=new SongListItemAdapter(getBaseContext(),new SongDbHelper(getBaseContext()).getAllSongs());
+        mSongList.setAdapter(mSongListAdapter);
+        //mFragmentSongList = SongListFragment.newInstance(80,-1);
+        //mFragmentManager.beginTransaction().add(R.id.songListFragmentContainer,mFragmentSongList).commit();
 
         mRunDbHelper = new RunDbHelper(getBaseContext());
         mTrackDbHelper = new TrackDbHelper(getBaseContext());
@@ -274,7 +314,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
         }else if(id == R.id.actionRefreshPlaylist){
             // @TODO get a more suitable playlist for current bpm
-
+            newPlaylist(currentBPM);
         }
 
         return super.onOptionsItemSelected(item);
@@ -327,11 +367,11 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
         @Override
         public void run() {
-            if(secs==60){
+            if(secs>59){
                 secs =0;
                 mins++;
             }
-            if(mins==60){
+            if(mins>59){
                 mins=0;
                 hours++;
             }
@@ -384,7 +424,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
                             //select new music title to new BPM
                             timesOver = 0;
                             runningBPM = currentBPM;
-                            audioPlayer.adjustPlaylist(runningBPM);
+                            newPlaylist(runningBPM);
                         }
                     }else{
                         if(currentBPM < runningBPM - threshold){//under BPM
@@ -405,7 +445,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
                             changeSpeed = false;
                             timesUnder = 0;
                             runningBPM = currentBPM;
-                            audioPlayer.adjustPlaylist(runningBPM);
+                            newPlaylist(runningBPM);
                         }
 
                         audioPlayer.adjustRate(rate);
@@ -418,7 +458,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
                     }
                 }
 
-                txtStepCountPerMinute.setText(""+currentBPM);
+                txtStepCountPerMinute.setText("" + currentBPM);
                 txtStepCount.setText("Step Counter: " + (mStepDetector.getmCount()));
 
             }

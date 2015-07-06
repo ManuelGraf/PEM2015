@@ -1,6 +1,7 @@
 package pem.yara.adapters;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,11 @@ public class SongListItemAdapter  extends ArrayAdapter<YaraSong> {
 
     private final Context context;
     private final List<YaraSong> values;
+    private int currentSong = 0;
+
+    public void setCurrentSong(int currentSong) {
+        this.currentSong = currentSong;
+    }
 
     public SongListItemAdapter(Context context, List<YaraSong> values){
         super(context, R.layout.fragment_song_item, values);
@@ -33,6 +39,11 @@ public class SongListItemAdapter  extends ArrayAdapter<YaraSong> {
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
         View rowView = inflater.inflate(R.layout.fragment_song_item, parent, false);
+
+        if(values.get(position).getId() == currentSong ){
+            Log.d("SongAdapter","song at position "+position+" has id "+values.get(position).getId()+" current:"+currentSong);
+            rowView =  inflater.inflate(R.layout.fragment_song_item_current, parent, false);
+        }
 
         TextView songId = (TextView) rowView.findViewById(R.id.songItemId);
         TextView songName = (TextView) rowView.findViewById(R.id.songItemName);

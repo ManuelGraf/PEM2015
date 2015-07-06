@@ -12,6 +12,7 @@ public class YaraSong {
     private int playCount;
 
     public YaraSong(int id,String title, String artist, String uri, Double tempo, Double score, int blocked, int playCount) {
+        this.id = id;
         this.title = title;
         this.artist = artist;
         this.uri = uri;

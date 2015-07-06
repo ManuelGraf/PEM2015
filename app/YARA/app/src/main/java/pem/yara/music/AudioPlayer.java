@@ -3,7 +3,6 @@ package pem.yara.music;
 import android.app.Application;
 import android.app.Service;
 import android.content.Intent;
-import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.media.MediaPlayer;
 import android.net.Uri;
@@ -12,7 +11,6 @@ import android.os.IBinder;
 import android.util.Log;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,13 +18,14 @@ import java.util.List;
 import pem.yara.db.SongDbHelper;
 import pem.yara.entity.YaraSong;
 
-import static android.media.MediaPlayer.*;
+import static android.media.MediaPlayer.OnCompletionListener;
 
 public class AudioPlayer extends Service implements OnCompletionListener {
 
     private Application context;
 
     private SQLiteDatabase db;
+    private SongDbHelper dbHelper;
 
     private MediaPlayer mediaPlayer = new MediaPlayer();
 
@@ -40,8 +39,8 @@ public class AudioPlayer extends Service implements OnCompletionListener {
     public void onCreate() {
         Log.i("AudioPlayer", "onCreate() called");
         context = getApplication();
-        SongDbHelper songDbHelper = new SongDbHelper(context);
-        db = songDbHelper.getWritableDatabase();
+        dbHelper = new SongDbHelper(context);
+        db = dbHelper.getWritableDatabase();
 
         adjustPlaylist(105);
     }
@@ -54,6 +53,10 @@ public class AudioPlayer extends Service implements OnCompletionListener {
 
     public void adjustRate(float rate){
         //Should call Soundpool: public final void setRate (int streamID, float rate)
+    }
+
+    public YaraSong getCurrentSong(){
+        return playlist.get(currentSong);
     }
 
     public void adjustPlaylist(double runningBPM) {
@@ -73,7 +76,7 @@ public class AudioPlayer extends Service implements OnCompletionListener {
     }
 
     private List<YaraSong> findSongsWithinRange(double lowerBound, double upperBound) {
-        String[] projection = {"title", "artist", "uri", "bpm", "count", "score", "blocked"};
+        /*String[] projection = {SongDbHelper.SongDbItem._ID,"title", "artist", "uri", "bpm", "count", "score", "blocked"};
 
         Cursor cursor = db.query(
                 SongDbHelper.SongDbItem.TABLE_NAME,
@@ -88,12 +91,12 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         cursor.moveToFirst();
         List<YaraSong> songs = new ArrayList<>();
         while(!cursor.isAfterLast()) {
-            YaraSong song = new YaraSong(cursor.getString(0), cursor.getString(1), cursor.getString(2), Double.parseDouble(cursor.getString(3)));
+            YaraSong song = new YaraSong(cursor.getInt(0),cursor.getString(1), cursor.getString(2), cursor.getString(3), Double.parseDouble(cursor.getString(4)),cursor.getDouble(5),cursor.getInt(6),cursor.getInt(7));
             songs.add(song);
             cursor.moveToNext();
         }
-        cursor.close();
-        return songs;
+        cursor.close();*/
+        return dbHelper.findSongsWithinRange(lowerBound,upperBound);
     }
 
     @Override
@@ -152,6 +155,41 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         } catch (IOException ioe) {
             Log.e("AudioPlayer", "error playing" + yaraSong);
         }
+    }
+    // play a specific song from current playlist
+    public void play(int pos) {
+        if (playlist.size() == 0) {
+            Log.d("AudioPlayer", "Trying to play empty playlist... returning!");
+            return;
+        }
+        YaraSong yaraSong;
+        try{
+            yaraSong = playlist.get(pos);
+        }catch(ArrayIndexOutOfBoundsException e ){
+            e.printStackTrace();
+            return;
+        }
+
+        if (mediaPlayer != null && paused) {
+            mediaPlayer.start();
+            paused = false;
+        } else if( mediaPlayer != null ) {
+            release();
+        }
+
+        try {
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(context, Uri.parse(yaraSong.getUri()));
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+            mediaPlayer.setOnCompletionListener(this);
+        } catch (IOException ioe) {
+            Log.e("AudioPlayer", "error playing" + yaraSong);
+        }
+    }
+
+    public List<YaraSong> getPlayList(){
+        return playlist;
     }
 
     public void stop() {
