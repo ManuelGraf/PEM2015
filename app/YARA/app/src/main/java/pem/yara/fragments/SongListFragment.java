@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -156,15 +155,14 @@ public class SongListFragment extends Fragment {
 
         listSongs.setAdapter(new SongListItemAdapter(getActivity().getApplicationContext(), values));
         // Songlist Click listener
-        listSongs.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
-                Log.d("listitemclick","clicked song " + values.get(position).getTitle());
-
-                dbHelper.incrementPlayCount(values.get(position).getId());
-                dbHelper.listEntries();
-            }
-        });
+//        listSongs.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
+//                Log.d("listitemclick","clicked song " + values.get(position).getTitle());
+//                dbHelper.incrementPlayCount(values.get(position).getId());
+//                dbHelper.listEntries();
+//            }
+//        });
         listSongs.setEmptyView(txtSongsEmpty);
 
 
