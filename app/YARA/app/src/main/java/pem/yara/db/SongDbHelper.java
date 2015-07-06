@@ -127,7 +127,7 @@ public class SongDbHelper extends SQLiteOpenHelper {
     }
 
     public void incrementPlayCount(int id){
-       String query = "UPDATE songs SET count=count+1 WHERE _id=="+id+";";
+        String query = "UPDATE songs SET count=count+1 WHERE _id=="+id+";";
         getWritableDatabase().execSQL(query);
         getWritableDatabase().close();
     }
