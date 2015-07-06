@@ -160,6 +160,9 @@ public class SongListFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> arg0, View view, int position, long arg3) {
                 Log.d("listitemclick","clicked song " + values.get(position).getTitle());
+
+                dbHelper.incrementPlayCount(values.get(position).getId());
+                dbHelper.listEntries();
             }
         });
         listSongs.setEmptyView(txtSongsEmpty);

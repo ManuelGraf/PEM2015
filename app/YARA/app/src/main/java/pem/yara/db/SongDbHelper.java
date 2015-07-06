@@ -104,6 +104,36 @@ public class SongDbHelper extends SQLiteOpenHelper {
             return songs;
 
     }
+    public void listEntries(){
+        String[] projection = {SongDbItem._ID,SongDbItem.COLUMN_NAME_TITLE, SongDbItem.COLUMN_NAME_ARTIST,SongDbItem.COLUMN_NAME_URI , SongDbItem.COLUMN_NAME_BPM,SongDbItem.COLUMN_NAME_PLAYCOUNT,SongDbItem.COLUMN_NAME_SCORE,SongDbItem.COLUMN_NAME_BLOCKED};
+
+        Cursor cursor = getReadableDatabase().query(
+                SongDbHelper.SongDbItem.TABLE_NAME,
+                projection,                         // The columns to return
+                null,
+                null,                               // The values for the WHERE clause
+                null,                               // don't group the rows
+                null,                               // don't filter by row groups
+                null                                // The sort order
+        );
+
+        cursor.moveToFirst();
+        List<YaraSong> songs = new ArrayList<>();
+        while(!cursor.isAfterLast()) {
+            Log.d("List all Songs",""+cursor.getInt(0)+" "+cursor.getString(1)+" "+ cursor.getString(2)+" "+ cursor.getString(3)+" "+ Double.parseDouble(cursor.getString(4))+" "+cursor.getDouble(5)+" "+cursor.getInt(6)+" "+cursor.getInt(7));
+            cursor.moveToNext();
+        }
+        cursor.close();
+    }
+
+    public void incrementPlayCount(int id){
+        String query = "UPDATE "+SongDbItem.TABLE_NAME+" SET "+SongDbItem.COLUMN_NAME_PLAYCOUNT+"="+SongDbItem.COLUMN_NAME_PLAYCOUNT+"+1 WHERE "+SongDbItem._ID +"="+id+";";
+        Log.d("increment Playcount",query);
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL(query);
+        db.close();
+    }
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(SQL_CREATE_ENTRIES);
