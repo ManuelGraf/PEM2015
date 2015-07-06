@@ -5,7 +5,7 @@ import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 
-public class StepCounter implements SensorEventListener {
+public class StepCounter implements StepDetection {
 
     private boolean startedStepCounter;
     private int stepCountInit;
@@ -18,6 +18,12 @@ public class StepCounter implements SensorEventListener {
         mCountLast = 0;
     }
 
+    /**
+     * Finds a view that was identified by the id attribute from the XML that
+     * was processed in.
+     *
+     * @return The view if found or null otherwise.
+     */
     public void onSensorChanged(SensorEvent event){
         Sensor sensor = event.sensor;
         float[] values = event.values;

@@ -6,7 +6,7 @@ import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.util.Log;
 
-public class StepAccelerometer implements SensorEventListener {
+public class StepAccelerometer implements StepDetection {
 
     private float   mLimit = 22.50f;
     private float   mLastValues[] = new float[3*2];

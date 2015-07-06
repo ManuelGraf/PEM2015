@@ -30,6 +30,7 @@ import pem.yara.fragments.SongListFragment;
 import pem.yara.music.AudioPlayer;
 import pem.yara.step.StepAccelerometer;
 import pem.yara.step.StepCounter;
+import pem.yara.step.StepDetection;
 
 
 public class RunActivity extends ActionBarActivity implements SongListFragment.OnSongListInteractionListener {
@@ -61,11 +62,8 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
 
     private SensorManager mSensorManager;
-    private Sensor mStepCounterSensor;
-    private Sensor mStepCounterAccelerometerSensor;
-
-    private StepAccelerometer mStepDetectorAccelerometer;
-    private StepCounter mStepDetectorCounter;
+    private Sensor mStepDetectorSensor;
+    private StepDetection mStepDetector;
 
     private Handler handler;
     //in ms
@@ -187,23 +185,16 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
 
         //Init StepDetector
         mSensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
-        mStepCounterSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
-        mStepDetectorCounter = new StepCounter();
-/*        mStepDetectorSensor = mSensorManager
-                .getDefaultSensor(Sensor.TYPE_STEP_DETECTOR);*/
-        mStepCounterAccelerometerSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
-        mStepDetectorAccelerometer = new StepAccelerometer();
-
-        mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
-
-        if(mStepCounterSensor != null){
+        mStepDetectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER);
+        if(mStepDetectorSensor != null){
             Log.d("Step Counter Type", "TYPE_STEP_COUNTER verfuegbar");
-            mSensorManager.registerListener(mStepDetectorCounter, mStepCounterSensor,SensorManager.SENSOR_DELAY_FASTEST);
+            mStepDetector = new StepCounter();
         }else{
             Log.d("Step Counter Type", "Auf Accelerometer Step Detection Schalten");
-            //TODO: Nach dem Testen das hier einkommentieren und anpassen, dass immer der verfuegbare Sensor verwendet wird
-            //mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
+            mStepDetectorSensor = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+            mStepDetector = new StepAccelerometer();
         }
+        mSensorManager.registerListener(mStepDetector, mStepDetectorSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         // timer
         timerHandler.postDelayed(timerTask, 1000);
@@ -230,7 +221,6 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
             }
 
         Log.d("Run Finished Listener", "Track received: " + aTrack.size() + " points");
-        // TODO: Wenn dies ein bekannter Track joajist, muss hier irgendwo die TrackID zu finden sein!
 
         YaraRun mYaraRun = new YaraRun(mTrackID, avgBPM, aTrack, new SimpleDateFormat("dd.MM.yyyy HH:mm:ss").format(Calendar.getInstance().getTime()));
 
@@ -254,7 +244,6 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         //TODO: Why are we doing this here?!?
         mRunDbHelper.getLastRunToTrack(mYaraRun.getTrackID());
 
-        // TODO Get BPM from this run!
         Intent intent = new Intent(getBaseContext(), StatisticsActivity.class);
         intent.putExtra("TrackID", mYaraRun.getTrackID());
         intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
@@ -295,12 +284,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         super.onResume();
 
         Log.d("RunActivity onResume", "resuming RunActivity");
-
-        if(mStepCounterSensor != null){
-            mSensorManager.registerListener(mStepDetectorCounter, mStepCounterSensor, SensorManager.SENSOR_DELAY_FASTEST);
-        }
-        //mSensorManager.registerListener(this, mStepCounterSensor,SensorManager.SENSOR_DELAY_FASTEST);
-        mSensorManager.registerListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor, SensorManager.SENSOR_DELAY_FASTEST);
+        mSensorManager.registerListener(mStepDetector, mStepDetectorSensor, SensorManager.SENSOR_DELAY_FASTEST);
 
         handler.post(timedTask);
 
@@ -324,11 +308,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         //stop the timer
         timerHandler.removeCallbacks(timerTask);
 
-        if(mStepCounterSensor != null){
-            mSensorManager.unregisterListener(mStepDetectorCounter, mStepCounterSensor);
-        }
-        //mSensorManager.unregisterListener(this, mStepCounterSensor);
-        mSensorManager.unregisterListener(mStepDetectorAccelerometer, mStepCounterAccelerometerSensor);
+        mSensorManager.unregisterListener(mStepDetector, mStepDetectorSensor);
 
         handler.removeCallbacks(timedTask);
         BPMList=null;
@@ -359,10 +339,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
             txtTime.setText((hours <10 ? "0":"")+hours+":"+(mins <10 ? "0":"")+mins+":"+(secs <10 ? "0":"")+secs);
 
             //Update von den Schrittfeldern
-            txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mStepDetectorAccelerometer.getmCount()));
-            if(mStepCounterSensor != null){
-                txtStepCount.setText("Step Counter StepDetector : " + (mStepDetectorCounter.getmCount()));
-            }
+            txtStepCount.setText("Step Counter Accelerometer : " + (mStepDetector.getmCount()));
 
             timerHandler.postDelayed(this, 1000);
         }
@@ -372,8 +349,8 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
     private Runnable timedTask  = new Runnable(){
         @Override
         public void run() {
-            Log.d("MY VERY OWN TIMED TASK", "BPM: "+currentBPM);
-            int steps = mStepDetectorAccelerometer.getSteps();
+            Log.d("MY VERY OWN TIMED TASK", "BPM: " + currentBPM);
+            int steps = mStepDetector.getSteps();
 
             if(steps != 0){
 
@@ -383,6 +360,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
                 if(minute){
 
                     currentBPM = calculateBPM();
+                    BPMList.add(currentBPM);
 
                     if(!changeSpeed){
                         if(currentBPM < runningBPM - threshold){//under BPM
@@ -433,21 +411,15 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
                         audioPlayer.adjustRate(rate);
                     }
                 }else{
+                    currentBPM = calculateBPM();
                     if(index >= intervalFactor){
                         minute = true;
+                        BPMList.add(currentBPM);
                     }
-                    currentBPM = calculateBPM();
                 }
-
-                BPMList.add(currentBPM);
-
-
 
                 txtStepCountPerMinute.setText(""+currentBPM);
-                txtStepCountAccelerometer.setText("Step Counter Accelerometer : " + (mStepDetectorAccelerometer.getmCount()));
-                if(mStepCounterSensor != null){
-                    txtStepCount.setText("Step Counter StepDetector : " + (mStepDetectorCounter.getmCount()));
-                }
+                txtStepCount.setText("Step Counter: " + (mStepDetector.getmCount()));
 
             }
             handler.postDelayed(timedTask, intervalDuration);
