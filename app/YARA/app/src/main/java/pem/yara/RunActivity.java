@@ -35,7 +35,7 @@ import pem.yara.step.StepCounter;
 public class RunActivity extends ActionBarActivity implements SongListFragment.OnSongListInteractionListener {
 
     private int mTrackID;
-
+    private PowerManager.WakeLock mWakeLock;
 
     LocationService mService;
     Intent locationIntent;
@@ -131,18 +131,23 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
             mTrackID = getIntent().getExtras().getInt("TrackID");
 
             YaraRun mYaraRun = mRunDbHelper.getLastRunToTrack(mTrackID);
-            double lastBPM = mYaraRun.getAvgBpm();
+            double lastBPM;
+
+            if(mYaraRun==null){
+                lastBPM = 50;   // Startwert
+            } else {
+                lastBPM = mYaraRun.getAvgBpm();
+            }
+
+
             audioPlayer.adjustPlaylist(lastBPM);
 
             Log.d("Statistics onCreate", "TrackID: " + mTrackID);
         } catch (Exception e){
+            e.printStackTrace();
             Log.d("Statistics onCreate", "No TrackID passed, new track!");
-            return;
+            mTrackID = -1;
         }
-
-
-
-
 
         // Bind service to later be able to address the mService-Object to get a recorded Track
         c.startService(locationIntent);
@@ -172,6 +177,10 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         txtTime = (TextView)findViewById(R.id.txtTime);
         txtDistance =(TextView)findViewById(R.id.txtTime);
 
+        // Acquire a partial WakeLock, to keep the background services running even if the phone goes to sleep
+        PowerManager mPowerManager = (PowerManager)getSystemService(Context.POWER_SERVICE);
+        mWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "MyWakeLock");
+        mWakeLock.acquire();
 
         mRunDbHelper = new RunDbHelper(getBaseContext());
         mTrackDbHelper = new TrackDbHelper(getBaseContext());
@@ -242,6 +251,7 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         // Unload RunActivity. Code after this WILL be executed!
         finishMe();
 
+        //TODO: Why are we doing this here?!?
         mRunDbHelper.getLastRunToTrack(mYaraRun.getTrackID());
 
         // TODO Get BPM from this run!
@@ -297,8 +307,11 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         initStepVariables();
     }
 
-    protected void onStop() {
-        super.onStop();
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        Log.d("RunActivity", "onDestroy");
 
         // Unbind and stop LocationService
         unbindService(mConnection);
@@ -321,6 +334,9 @@ public class RunActivity extends ActionBarActivity implements SongListFragment.O
         BPMList=null;
         intervalSteps = null;
         minute = false;
+
+        // Release the WakeLock
+        mWakeLock.release();
     }
 
     // Timertask executes every second

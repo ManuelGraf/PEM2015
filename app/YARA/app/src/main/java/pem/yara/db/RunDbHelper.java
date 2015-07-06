@@ -243,9 +243,13 @@ public class RunDbHelper  extends SQLiteOpenHelper {
         );
 
         c.moveToFirst();
-        Log.d("getLastRunToTrack", "Letzter Run (ID): " + c.getInt(c.getColumnIndexOrThrow(RunDbItem._ID)));
-
-        myResult = getRuns(c.getInt(c.getColumnIndexOrThrow(RunDbItem._ID)), -1).get(0);
+        if(!c.isAfterLast()){
+            Log.d("getLastRunToTrack", "Letzter Run (ID): " + c.getInt(c.getColumnIndexOrThrow(RunDbItem._ID)));
+            myResult = getRuns(c.getInt(c.getColumnIndexOrThrow(RunDbItem._ID)), -1).get(0);
+        } else {
+            Log.d("getLastRunToTrack", "Noch keine Runs vorhanden!");
+            myResult=null;
+        }
 
         c.close();
 

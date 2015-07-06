@@ -195,6 +195,9 @@ public class StatisticsActivity extends ActionBarActivity {
         }
         LatLngBounds bounds = mLatLngBuilder.build();
 
+        if(startPoint==null)
+            startPoint=new LatLng(48.13453816, 11.58208521);    // Munich
+
         // Add Marker for Start of Run:
         MapsInitializer.initialize(getBaseContext());
         mGoogleMap.addPolyline(mPolylineOptions);
@@ -206,7 +209,7 @@ public class StatisticsActivity extends ActionBarActivity {
         // Zoom Map on starting point. This needs to be done; otherwise, the map won't load completely (trying to show the whole world, thus taking forever)
         mCameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
         // Zoom in/out on whole track
-        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 13));
+        mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 12));
 
         mGoogleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
