@@ -49,8 +49,10 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     Class methods from here on
      */
 
-    /* Initialize the Location and API services once on Create.
-        These services are started as RunActivity starts */
+    /**
+     *  Initialize the Location and API services once on Create.
+     *  These services are started as RunActivity starts
+     */
     @Override
     public void onCreate(){
         super.onCreate();
@@ -69,9 +71,10 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
                 if(aTrack.isEmpty()){
                     aTrack.add(location);
                 } else{
+                    // Upon receiving a Location Update, check if the user moved at all:
                     float tmpDistance=aTrack.get(aTrack.size() - 1).distanceTo(location);
                     Log.d("LocationListener", "User moved for " + tmpDistance + " Meters");
-                    if(tmpDistance > 2.f){
+                    if(tmpDistance > 2.f){  // Two Meters, because why not - at least he moved
                         aTrack.add(location);
                         distanceUntilNow+= tmpDistance;
                     }

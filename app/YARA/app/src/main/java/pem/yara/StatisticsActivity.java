@@ -56,6 +56,10 @@ public class StatisticsActivity extends ActionBarActivity {
 
     private int mTrackID;
 
+    /**
+     * Initialize Google Maps Serviec
+     * @param savedInstanceState
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,12 +89,13 @@ public class StatisticsActivity extends ActionBarActivity {
             mTrackID = trackID;
             Log.d("Statistics onCreate", "TrackID: " + trackID);
         } catch (Exception e){
+            // No ID passed: Nothing to show.
+            //TODO: Eigentlich sollten wir hier nie rein kommen. Sollen wir das ernsthaft abfangen, falls doch?
             Log.d("Statistics onCreate", "No TrackID passed");
             return;
         }
 
         // Get UI Elements:
-
         trackTime = (TextView)findViewById(R.id.track_item_time);
         trackPace = (TextView)findViewById(R.id.track_item_pace);
         trackDistance = (TextView)findViewById(R.id.track_item_distance);
@@ -150,6 +155,7 @@ public class StatisticsActivity extends ActionBarActivity {
             avgSpeed += r.getAvgSpeed();
         }
 
+        // Don't divide by zero!
         if(allRuns.size()>0) {
             avgTime /= allRuns.size();
             avgPace /= allRuns.size();
@@ -166,7 +172,7 @@ public class StatisticsActivity extends ActionBarActivity {
         if(myTrack.getPathString().length()>0)
             trackPoints= myTrack.getPathString().split(";", 0);
         else
-            trackPoints = new String[]{"49,11"};
+            trackPoints = new String[]{"48.14483530,11.55800670"};  // Munich
 
         Log.d("StatisticsActivity", "Anzahl Punkte myTrack: " + trackPoints.length);
 
@@ -187,6 +193,7 @@ public class StatisticsActivity extends ActionBarActivity {
             Log.d("StatisticsActivity", tmpCoordinate.toString());
 
             if(i==0){
+                // Set Marker to Starting Point
                 startPoint = tmpCoordinate;
             }
 
@@ -194,9 +201,6 @@ public class StatisticsActivity extends ActionBarActivity {
             mPolylineOptions.add(tmpCoordinate);
         }
         LatLngBounds bounds = mLatLngBuilder.build();
-
-        if(startPoint==null)
-            startPoint=new LatLng(48.13453816, 11.58208521);    // Munich
 
         // Add Marker for Start of Run:
         MapsInitializer.initialize(getBaseContext());
@@ -207,9 +211,9 @@ public class StatisticsActivity extends ActionBarActivity {
                 .position(startPoint));
 
         // Zoom Map on starting point. This needs to be done; otherwise, the map won't load completely (trying to show the whole world, thus taking forever)
-        mCameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
-        // Zoom in/out on whole track
         mGoogleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(startPoint, 12));
+        // Zoom in/out on whole track
+        mCameraUpdate = CameraUpdateFactory.newLatLngBounds(bounds, 100);
 
         mGoogleMap.setOnMapLoadedCallback(new GoogleMap.OnMapLoadedCallback() {
             @Override
