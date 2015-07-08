@@ -19,11 +19,12 @@ import pem.yara.SongChangedListener;
 import pem.yara.db.SongDbHelper;
 import pem.yara.entity.YaraSong;
 
+import static android.media.AudioManager.*;
 import static android.media.AudioManager.FLAG_PLAY_SOUND;
 import static android.media.AudioManager.STREAM_MUSIC;
 import static android.media.MediaPlayer.OnCompletionListener;
 
-public class AudioPlayer extends Service implements OnCompletionListener {
+public class AudioPlayer extends Service implements OnCompletionListener, OnAudioFocusChangeListener {
 
     private Application context;
 
@@ -54,24 +55,33 @@ public class AudioPlayer extends Service implements OnCompletionListener {
         audioManager = (AudioManager)getSystemService(context.AUDIO_SERVICE);
         maxVolume = audioManager.getStreamMaxVolume(STREAM_MUSIC);
         baseVolume = audioManager.getStreamVolume(STREAM_MUSIC);
+
+        int result = audioManager.requestAudioFocus(this, STREAM_MUSIC, AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
+        if (result != AUDIOFOCUS_REQUEST_GRANTED) {
+            Log.e("AudioPlayer", "audio focus not granted");
+        }
     }
 
     @Override
     public void onDestroy() {
         Log.i("AudioPlayer", "onDestroy() called");
+        audioManager.abandonAudioFocus(this);
         release();
     }
 
     public void adjustVolume(float factor) {
         if (factor == 1.0f) {
+            Log.i("AudioPlayer", "Volume set to base " + baseVolume);
             audioManager.setStreamVolume(STREAM_MUSIC, baseVolume, FLAG_PLAY_SOUND);
         }
-        audioManager.setStreamVolume(STREAM_MUSIC, getNewVolume(factor), FLAG_PLAY_SOUND);
+        int newVolume = getNewVolume(factor);
+        audioManager.setStreamVolume(STREAM_MUSIC, newVolume, FLAG_PLAY_SOUND);
     }
 
     private int getNewVolume(float factor) {
         int currentVolume = audioManager.getStreamVolume(STREAM_MUSIC);
         int newVolume = (int)(currentVolume * factor);
+        Log.i("AudioPlayer", "Volume set to " + newVolume + " from " + currentVolume);
         return newVolume > maxVolume ? maxVolume : newVolume;
     }
 
@@ -187,6 +197,11 @@ public class AudioPlayer extends Service implements OnCompletionListener {
 
     public void setSongChangedListener(SongChangedListener songChangedListener) {
         this.songChangedListener = songChangedListener;
+    }
+
+    @Override
+    public void onAudioFocusChange(int focusChange) {
+        Log.i("AudioPlayer", "Focus changed to status " + focusChange);
     }
 
     public class AudioPlayerBinder extends Binder {
