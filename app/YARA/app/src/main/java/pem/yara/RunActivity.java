@@ -150,9 +150,9 @@ public class RunActivity extends ActionBarActivity implements SongChangedListene
         Context c;
         c=this.getBaseContext();
 
+        initStepVariables();
 
         // Get TrackID from Intent
-        double lastBPM = 0;
         try {
             mTrackID = getIntent().getExtras().getInt("TrackID");
 
@@ -162,6 +162,10 @@ public class RunActivity extends ActionBarActivity implements SongChangedListene
                 mLastBPM = -1;   // Startwert
             } else {
                 mLastBPM = mYaraRun.getAvgBpm();
+                for(int i = 0; i < intervalFactor; i++){
+                    intervalSteps[i] = (int) mLastBPM/intervalFactor;
+                }
+                runningBPM = (int) mLastBPM;
             }
 
             Log.d("Run onCreate", "TrackID: " + mTrackID);
@@ -392,7 +396,7 @@ public class RunActivity extends ActionBarActivity implements SongChangedListene
 
         handler.post(timedTask);
 
-        initStepVariables();
+        //initStepVariables();
     }
 
     @Override
