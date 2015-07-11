@@ -34,9 +34,8 @@ public class StartActivity extends ActionBarActivity implements SongListFragment
         setContentView(R.layout.activity_start);
 
         txtLoadingIndicator = (TextView)findViewById(R.id.infoBox);
-        // TODO: Remove reset-Statements when going live
-        new RunDbHelper(getBaseContext()).resetDB();
-        new TrackDbHelper(getBaseContext()).resetDB();
+//        new RunDbHelper(getBaseContext()).resetDB();
+//        new TrackDbHelper(getBaseContext()).resetDB();
 
         mPagerAdapter = new HomeScreenPageAdapter(getSupportFragmentManager());
         mViewPager = (ViewPager) findViewById(R.id.pager);

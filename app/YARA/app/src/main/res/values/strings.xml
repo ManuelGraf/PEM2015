@@ -40,6 +40,4 @@
     <color name="actionBarBg">#0e4c94</color>
     <color name="actionBarBgLight">#b2d6ff</color>
 
-<!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
