@@ -26,13 +26,8 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     private LocationRequest mLocationRequest;
     private com.google.android.gms.location.LocationListener mLocationListener;
 
-    // TODO: Figure out a reasonable interval
     private int recInterval = 1000;
     private ArrayList<Location> aTrack;
-
-    public double getDistanceUntilNow() {
-        return distanceUntilNow;
-    }
 
     private double distanceUntilNow;
     private int secondsRun;
@@ -41,7 +36,19 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     Public methods for Clients to call
      */
 
+    /**
+     * Returns the distance the User has run so far
+     *
+     * @return That distance as double
+     */
+    public double getDistanceUntilNow() {
+        return distanceUntilNow;
+    }
 
+    /**
+     * Finishes listening for Locations by removing updates from the Google Api Client. Returns all points in an ArrayList.
+     * @return An ArrayList of Location-Objects representing the track the user has run
+     */
     public ArrayList<Location> receiveTrack(){
         LocationServices.FusedLocationApi.removeLocationUpdates(mGoogleApiClient, mLocationListener);
         return aTrack;
@@ -105,6 +112,7 @@ public class LocationService extends Service implements  GoogleApiClient.Connect
     public int onStartCommand(Intent intent, int flags, int startID){
         super.onStartCommand(intent, flags, startID);
 
+        // Receive a new recording Interval - maybe
         Bundle b = intent.getExtras();
         if(b != null && b.containsKey("recInterval")) {
             recInterval = b.getInt("recInterval");

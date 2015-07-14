@@ -90,7 +90,6 @@ public class StatisticsActivity extends ActionBarActivity {
             Log.d("Statistics onCreate", "TrackID: " + trackID);
         } catch (Exception e){
             // No ID passed: Nothing to show.
-            //TODO: Eigentlich sollten wir hier nie rein kommen. Sollen wir das ernsthaft abfangen, falls doch?
             Log.d("Statistics onCreate", "No TrackID passed");
             return;
         }
