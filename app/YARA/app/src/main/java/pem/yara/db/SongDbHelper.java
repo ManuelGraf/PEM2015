@@ -104,6 +104,7 @@ public class SongDbHelper extends SQLiteOpenHelper {
             return songs;
 
     }
+
     public void listEntries(){
         String[] projection = {SongDbItem._ID,SongDbItem.COLUMN_NAME_TITLE, SongDbItem.COLUMN_NAME_ARTIST,SongDbItem.COLUMN_NAME_URI , SongDbItem.COLUMN_NAME_BPM,SongDbItem.COLUMN_NAME_PLAYCOUNT,SongDbItem.COLUMN_NAME_SCORE,SongDbItem.COLUMN_NAME_BLOCKED};
 

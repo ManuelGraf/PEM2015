@@ -58,7 +58,7 @@ public class AudioPlayer extends Service implements OnCompletionListener, OnAudi
 
         int result = audioManager.requestAudioFocus(this, STREAM_MUSIC, AUDIOFOCUS_GAIN_TRANSIENT_MAY_DUCK);
         if (result != AUDIOFOCUS_REQUEST_GRANTED) {
-            Log.e("AudioPlayer", "audio focus not granted");
+            Log.w("AudioPlayer", "audio focus not granted");
         }
     }
 
@@ -149,12 +149,11 @@ public class AudioPlayer extends Service implements OnCompletionListener, OnAudi
             return;
         }
 
-
         if (mediaPlayer != null && paused) {
             mediaPlayer.start();
             paused = false;
             return;
-        } else if(mediaPlayer != null ) {
+        } else if (mediaPlayer != null ) {
             release();
         }
 
